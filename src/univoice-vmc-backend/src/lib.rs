@@ -1,39 +1,36 @@
-
-use std::{cell::RefCell, result};
-use std::mem;
-use icrc_ledger_types::icrc1::account::Account;
-use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
-use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
-use candid::{candid_method, export_service, Nat, Principal,CandidType, Deserialize,Encode};
-
-use serde::Serialize;
-
 mod ledgertype;
 
-use ledgertype::{ComfyUIPayload}
+use candid::{candid_method, export_service, 
+    Nat, Principal,CandidType, Deserialize,Encode};
+use std::{cell::RefCell, result};
+use std::mem;    
+use serde::Serialize;
 
 
-#[derive(CandidType, Deserialize, Serialize)]
-pub struct TransferArgs {
-    amount: NumTokens,
-    to_account: Account,
+use ledgertype::{ComfyUIPayload,TransferArgs,MinerTxClaimRecord};
+
+use icrc_ledger_types::icrc1::account::{Account,Subaccount,DEFAULT_SUBACCOUNT};
+use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
+use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
+
+#[derive(CandidType,Deserialize,Clone,Default)]
+pub struct  State {
+    miner_tx_leger:Vec<MinerTxClaimRecord>
+}
+
+#[derive(CandidType, Default,Deserialize,Clone)]
+struct StableState {
+    state: State,
 }
 
 thread_local! {
     static STATE: RefCell<State> = RefCell::new(State::default());
 }
 
-#[derive(CandidType,Deserialize,Clone,Default)]
-pub struct  State {
-   
-}
-
-
 #[ic_cdk::query]
 fn greet(name: String) -> String {
     format!("Hello, {}!", name)
 }
-
 #[ic_cdk::query]
 async fn query_poll_balance()->Result<NumTokens,String> {
     ic_cdk::println!(
@@ -101,7 +98,3 @@ async fn transfer(args: TransferArgs) -> Result<BlockIndex, String> {
     // 8. Use `map_err` again to transform any specific ledger transfer errors into a readable string format, facilitating error handling and debugging.
     .map_err(|e: TransferFromError| format!("ledger transfer error {:?}", e))
 }
-
-
-
-

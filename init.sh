@@ -5,6 +5,147 @@ echo "===========SETUP========="
 dfx start --background --clean
 
 
+echo "==========prepare NFT================"
+#installing
+#npm i -g ic-mops
+#vessel
+#wget https://github.com/dfinity/vessel/releases/download/v0.6.4/vessel-macos
+
+set -ex
+
+dfx stop
+dfx start --clean --background
+
+dfx identity use univoicetest
+ADMIN_PRINCIPAL=$(dfx identity get-principal)
+
+dfx deploy icrc7 --argument 'record {icrc7_args = null; icrc37_args =null; icrc3_args =null;}' --mode reinstall
+ICRC7_CANISTER=$(dfx canister id icrc7)
+echo $ICRC7_CANISTER
+
+dfx canister call icrc7 init
+
+
+dfx canister call icrc7 icrcX_mint "(
+  vec {
+    record {
+      token_id = 0 : nat;
+      owner = opt record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;};
+      metadata = variant {
+        Map = vec {
+          record { \"icrc97:metadata\"; variant { Map = vec {
+            record { \"name\"; variant { Text = \"Image 1\" } };
+            record { \"description\"; variant { Text = \"A beautiful space image from NASA.\" } };
+            record { \"assets\"; variant { Array = vec {
+              variant { Map = vec {
+                record { \"url\"; variant { Text = \"https://images-assets.nasa.gov/image/PIA18249/PIA18249~orig.jpg\" } };
+                record { \"mime\"; variant { Text = \"image/jpeg\" } };
+                record { \"purpose\"; variant { Text = \"icrc97:image\" } }
+              }}
+            }}}
+          }}}
+        }
+      };
+      memo = opt blob \"\00\01\";
+      override = true;
+      created_at_time = null;
+    };
+    record {
+      token_id = 1 : nat;
+      owner = opt record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;};
+      metadata = variant {
+        Map = vec {
+          record { \"icrc97:metadata\"; variant { Map = vec {
+            record { \"name\"; variant { Text = \"Image 2\" }};
+            record { \"description\"; variant { Text = \"Another stunning NASA image.\" } };
+            record { \"assets\"; variant { Array = vec {
+              variant { Map = vec {
+                record { \"url\"; variant { Text = \"https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001465/GSFC_20171208_Archive_e001465~orig.jpg\" } };
+                record { \"mime\"; variant { Text = \"image/jpeg\" } };
+                record { \"purpose\"; variant { Text = \"icrc97:image\" } }
+              }}
+            }}}
+          }}}
+        }
+      };
+      memo = opt blob \"\00\01\";
+      override = true;
+      created_at_time = null;
+    };
+    record {
+      token_id = 2 : nat;
+      owner = opt record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;};
+      metadata = variant {
+        Map = vec {
+          record { \"icrc97:metadata\"; variant { Map = vec {
+            record { \"name\"; variant { Text = \"Image 3\" } };
+            record { \"description\"; variant { Text = \"Hubble sees the wings of a butterfly.\" } };
+            record { \"assets\"; variant { Array = vec {
+              variant { Map = vec {
+                record { \"url\"; variant { Text = \"https://images-assets.nasa.gov/image/hubble-sees-the-wings-of-a-butterfly-the-twin-jet-nebula_20283986193_o/hubble-sees-the-wings-of-a-butterfly-the-twin-jet-nebula_20283986193_o~orig.jpg\" } };
+                record { \"mime\"; variant { Text = \"image/jpeg\" } };
+                record { \"purpose\"; variant { Text = \"icrc97:image\" } }
+              }}
+            }}}
+          }}}
+        }
+      };
+      memo = opt blob \"\00\01\";
+      override = true;
+      created_at_time = null;
+    };
+    record {
+      token_id = 3 : nat;
+      owner = opt record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;};
+      metadata = variant {
+        Map = vec {
+          record { \"icrc97:metadata\"; variant { Map = vec {
+            record { \"name\"; variant { Text = \"Image 4\" } };
+            record { \"description\"; variant { Text = \"Another beautiful image from NASA archives.\" } };
+            record { \"assets\"; variant { Array = vec {
+              variant { Map = vec {
+                record { \"url\"; variant { Text = \"https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001518/GSFC_20171208_Archive_e001518~orig.jpg\" } };
+                record { \"mime\"; variant { Text = \"image/jpeg\" } };
+                record { \"purpose\"; variant { Text = \"icrc97:image\" } }
+              }}
+            }}}
+          }}}
+        }
+      };
+      memo = opt blob \"\00\01\";
+      override = true;
+      created_at_time = null;
+    };
+  }
+)"
+
+dfx canister call icrc7 icrc7_tokens_of "(record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;},null,null)"
+
+#All tokens should be owned by the canister
+echo "All tokens should be owned by the canister"
+dfx canister call icrc7 icrc7_tokens_of "(record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;},null,null)"
+
+#Should be approved to transfer
+echo "Should be approved to transfer"
+dfx canister call icrc7 icrc37_is_approved "(vec{record { spender=record {owner = principal \"$ADMIN_PRINCIPAL\"; subaccount = null;}; from_subaccount=null; token_id=0;}})" --query
+
+#Check that the owner is spender
+echo "Check that the owner is spender"
+dfx canister call icrc7 icrc37_get_collection_approvals "(record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;},null, null)" --query
+
+#tranfer from a token to the admin
+echo "tranfer from a token to the admin"
+dfx canister call icrc7 icrc37_transfer_from "(vec{record { 
+  spender = principal \"$ADMIN_PRINCIPAL\";
+  from = record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null}; 
+  to = record { owner = principal \"$ADMIN_PRINCIPAL\"; subaccount = null};
+  token_id =  0 : nat;
+  memo = null;
+  created_at_time = null;}})"
+
+echo "===========Prepared Univoice Tokens===================="
+
+
 dfx deploy icrc1_ledger_canister --argument "(variant {
   Init = record {
     token_symbol = \"UNIVOICE\";

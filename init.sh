@@ -1,11 +1,11 @@
-dfx stop
-set -e
+#dfx stop
+#set -e
 #trap 'dfx stop' EXIT
-echo "===========SETUP========="
-dfx start --background --clean
+echo "===========SETUP tokens========="
+#dfx start --background --clean
 
 
-echo "==========prepare NFT================"
+#echo "==========prepare NFT================"
 #installing
 #npm i -g ic-mops
 #vessel
@@ -17,16 +17,29 @@ dfx stop
 dfx start --clean --background
 
 dfx identity use univoicetest
+dfx deploy icrc7_nft_canister --argument 'record {icrc7_args = null; icrc37_args =null; icrc3_args =null;}' --mode reinstall
+dfx deploy  univoice-vmc-backend 
 ADMIN_PRINCIPAL=$(dfx identity get-principal)
 
-dfx deploy icrc7 --argument 'record {icrc7_args = null; icrc37_args =null; icrc3_args =null;}' --mode reinstall
-ICRC7_CANISTER=$(dfx canister id icrc7)
+
+dfx identity use alice
+ALICE_PRINCIPAL=$(dfx identity get-principal)
+
+dfx identity use bob
+BOB_PRINCIPAL=$(dfx identity get-principal)
+
+
+ADMIN_PRINCIPAL=$(dfx identity get-principal)
+
+#dfx deploy icrc7 --argument 'record {icrc7_args = null; icrc37_args =null; icrc3_args =null;}'
+
+ICRC7_CANISTER=$(dfx canister id icrc7_nft_canister)
 echo $ICRC7_CANISTER
 
-dfx canister call icrc7 init
+dfx canister call icrc7_nft_canister init
 
 
-dfx canister call icrc7 icrcX_mint "(
+dfx canister call icrc7_nft_canister icrcX_mint "(
   vec {
     record {
       token_id = 0 : nat;
@@ -118,24 +131,23 @@ dfx canister call icrc7 icrcX_mint "(
     };
   }
 )"
-
-dfx canister call icrc7 icrc7_tokens_of "(record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;},null,null)"
+echo "==================net call $ICRC7_CANISTER ================"
+dfx canister call icrc7_nft_canister icrc7_tokens_of "(record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;},null,null)"
 
 #All tokens should be owned by the canister
 echo "All tokens should be owned by the canister"
-dfx canister call icrc7 icrc7_tokens_of "(record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;},null,null)"
 
 #Should be approved to transfer
 echo "Should be approved to transfer"
-dfx canister call icrc7 icrc37_is_approved "(vec{record { spender=record {owner = principal \"$ADMIN_PRINCIPAL\"; subaccount = null;}; from_subaccount=null; token_id=0;}})" --query
+dfx canister call icrc7_nft_canister icrc37_is_approved "(vec{record { spender=record {owner = principal \"$ADMIN_PRINCIPAL\"; subaccount = null;}; from_subaccount=null; token_id=0;}})" --query
 
 #Check that the owner is spender
 echo "Check that the owner is spender"
-dfx canister call icrc7 icrc37_get_collection_approvals "(record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;},null, null)" --query
+dfx canister call icrc7_nft_canister icrc37_get_collection_approvals "(record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null;},null, null)" --query
 
 #tranfer from a token to the admin
 echo "tranfer from a token to the admin"
-dfx canister call icrc7 icrc37_transfer_from "(vec{record { 
+dfx canister call icrc7_nft_canister icrc37_transfer_from "(vec{record { 
   spender = principal \"$ADMIN_PRINCIPAL\";
   from = record { owner = principal \"$ICRC7_CANISTER\"; subaccount = null}; 
   to = record { owner = principal \"$ADMIN_PRINCIPAL\"; subaccount = null};
@@ -143,8 +155,11 @@ dfx canister call icrc7 icrc37_transfer_from "(vec{record {
   memo = null;
   created_at_time = null;}})"
 
-echo "===========Prepared Univoice Tokens===================="
+dfx canister call icrc7_nft_canister icrc7_tokens_of "(record { owner = principal \"$ADMIN_PRINCIPAL\"; subaccount = null;},null,null)"
 
+
+echo "===========Prepared Univoice Tokens===================="
+dfx deploy icrc1_index_canister --argument '(opt variant { Init = record { ledger_id = principal "mxzaz-hqaaa-aaaar-qaada-cai"; retrieve_blocks_from_ledger_interval_seconds = opt 10; } })'
 
 dfx deploy icrc1_ledger_canister --argument "(variant {
   Init = record {
@@ -177,7 +192,6 @@ dfx canister call icrc1_ledger_canister icrc1_balance_of "(record {
   owner = principal \"$(dfx identity --identity default get-principal)\";
 })"
 echo "===========SETUP DONE========="
-dfx deploy  univoice-vmc-backend 
 
 
 dfx canister call icrc1_ledger_canister icrc1_balance_of "(record {

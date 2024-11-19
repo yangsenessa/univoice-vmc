@@ -39,6 +39,7 @@ pub struct ComfyUIPayload {
 pub struct WorkLoadLedgerItem {
     pub wkload_id:BlockIndex,
     pub work_load :ComfyUIPayload,
+    pub block_tokens:NumTokens,
     pub mining_status:MinerTxState
 }
 

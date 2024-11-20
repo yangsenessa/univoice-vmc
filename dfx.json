@@ -32,6 +32,18 @@
     "build": {
       "args": "",
       "packtool": ""
+    },
+    "replica": {
+      "subnet_type": "system"
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:4943"
+    },
+    "ic": {
+      "providers": ["https://ic0.app/"],
+      "type": "persistent"
     }
   },
   "output_env_file": ".env",

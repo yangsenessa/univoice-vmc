@@ -4,12 +4,13 @@ use candid::{candid_method, export_service,
     Nat, Principal,CandidType, Deserialize,Encode};
 use std::{cell::RefCell, result};
 use std::mem;    
+use ic_cdk::query;
 use serde::Serialize;
 
 
 use ledgertype::{ComfyUIPayload,TransferArgs,MinerTxClaimRecord};
 
-use icrc_ledger_types::icrc1::account::{Account,Subaccount,DEFAULT_SUBACCOUNT};
+use icrc_ledger_types::icrc1::account::{Account,Subaccount};
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
 use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
 
@@ -31,7 +32,7 @@ thread_local! {
 fn greet(name: String) -> String {
     format!("Hello, {}!", name)
 }
-#[ic_cdk::query]
+#[query]
 async fn query_poll_balance()->Result<NumTokens,String> {
     ic_cdk::println!(
         "Query balance of mining pool {}",

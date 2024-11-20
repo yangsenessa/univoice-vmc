@@ -1,3 +1,10 @@
+
+type TransferArgs = record { to_account : Account; amount : nat };
+type Account = record { owner : principal; subaccount : opt blob };
+type Result = variant { Ok : nat; Err : text };
+
 service : {
     "greet": (text) -> (text) query;
+    "transfer" : (TransferArgs) -> (Result);
+    "query_poll_balance" :() -> (Result) query;
 }

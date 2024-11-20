@@ -17,8 +17,6 @@ set -ex
 #dfx start --clean --background
 
 dfx identity use univoicetest
-dfx deploy  univoice-vmc-backend 
-
 
 echo "===========Prepared Univoice Tokens===================="
 dfx deploy icrc1_index_canister --argument '(opt variant { Init = record { ledger_id = principal "mxzaz-hqaaa-aaaar-qaada-cai"; retrieve_blocks_from_ledger_interval_seconds = opt 10; } })'
@@ -54,7 +52,8 @@ dfx canister call icrc1_ledger_canister icrc1_balance_of "(record {
   owner = principal \"$(dfx identity --identity default get-principal)\";
 })"
 echo "===========SETUP DONE========="
-
+dfx deploy  univoice-vmc-backend 
+dfx deploy  univoice-vmc-frontend 
 
 dfx canister call icrc1_ledger_canister icrc1_balance_of "(record {
   owner = principal \"$(dfx identity --identity default get-principal)\";
@@ -73,19 +72,18 @@ dfx canister call --identity default icrc1_ledger_canister icrc2_approve "(
 echo "===========icrc2_approve_end========="
 
 
-#dfx canister call --identity default univoice-vmc-backend transfer "(record {
-#  amount = 100_000_000;
-#  to_account = record {
-#   owner = principal \"$(dfx canister id univoice-vmc-backend)\";
-#  };
-#})"
+dfx canister call --identity default univoice-vmc-backend transfer "(record {
+  amount = 100_000_000;
+  to_account = record {
+   owner = principal \"$(dfx canister id univoice-vmc-backend)\";  };
+})"
 
-#echo "===========query balance========"
+echo "===========query balance========"
 
-#dfx canister call icrc1_ledger_canister icrc1_balance_of "(record {
-#  owner = principal \"$(dfx canister id univoice-vmc-backend)\";
-#})"
+dfx canister call icrc1_ledger_canister icrc1_balance_of "(record {
+  owner = principal \"$(dfx canister id univoice-vmc-backend)\";
+})"
 
-#echo "===========query balance inner========"
-#dfx canister call  univoice-vmc-backend query_poll_balance
+echo "===========query balance inner========"
+dfx canister call univoice-vmc-backend query_poll_balance
 

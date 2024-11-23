@@ -1,8 +1,8 @@
-dfx stop
-set -e
+#dfx stop
+#set -e
 #trap 'dfx stop' EXIT
 echo "===========SETUP tokens========="
-dfx start --background --clean
+#dfx start --background --clean
 
 
 #echo "==========prepare NFT================"
@@ -10,16 +10,13 @@ dfx start --background --clean
 #npm i -g ic-mops
 #vessel
 #wget https://github.com/dfinity/vessel/releases/download/v0.6.4/vessel-macos
-
 set -ex
 
 #dfx stop
 #dfx start --clean --background
-
 dfx identity use univoicetest
 
 echo "===========Prepared Univoice Tokens===================="
-dfx deploy icrc1_index_canister --argument '(opt variant { Init = record { ledger_id = principal "mxzaz-hqaaa-aaaar-qaada-cai"; retrieve_blocks_from_ledger_interval_seconds = opt 10; } })'
 
 dfx deploy icrc1_ledger_canister --argument "(variant {
   Init = record {
@@ -48,6 +45,9 @@ dfx deploy icrc1_ledger_canister --argument "(variant {
     };
   }
 })"
+
+dfx deploy icrc1_index_canister --argument '(opt variant { Init = record { ledger_id = principal "mxzaz-hqaaa-aaaar-qaada-cai"} })'
+
 dfx canister call icrc1_ledger_canister icrc1_balance_of "(record {
   owner = principal \"$(dfx identity --identity default get-principal)\";
 })"

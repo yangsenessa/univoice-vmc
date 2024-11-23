@@ -2,21 +2,34 @@ mod ledgertype;
 
 use candid::{candid_method, export_service, 
     Nat, Principal,CandidType, Deserialize,Encode};
+use std::borrow::Borrow;
 use std::{cell::RefCell, result};
 use std::mem;    
 use ic_cdk::query;
 use serde::Serialize;
 
 
-use ledgertype::{ComfyUIPayload,TransferArgs,MinerTxClaimRecord};
+use ledgertype::{ComfyUIPayload, TransferArgs, TxIndex, UnvMinnerLedgerRecord, WorkLoadLedgerItem};
 
-use icrc_ledger_types::icrc1::account::{Account,Subaccount};
+use icrc_ledger_types::icrc1::account::{self, Account, Subaccount};
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
 use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
 
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+struct Subscriber {
+    topic: String,
+}
+
+#[derive(Clone, CandidType, Deserialize)]
+struct Event0301008 {
+    topic:String,
+    payload:WorkLoadLedgerItem
+}
+
 #[derive(CandidType,Deserialize,Clone,Default)]
 pub struct  State {
-    miner_tx_leger:Vec<MinerTxClaimRecord>
+    unv_tx_leger:Vec<UnvMinnerLedgerRecord>
 }
 
 #[derive(CandidType, Default,Deserialize,Clone)]
@@ -98,4 +111,54 @@ async fn transfer(args: TransferArgs) -> Result<BlockIndex, String> {
     .0
     // 8. Use `map_err` again to transform any specific ledger transfer errors into a readable string format, facilitating error handling and debugging.
     .map_err(|e: TransferFromError| format!("ledger transfer error {:?}", e))
+}
+
+#[ic_cdk::update]
+async fn setup_subscribe(publisher_id: Principal, topic: String) {
+    let subscriber = Subscriber { topic };
+    let _call_result: Result<(), _> =
+        ic_cdk::call(publisher_id, "subscribe", (subscriber,)).await;
+}
+
+#[ic_cdk::update]
+async fn publish_0301008(event:Event0301008) -> Result<TxIndex,String>{
+    let ledger_item = event.payload;
+
+    ic_cdk::println!("Init Nft owners");
+
+    let nft_vec = init_nft_tokens();
+    let miners_nft= ic_cdk::call::<(Vec<Nat>,),(Vec<Option<Account>>,)> (
+        Principal::from_text("bkyz2-fmaaa-aaaaa-qaaaq-cai")
+            .expect("Could not decode the principal."),
+           "icrc7_owner_of" ,
+           (nft_vec,),
+
+    )
+    .await
+    .map_err(|e| format!("failed to call ledger: {:?}", e));
+    
+    match miners_nft {
+        Ok(accounts_opt) => {
+            let accounts = accounts_opt.0;
+            for account in accounts {
+                if let Some(acctwithsub) = account {
+                    ic_cdk::println!("NFT owner is {}"
+                              ,acctwithsub.owner.to_text() );
+                }
+            }
+        },
+        Err(e) => ic_cdk::println!("Call NFT err {}",e)
+    }
+    
+    Ok(TxIndex::from(0 as u128))
+
+}
+
+fn init_nft_tokens() -> Vec<Nat> {
+    let mut tokens:Vec<Nat> = Vec::new();
+    tokens.push(Nat::from(0 as u32));
+    tokens.push(Nat::from(1 as u32));
+    tokens.push(Nat::from(2 as u32));
+    tokens.push(Nat::from(3 as u32));
+    return tokens;
 }

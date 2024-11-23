@@ -19,6 +19,17 @@ impl Default  for MinerTxState {
        MinerTxState::Prepared(String::from("prepared"))
    }
 }
+#[derive(CandidType,Deserialize,Clone)]
+
+pub enum TransferTxState {
+    Finished,
+    Cancel
+}
+impl Default  for TransferTxState {
+    fn default() -> Self {
+        TransferTxState::Finished
+   }
+}
 
 #[derive(Clone, Debug, Default, CandidType, Deserialize)]
 
@@ -43,19 +54,23 @@ pub struct WorkLoadLedgerItem {
     pub mining_status:MinerTxState
 }
 
+#[derive(Clone, CandidType, Deserialize)]
+pub struct UnvMinnerLedgerRecord{
+    pub minner:Principal,
+    pub meta_workload:WorkLoadLedgerItem,
+    pub block_index:BlockIndex,
+    pub trans_tx_index:TxIndex,
+    pub tokens:NumTokens,
+    pub gmt_pay_finish:Timestamp,
+    pub biz_state:TransferTxState
+}
+
 #[derive(CandidType, Deserialize, Serialize)]
 pub struct TransferArgs {
     pub amount: NumTokens,
     pub to_account: Account,
 }
 
-#[derive(Clone, CandidType, Deserialize)]
-pub struct MinerTxClaimRecord {
-    pub miner_id:TxIndex,
-    pub relate_workload_id:BlockIndex,
-    pub owner:Principal,
-    pub tokens:NumTokens,
-    pub gmt_date:Timestamp,
-    pub status:MinerTxState
-}
+
+
 

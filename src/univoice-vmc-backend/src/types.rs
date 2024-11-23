@@ -44,4 +44,8 @@ pub struct MetadataPart {
     data: Vec<u8>,
 }
 
+#[derive(CandidType, Deserialize)]
+pub type NFTtokenId =u128;
+
+
 

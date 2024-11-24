@@ -4,16 +4,20 @@ type Account = record { owner : principal; subaccount : opt blob };
 type Result = variant { Ok : nat; Err : text };
 type BlockIndex = nat;
 type NumTokens = nat;
+type TxIndex = nat;
 type Timestamp = nat64;
-
-
 
 type Subscriber = record {
     topic:text;
   };
 type MinerTxState = variant {
    Prepared:text;
-   Claimed:text
+   Claimed:text;
+};
+
+type TransferTxState = variant {
+   WaitClaim;
+    Claimed;
 };
 
 type ComfyUIPayload =
@@ -26,7 +30,7 @@ type ComfyUIPayload =
     voice_key:text;
     deduce_asset_key:text;
     status:text;
-    gmt_datatime:Timestamp
+    gmt_datatime:Timestamp;
   };
 
 type WorkLoadLedgerItem =
@@ -34,14 +38,25 @@ type WorkLoadLedgerItem =
     wkload_id : BlockIndex;
     work_load : ComfyUIPayload;
     block_tokens: NumTokens;
-    mining_status : MinerTxState
+    mining_status : MinerTxState;
   };
 
 type Event0301008 = record {
   topic:text;
   payload:WorkLoadLedgerItem;
 
-}
+};
+
+type UnvMinnerLedgerRecord= record {
+     minner:Account;
+     meta_workload:WorkLoadLedgerItem;
+     block_index:opt BlockIndex;
+     trans_tx_index:opt TxIndex;
+     tokens:NumTokens;
+     gmt_datetime:Timestamp;
+     biz_state:TransferTxState;
+
+};
 
 service : {
     "greet": (text) -> (text) query;
@@ -49,5 +64,6 @@ service : {
     "query_poll_balance" :() -> (Result) query;
     "setup_subscribe": (principal,text) -> ();
     "publish_0301008":(Event0301008) ->(Result);
+    "get_all_miner_jnl":() ->(opt vec  UnvMinnerLedgerRecord) query;
 
-}
+};

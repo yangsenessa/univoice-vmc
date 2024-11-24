@@ -2,18 +2,21 @@ mod ledgertype;
 
 use candid::{candid_method, export_service, 
     Nat, Principal,CandidType, Deserialize,Encode};
-use std::borrow::Borrow;
+use std::borrow::{Borrow, BorrowMut};
+use std::ops::DerefMut;
 use std::{cell::RefCell, result};
 use std::mem;    
-use ic_cdk::query;
+use ic_cdk::storage;
 use serde::Serialize;
 
 
-use ledgertype::{ComfyUIPayload, TransferArgs, TxIndex, UnvMinnerLedgerRecord, WorkLoadLedgerItem};
+use ledgertype::{ TransferArgs, TxIndex,TransferTxState, 
+                  UnvMinnerLedgerRecord, WorkLoadLedgerItem,ApproveResult};
 
 use icrc_ledger_types::icrc1::account::{self, Account, Subaccount};
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
 use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
+use icrc_ledger_types::icrc2::approve::{ApproveArgs,ApproveError};
 
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
@@ -45,7 +48,7 @@ thread_local! {
 fn greet(name: String) -> String {
     format!("Hello, {}!", name)
 }
-#[query]
+#[ic_cdk::query]
 async fn query_poll_balance()->Result<NumTokens,String> {
     ic_cdk::println!(
         "Query balance of mining pool {}",
@@ -142,8 +145,27 @@ async fn publish_0301008(event:Event0301008) -> Result<TxIndex,String>{
             let accounts = accounts_opt.0;
             for account in accounts {
                 if let Some(acctwithsub) = account {
-                    ic_cdk::println!("NFT owner is {}"
-                              ,acctwithsub.owner.to_text() );
+                   
+                    let blockindex=produce_unv_miner_ledger(&ledger_item,&acctwithsub);
+
+
+                    ic_cdk::println!("NFT owner is {}, blockindex is {}"
+                           ,acctwithsub.owner.to_text() , blockindex);
+                    
+                    let approve_tokens = NumTokens::from(1000 as u128);
+                    let approveresult = call_approve_with_block_tokens(&approve_tokens).await;
+                    match approveresult {
+                        ApproveResult::Ok(i) => {
+                            ic_cdk::println!("Approve Success");
+                            return Ok(i)
+                        },
+                        ApproveResult::Err(e) =>{
+                            ic_cdk::println!("Approve fail {}", e);
+                            return Err(String::from(e.to_string()))
+                        }
+                        
+                    }                    
+
                 }
             }
         },
@@ -153,6 +175,97 @@ async fn publish_0301008(event:Event0301008) -> Result<TxIndex,String>{
     Ok(TxIndex::from(0 as u128))
 
 }
+#[ic_cdk::query]
+fn get_all_miner_jnl() ->Option<Vec<UnvMinnerLedgerRecord>> {
+    STATE.with(|s|{
+         Some(s.borrow().unv_tx_leger.clone())
+    })
+}
+
+//#[ic_cdk::update]
+//async fn miner_claim(block_index:BlockIndex) ->Result<TxIndex,String> {
+//   claim_to_account_from_index(block_index)
+    
+//}
+
+
+fn claim_to_account_from_index(block_index:BlockIndex) -> Result<TxIndex,String>{
+    STATE.with(|s|{
+        for miner_ledger in s.borrow_mut().unv_tx_leger.iter_mut() {
+
+        }
+    });
+    Ok(TxIndex::from(0 as usize))
+}
+
+async  fn call_approve_with_block_tokens(tokens:&NumTokens) ->ApproveResult {
+    let approveArgs = ApproveArgs {
+        fee:Some(NumTokens::from(10 as u128)),
+        memo:None,
+        from_subaccount:None,
+        created_at_time:Some(ic_cdk::api::time()),
+        amount: tokens.clone(),
+        expected_allowance: Some(NumTokens::from(1000 as u128)),
+        expires_at:None,
+        spender: Account::from(ic_cdk::id()) 
+    };
+    ic_cdk::call::<(ApproveArgs,),(ApproveResult,)>(
+        Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
+            .expect("Could not decode the principal."),
+        // 3. Specify the method name on the target canister to be called, in this case, "icrc1_transfer".
+        "icrc2_approve",
+        // 4. Provide the arguments for the call in a tuple, here `transfer_args` is encapsulated as a single-element tuple.
+        (approveArgs,),
+    )
+    .await
+    .map_err(|e| format!("fail to call ledger:{:?}",e))
+    .unwrap().0
+}
+
+//Call icrc1_ledger
+async fn call_transfer(miner_ledger:&UnvMinnerLedgerRecord) -> Result<BlockIndex,String> {
+
+    let transfer_from_args = TransferFromArgs {
+        // the account we want to transfer tokens from (in this case we assume the caller approved the canister to spend funds on their behalf)
+        from: Account::from(ic_cdk::id()),
+        // can be used to distinguish between transactions
+        memo: None,
+        // the amount we want to transfer
+        amount: miner_ledger.tokens.clone(),
+        // the subaccount we want to spend the tokens from (in this case we assume the default subaccount has been approved)
+        spender_subaccount: None,
+        // if not specified, the default fee for the canister is used
+        fee: None,
+        // the account we want to transfer tokens to
+        to: miner_ledger.minner.clone(),
+        // a timestamp indicating when the transaction was created by the caller; if it is not specified by the caller then this is set to the current ICP time
+        created_at_time: None,
+    };
+
+    // 1. Asynchronously call another canister function using `ic_cdk::call`.
+    ic_cdk::call::<(TransferFromArgs,), (Result<BlockIndex, TransferFromError>,)>(
+        // 2. Convert a textual representation of a Principal into an actual `Principal` object. The principal is the one we specified in `dfx.json`.
+        //    `expect` will panic if the conversion fails, ensuring the code does not proceed with an invalid principal.
+        Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
+            .expect("Could not decode the principal."),
+        // 3. Specify the method name on the target canister to be called, in this case, "icrc1_transfer".
+        "icrc2_transfer_from",
+        // 4. Provide the arguments for the call in a tuple, here `transfer_args` is encapsulated as a single-element tuple.
+        (transfer_from_args,),
+    )
+    .await // 5. Await the completion of the asynchronous call, pausing the execution until the future is resolved.
+    // 6. Apply `map_err` to transform any network or system errors encountered during the call into a more readable string format.
+    //    The `?` operator is then used to propagate errors: if the result is an `Err`, it returns from the function with that error,
+    //    otherwise, it unwraps the `Ok` value, allowing the chain to continue.
+    .map_err(|e| format!("failed to call ledger: {:?}", e))?
+    // 7. Access the first element of the tuple, which is the `Result<BlockIndex, TransferError>`, for further processing.
+    .0
+    // 8. Use `map_err` again to transform any specific ledger transfer errors into a readable string format, facilitating error handling and debugging.
+    .map_err(|e: TransferFromError| format!("ledger transfer error {:?}", e))
+}
+
+
+
 
 fn init_nft_tokens() -> Vec<Nat> {
     let mut tokens:Vec<Nat> = Vec::new();
@@ -161,4 +274,45 @@ fn init_nft_tokens() -> Vec<Nat> {
     tokens.push(Nat::from(2 as u32));
     tokens.push(Nat::from(3 as u32));
     return tokens;
+}
+
+fn produce_unv_miner_ledger(workloadledger:&WorkLoadLedgerItem, nft_owner:&Account) -> BlockIndex {
+    
+    STATE.with(|s|{
+        
+        let top_block=s.borrow_mut().unv_tx_leger.len();
+        let block_index = BlockIndex::from(top_block+1);
+        let minner_ledger = UnvMinnerLedgerRecord {        
+            minner : nft_owner.clone(),
+            meta_workload : workloadledger.clone(),
+            block_index : Some(block_index.clone()),
+            tokens:workloadledger.clone().block_tokens,
+            trans_tx_index:Option::None,
+            gmt_datetime: ic_cdk::api::time(),
+            biz_state:TransferTxState::WaitClaim   
+        };
+        s.borrow_mut().borrow_mut().unv_tx_leger.push(minner_ledger);
+        return block_index;
+    })
+
+    
+}
+
+#[ic_cdk::pre_upgrade]
+fn pre_upgrade() {
+    let state = STATE.with(|state: &RefCell<State>| mem::take(&mut *state.borrow_mut()));
+    let stable_state: StableState = StableState { state };
+    ic_cdk::println!("pre_upgrade");
+    storage::stable_save((stable_state,)).unwrap();
+
+}
+
+#[ic_cdk::post_upgrade]
+fn post_upgrade() {
+    ic_cdk::println!("post_upgrade");
+    let (StableState { state },) = storage::stable_restore()
+                                              .expect("failed to restore stable state");
+    STATE.with(|state0| *state0.borrow_mut() = state);
+    ic_cdk::println!("post_upgrade");
+
 }

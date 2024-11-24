@@ -4,6 +4,7 @@ use candid::{CandidType, Principal,Deserialize,Nat};
 use serde::Serialize;
 use icrc_ledger_types::icrc1::account::{Account,Subaccount,DEFAULT_SUBACCOUNT};
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
+use icrc_ledger_types::icrc2::approve::ApproveError;
 
 
 pub type TxIndex = Nat;
@@ -22,12 +23,12 @@ impl Default  for MinerTxState {
 #[derive(CandidType,Deserialize,Clone)]
 
 pub enum TransferTxState {
-    Finished,
-    Cancel
+    WaitClaim,
+    Claimed
 }
 impl Default  for TransferTxState {
     fn default() -> Self {
-        TransferTxState::Finished
+        TransferTxState::WaitClaim
    }
 }
 
@@ -56,12 +57,12 @@ pub struct WorkLoadLedgerItem {
 
 #[derive(Clone, CandidType, Deserialize)]
 pub struct UnvMinnerLedgerRecord{
-    pub minner:Principal,
+    pub minner:Account,
     pub meta_workload:WorkLoadLedgerItem,
-    pub block_index:BlockIndex,
-    pub trans_tx_index:TxIndex,
+    pub block_index:Option<BlockIndex>,
+    pub trans_tx_index:Option<TxIndex>,
     pub tokens:NumTokens,
-    pub gmt_pay_finish:Timestamp,
+    pub gmt_datetime:Timestamp,
     pub biz_state:TransferTxState
 }
 
@@ -70,6 +71,12 @@ pub struct TransferArgs {
     pub amount: NumTokens,
     pub to_account: Account,
 }
+#[derive(CandidType, Deserialize, Serialize)]
+pub enum ApproveResult {
+    Ok(BlockIndex),
+    Err(ApproveError)  
+}
+
 
 
 

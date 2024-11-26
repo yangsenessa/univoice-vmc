@@ -67,5 +67,5 @@ service : {
     "setup_subscribe": (principal,text) -> ();
     "publish_0301008":(Event0301008) ->(Result);
     "get_all_miner_jnl":() ->(opt vec  UnvMinnerLedgerRecord) query;
-
+    "claim_to_account_from_index":(BlockIndex) ->(Result)
 };

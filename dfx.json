@@ -6,7 +6,8 @@
       "type": "rust",
       "dependencies": [
         "icrc1_ledger_canister"
-      ]
+      ],
+      "specified_id": "b77ix-eeaaa-aaaaa-qaada-cai"
     },
     "univoice-vmc-frontend": {
       "dependencies": [

@@ -186,6 +186,8 @@ async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex,
                     claimed_ledger.biz_state = TransferTxState::Claimed;
                     claimed_ledger.meta_workload.mining_status =
                         MinerTxState::Claimed(String::from("claimed"));
+                    claimed_mint_ledger(&block_index)
+                                     .map_err(|e|{format!("fail to call ledger:{:?}", e)});
                     ic_cdk::println!("Transfer Success {}", i);
                 }
                 Result::Err(e) => {
@@ -208,6 +210,19 @@ fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord
         }
         None
     })
+}
+
+fn claimed_mint_ledger(index:&BlockIndex) -> Result<(),String> {
+    STATE.with(|s| {
+        for item in s.borrow_mut().unv_tx_leger.iter_mut() {
+            if *index == item.clone().block_index.unwrap() {
+                item.biz_state = TransferTxState::Claimed;
+                item.meta_workload.mining_status = MinerTxState::Claimed(String::from("claimed"));
+                return Ok(());
+            }
+        }
+        Err(String::from("Ledger is in blackhole"))
+    } )
 }
 
 async fn call_approve_with_block_tokens(account: &Account, tokens: &NumTokens) -> ApproveResult {

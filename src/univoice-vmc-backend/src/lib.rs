@@ -168,12 +168,6 @@ fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
     STATE.with(|s| Some(s.borrow().unv_tx_leger.clone()))
 }
 
-//#[ic_cdk::update]
-//async fn miner_claim(block_index:BlockIndex) ->Result<TxIndex,String> {
-//   claim_to_account_from_index(block_index)
-
-//}
-
 #[ic_cdk::update]
 async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex, String> {
     let miner_ledger = get_unclaimed_mint_ledger(&block_index);

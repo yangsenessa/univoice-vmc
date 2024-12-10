@@ -63,7 +63,7 @@ type UnvMinnerLedgerRecord= record {
 service : {
     "greet": (text) -> (text) query;
     "transfer" : (TransferArgs) -> (Result);
-    "query_poll_balance" :() -> (Result) query;
+    "query_poll_balance" :() -> (Result) ;
     "setup_subscribe": (principal,text) -> ();
     "publish_0301008":(Event0301008) ->(Result);
     "get_all_miner_jnl":() ->(opt vec  UnvMinnerLedgerRecord) query;

@@ -49,7 +49,7 @@ thread_local! {
 fn greet(name: String) -> String {
     format!("Hello, {}!", name)
 }
-#[ic_cdk::query]
+#[ic_cdk::update]
 async fn query_poll_balance() -> Result<NumTokens, String> {
     ic_cdk::println!("Query balance of mining pool {}", ic_cdk::id(),);
 
@@ -97,7 +97,8 @@ async fn transfer(args: TransferArgs) -> Result<BlockIndex, String> {
         // 2. Convert a textual representation of a Principal into an actual `Principal` object. The principal is the one we specified in `dfx.json`.
         //    `expect` will panic if the conversion fails, ensuring the code does not proceed with an invalid principal.
         Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
-            .expect("Could not decode the principal."),
+                .expect("Could not decode the principal."),
+        //ic_cdk::caller(),
         // 3. Specify the method name on the target canister to be called, in this case, "icrc1_transfer".
         "icrc2_transfer_from",
         // 4. Provide the arguments for the call in a tuple, here `transfer_args` is encapsulated as a single-element tuple.
@@ -139,6 +140,9 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
     match miners_nft {
         Ok(accounts_opt) => {
             let accounts = accounts_opt.0;
+            let sharding_size = accounts.len();
+            let block_tokens = ledger_item.clone().block_tokens/sharding_size;
+            ic_cdk::println!("Per-nft sharing of {} tokens", block_tokens);
             for account in accounts {
                 if let Some(acctwithsub) = account {
                     if acctwithsub
@@ -148,7 +152,7 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
                         continue;
                     }
 
-                    let blockindex = produce_unv_miner_ledger(&ledger_item, &acctwithsub);
+                    let blockindex = produce_unv_miner_ledger(&ledger_item, &acctwithsub,&block_tokens);
 
                     ic_cdk::println!(
                         "NFT owner is {}, blockindex is {}",
@@ -269,7 +273,7 @@ async fn call_transfer(miner_ledger: &UnvMinnerLedgerRecord) -> Result<BlockInde
         //    `expect` will panic if the conversion fails, ensuring the code does not proceed with an invalid principal.
         Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
             .expect("Could not decode the principal."),
-        // 3. Specify the method name on the target canister to be called, in this case, "icrc1_transfer".
+        // 3. Specify the method name on the target canister to be called, in this case, "icrc2_transfer_from".
         "icrc2_transfer_from",
         // 4. Provide the arguments for the call in a tuple, here `transfer_args` is encapsulated as a single-element tuple.
         (transfer_from_args,),
@@ -297,6 +301,7 @@ fn init_nft_tokens() -> Vec<Nat> {
 fn produce_unv_miner_ledger(
     workloadledger: &WorkLoadLedgerItem,
     nft_owner: &Account,
+    block_tokens:&Nat
 ) -> BlockIndex {
     STATE.with(|s| {
         let top_block = s.borrow_mut().unv_tx_leger.len();
@@ -305,7 +310,7 @@ fn produce_unv_miner_ledger(
             minner: nft_owner.clone(),
             meta_workload: workloadledger.clone(),
             block_index: Some(block_index.clone()),
-            tokens: workloadledger.clone().block_tokens,
+            tokens: block_tokens.clone(),
             trans_tx_index: Option::None,
             gmt_datetime: ic_cdk::api::time(),
             biz_state: TransferTxState::WaitClaim,

@@ -127,46 +127,60 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
 
     ic_cdk::println!("Init Nft owners");
 
-    let nft_vec = init_nft_tokens();
-    let miners_nft = ic_cdk::call::<(Vec<Nat>,), (Vec<Option<Account>>,)>(
-        Principal::from_text("bkyz2-fmaaa-aaaaa-qaaaq-cai")
-            .expect("Could not decode the principal."),
-        "icrc7_owner_of",
-        (nft_vec,),
-    )
-    .await
-    .map_err(|e| format!("failed to call ledger: {:?}", e));
+    let nft_vec_param = init_nft_tokens(&ledger_item).await;
+    ic_cdk::println!("Finish init Nft owners");
+    let mut miner_acounts:Vec<Account> = Vec::new();
 
-    match miners_nft {
-        Ok(accounts_opt) => {
-            let accounts = accounts_opt.0;
-            let sharding_size = accounts.len();
-            let block_tokens = ledger_item.clone().block_tokens/sharding_size;
-            ic_cdk::println!("Per-nft sharing of {} tokens", block_tokens);
-            for account in accounts {
-                if let Some(acctwithsub) = account {
-                    if acctwithsub
-                        .owner
-                        .eq(&Principal::from_str(&ledger_item.nft_pool).unwrap())
-                    {
-                        continue;
+    //Build miner_collection
+    for nft_vec in  nft_vec_param {
+        ic_cdk::println!("Call Nft collection params");
+        let miners_nft = ic_cdk::call::<(Vec<Nat>,), (Vec<Option<Account>>,)>(
+            Principal::from_str(&ledger_item.nft_pool)
+                       .expect("Could not decode the principal."),
+            "icrc7_owner_of",
+            (nft_vec,),
+        )
+        .await
+        .map_err(|e| format!("failed to call ledger: {:?}", e));
+
+        match miners_nft {
+            Ok(accounts_opt) => {
+                let accounts = accounts_opt;
+                for account in accounts.0 {
+                    if let Some(acctwithsub) = account {
+                        if acctwithsub
+                            .owner
+                            .eq(&Principal::from_str(&ledger_item.nft_pool).unwrap())
+                        {
+                            continue;
+                        }
+                        ic_cdk::println!("Add nft owner");
+                        miner_acounts.push(acctwithsub.clone());
+    
                     }
-
-                    let blockindex = produce_unv_miner_ledger(&ledger_item, &acctwithsub,&block_tokens);
-
-                    ic_cdk::println!(
+                }
+                
+            }
+            Err(e) => ic_cdk::println!("Call NFT err {}", e),
+        }
+    }
+    let sharding_size = miner_acounts.len();
+    let block_tokens = ledger_item.clone().block_tokens/sharding_size;
+    ic_cdk::println!("Per-nft sharing of {} tokens", block_tokens);
+    let mut blockindex:Nat = Nat::from(0 as u128);
+    for miner in miner_acounts {
+        blockindex = produce_unv_miner_ledger(&ledger_item, &miner,&block_tokens);
+    
+        ic_cdk::println!(
                         "NFT owner is {}, blockindex is {}",
-                        acctwithsub.owner.to_text(),
+                        miner.owner.to_text(),
                         blockindex
                     );
-                }
-            }
-        }
-        Err(e) => ic_cdk::println!("Call NFT err {}", e),
-    }
-
-    Ok(TxIndex::from(0 as u128))
+    }   
+    Ok(TxIndex::from(blockindex))
 }
+
+
 #[ic_cdk::query]
 fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
     STATE.with(|s| Some(s.borrow().unv_tx_leger.clone()))
@@ -289,13 +303,44 @@ async fn call_transfer(miner_ledger: &UnvMinnerLedgerRecord) -> Result<BlockInde
     .map_err(|e: TransferFromError| format!("ledger transfer error {:?}", e))
 }
 
-fn init_nft_tokens() -> Vec<Nat> {
-    let mut tokens: Vec<Nat> = Vec::new();
-    tokens.push(Nat::from(0 as u32));
-    tokens.push(Nat::from(1 as u32));
-    tokens.push(Nat::from(2 as u32));
-    tokens.push(Nat::from(3 as u32));
-    return tokens;
+async  fn total_nft_supply(ledger:&WorkLoadLedgerItem ) ->Nat {
+    ic_cdk::call::<(),(Nat,)> (
+            Principal::from_text(ledger.nft_pool.clone())
+                               .expect("Could not decode the principal."),
+        "icrc7_total_supply",
+        (),
+    ).await
+    .map_err(|e| format!("failed to call ledger: {:?}", e)).unwrap().0
+}
+
+async  fn init_nft_tokens(ledger:&WorkLoadLedgerItem ) -> Vec<Vec<Nat>> {
+    let mut tokens_shard: Vec<Nat> = Vec::new();
+    let mut nft_tokens_param: Vec<Vec<Nat>> = Vec::new();
+    let max_tokenid:Nat = total_nft_supply(&ledger).await;
+    ic_cdk::println!("Total Nft Supply is {}",&max_tokenid);
+
+    let mut i: u128= 0 as u128;
+    let tmp_tokennum:Nat=Nat::from(21_000 as u128) ;
+    let glb_shard_size = 50;
+    loop {
+    
+        tokens_shard.push(Nat::from(i.clone()));
+        i +=1;
+    
+        if Nat::from(i).eq(&Nat::from(glb_shard_size as u128))  {
+            nft_tokens_param.push(tokens_shard.clone());
+            tokens_shard.clear();
+            ic_cdk::println!("Init Nft shard to Index of {}", i);
+        }
+
+        if Nat::from(i) == max_tokenid {
+            break;
+        }                
+    }
+    if tokens_shard.len() > 0 {
+        nft_tokens_param.push(tokens_shard.clone());
+    }
+    return nft_tokens_param;
 }
 
 fn produce_unv_miner_ledger(

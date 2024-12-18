@@ -4,9 +4,6 @@ use icrc_ledger_types::icrc1::account::{Account,Subaccount,DEFAULT_SUBACCOUNT};
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens, TransferArg, TransferError};
 use std::collections::HashMap;
 
-
-
-
 //NFT miner
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct NFTDetail {
@@ -14,6 +11,12 @@ pub struct NFTDetail {
     pub tokenid:u64,
     pub contract:ContractInfo
 }
+
+#[derive(Clone, Debug, CandidType,Default, Deserialize)]
+pub struct NftUnivoicePricipal {
+    pub owners:Vec<String>
+}
+
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct  ContractInfo {
     pub constractid:String,
@@ -44,8 +47,6 @@ pub struct MetadataPart {
     data: Vec<u8>,
 }
 
-#[derive(CandidType, Deserialize)]
-pub type NFTtokenId =u128;
 
 
 

@@ -1,8 +1,8 @@
 mod ledgertype;
+mod types;
 
 use candid::{candid_method, export_service, CandidType, Deserialize, Encode, Nat, Principal};
 use ic_cdk::storage;
-use serde::Serialize;
 use std::borrow::{Borrow, BorrowMut};
 use std::future::IntoFuture;
 use std::mem;
@@ -10,10 +10,17 @@ use std::ops::{DerefMut, Index};
 use std::str::FromStr;
 use std::{cell::RefCell, result};
 
+use ic_cdk::api::management_canister::http_request::{
+    http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
+    TransformContext,
+};
+use serde::{Serialize};
+use serde_json::{self, Value};
 use ledgertype::{
     ApproveResult, MinerTxState, TransferArgs, TransferTxState, TxIndex, UnvMinnerLedgerRecord,
     WorkLoadLedgerItem,
 };
+use types::{NftUnivoicePricipal};
 
 use icrc_ledger_types::icrc1::account::{self, Account, Subaccount};
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
@@ -34,6 +41,7 @@ struct Event0301008 {
 #[derive(CandidType, Deserialize, Clone, Default)]
 pub struct State {
     unv_tx_leger: Vec<UnvMinnerLedgerRecord>,
+    unv_nft_owners:Vec<Account>
 }
 
 #[derive(CandidType, Default, Deserialize, Clone)]
@@ -48,6 +56,24 @@ thread_local! {
 #[ic_cdk::query]
 fn greet(name: String) -> String {
     format!("Hello, {}!", name)
+}
+
+
+#[ic_cdk::update]
+async fn call_unvoice_for_ext_nft( nft_owners:NftUnivoicePricipal)->Result<usize,String>{
+   
+    STATE.with(|s| {
+        s.borrow_mut().unv_nft_owners.clear();
+        for owner_principal in nft_owners.owners {
+            s.borrow_mut().unv_nft_owners.push(
+                Account::from_str(owner_principal.as_str()).expect(
+                    "Error principal refered"
+                )
+            );          
+    };
+    Ok( s.borrow_mut().unv_nft_owners.len())
+    })
+  
 }
 #[ic_cdk::update]
 async fn query_poll_balance() -> Result<NumTokens, String> {
@@ -130,6 +156,8 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
     let nft_vec_param = init_nft_tokens(&ledger_item).await;
     ic_cdk::println!("Finish init Nft owners");
     let mut miner_acounts:Vec<Account> = Vec::new();
+
+
 
     //Build miner_collection
     for nft_vec in  nft_vec_param {
@@ -266,7 +294,7 @@ async fn call_approve_with_block_tokens(account: &Account, tokens: &NumTokens) -
 async fn call_transfer(miner_ledger: &UnvMinnerLedgerRecord) -> Result<BlockIndex, String> {
     let transfer_from_args = TransferFromArgs {
         // the account we want to transfer tokens from (in this case we assume the caller approved the canister to spend funds on their behalf)
-        from: Account::from(ic_cdk::id()),
+        from: Account::from_str(&miner_ledger.meta_workload.token_pool).expect("Get token pool error"),
         // can be used to distinguish between transactions
         memo: None,
         // the amount we want to transfer
@@ -313,6 +341,16 @@ async  fn total_nft_supply(ledger:&WorkLoadLedgerItem ) ->Nat {
     .map_err(|e| format!("failed to call ledger: {:?}", e)).unwrap().0
 }
 
+async  fn total_nft_supply_owner(ledger:&WorkLoadLedgerItem ) ->Nat {
+    ic_cdk::call::<(),(Nat,)> (
+            Principal::from_text(ledger.nft_pool.clone())
+                               .expect("Could not decode the principal."),
+        "icrc7_total_supply",
+        (),
+    ).await
+    .map_err(|e| format!("failed to call ledger: {:?}", e)).unwrap().0
+}
+
 async  fn init_nft_tokens(ledger:&WorkLoadLedgerItem ) -> Vec<Vec<Nat>> {
     let mut tokens_shard: Vec<Nat> = Vec::new();
     let mut nft_tokens_param: Vec<Vec<Nat>> = Vec::new();
@@ -342,6 +380,9 @@ async  fn init_nft_tokens(ledger:&WorkLoadLedgerItem ) -> Vec<Vec<Nat>> {
     }
     return nft_tokens_param;
 }
+
+
+
 
 fn produce_unv_miner_ledger(
     workloadledger: &WorkLoadLedgerItem,
@@ -381,3 +422,5 @@ fn post_upgrade() {
     STATE.with(|state0| *state0.borrow_mut() = state);
     ic_cdk::println!("post_upgrade");
 }
+
+ic_cdk::export_candid!();

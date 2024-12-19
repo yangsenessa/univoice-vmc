@@ -20,7 +20,7 @@ impl Default  for MinerTxState {
        MinerTxState::Prepared(String::from("prepared"))
    }
 }
-#[derive(CandidType,Deserialize,Clone)]
+#[derive(CandidType,Deserialize,Clone,PartialEq)]
 
 pub enum TransferTxState {
     WaitClaim,

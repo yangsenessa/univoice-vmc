@@ -226,7 +226,7 @@ async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex,
                     claimed_ledger.biz_state = TransferTxState::Claimed;
                     claimed_ledger.meta_workload.mining_status =
                         MinerTxState::Claimed(String::from("claimed"));
-                    claimed_mint_ledger(&block_index)
+                    claimed_mint_ledger(&block_index, &i)
                                      .map_err(|e|{format!("fail to call ledger:{:?}", e)});
                     ic_cdk::println!("Transfer Success {}", i);
                 }
@@ -245,6 +245,10 @@ fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord
     STATE.with(|s| {
         for item in s.borrow().unv_tx_leger.iter() {
             if *index == item.clone().block_index.unwrap() {
+                if item.biz_state == TransferTxState::Claimed{
+                    return None
+                }
+
                 return Some(item.clone());
             }
         }
@@ -252,12 +256,14 @@ fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord
     })
 }
 
-fn claimed_mint_ledger(index:&BlockIndex) -> Result<(),String> {
+
+fn claimed_mint_ledger(index:&BlockIndex, trans_index:&TxIndex) -> Result<(),String> {
     STATE.with(|s| {
         for item in s.borrow_mut().unv_tx_leger.iter_mut() {
             if *index == item.clone().block_index.unwrap() {
                 item.biz_state = TransferTxState::Claimed;
                 item.meta_workload.mining_status = MinerTxState::Claimed(String::from("claimed"));
+                item.trans_tx_index = Some(trans_index.clone());
                 return Ok(());
             }
         }
@@ -292,6 +298,7 @@ async fn call_approve_with_block_tokens(account: &Account, tokens: &NumTokens) -
 
 //Call icrc1_ledger
 async fn call_transfer(miner_ledger: &UnvMinnerLedgerRecord) -> Result<BlockIndex, String> {
+    ic_cdk::println!("Begin transfer {} tokens", miner_ledger.tokens);
     let transfer_from_args = TransferFromArgs {
         // the account we want to transfer tokens from (in this case we assume the caller approved the canister to spend funds on their behalf)
         from: Account::from_str(&miner_ledger.meta_workload.token_pool).expect("Get token pool error"),

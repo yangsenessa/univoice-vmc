@@ -1,0 +1,1 @@
+export const isLocalNet = (): boolean => process.env.DFX_NETWORK === 'local';

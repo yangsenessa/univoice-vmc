@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import environment from 'vite-plugin-environment';
 import dotenv from 'dotenv';
+import path from 'path'
 
 dotenv.config({ path: '../../.env' });
 
@@ -37,7 +38,14 @@ export default defineConfig({
         replacement: fileURLToPath(
           new URL("../declarations", import.meta.url)
         ),
-      },
-    ],
+      },{
+        find: "@",
+        replacement: path.resolve(__dirname, 'src'),
+      }
+    ], // 要相应tsconfig.json配置path
+    // alias: {
+    //   '@': path.resolve(__dirname, 'src'), // @符号要解析
+    // },
+    // extensions: ['.js', '.ts', '.jsx', '.tsx'], // import 可以省略的拓展名
   },
 });

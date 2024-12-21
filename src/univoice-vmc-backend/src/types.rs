@@ -11,6 +11,12 @@ pub struct NFTDetail {
     pub tokenid:u64,
     pub contract:ContractInfo
 }
+#[derive(Clone, Debug, CandidType,Default, Deserialize)]
+pub struct UserIdentityInfo {
+    pub user_id:String,
+    pub principalid_txt:String,
+    pub user_nick:String
+}
 
 #[derive(Clone, Debug, CandidType,Default, Deserialize)]
 pub struct NftUnivoicePricipal {

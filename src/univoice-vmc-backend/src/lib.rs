@@ -20,7 +20,7 @@ use ledgertype::{
     ApproveResult, MinerTxState, TransferArgs, TransferTxState, TxIndex, UnvMinnerLedgerRecord,
     WorkLoadLedgerItem,
 };
-use types::{NftUnivoicePricipal};
+use types::{NftUnivoicePricipal, UserIdentityInfo};
 
 use icrc_ledger_types::icrc1::account::{self, Account, Subaccount};
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
@@ -41,7 +41,8 @@ struct Event0301008 {
 #[derive(CandidType, Deserialize, Clone, Default)]
 pub struct State {
     unv_tx_leger: Vec<UnvMinnerLedgerRecord>,
-    unv_nft_owners:Vec<Account>
+    unv_nft_owners:Vec<Account>,
+    unv_user_infos:Vec<UserIdentityInfo>
 }
 
 #[derive(CandidType, Default, Deserialize, Clone)]
@@ -212,6 +213,31 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
 #[ic_cdk::query]
 fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
     STATE.with(|s| Some(s.borrow().unv_tx_leger.clone()))
+}
+
+#[ic_cdk::update]
+fn sync_userinfo_identity(user_infos:Vec<UserIdentityInfo>) ->Result<usize, String> {
+    STATE.with(|s|{
+        let mut tmp_userinfo:Vec<UserIdentityInfo> = Vec::new();
+        
+        for item in user_infos.clone(){
+            for user_info_item in s.borrow().unv_user_infos.iter() {
+                if item.user_id == user_info_item.user_id {
+                    continue;
+                } else {
+                    tmp_userinfo.push(item.clone());
+                }
+            }
+
+        }
+
+        let userinfo_size:usize = s.borrow().unv_user_infos.len();
+
+        Ok(userinfo_size)
+    } 
+
+    )
+
 }
 
 #[ic_cdk::update]

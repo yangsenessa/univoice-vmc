@@ -219,23 +219,36 @@ fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
 fn sync_userinfo_identity(user_infos:Vec<UserIdentityInfo>) ->Result<usize, String> {
     STATE.with(|s|{
         let mut tmp_userinfo:Vec<UserIdentityInfo> = Vec::new();
+        let mut idl_cnt = 0;
         
-        for item in user_infos.clone(){
+        for item in user_infos.clone() {
+            if s.borrow().unv_user_infos.len() ==0 {
+                ic_cdk::println!("Sync userinfos from univoice-init push");
+                    tmp_userinfo.push(item.clone());
+            }
+
             for user_info_item in s.borrow().unv_user_infos.iter() {
                 if item.user_id == user_info_item.user_id {
-                    continue;
-                } else {
-                    tmp_userinfo.push(item.clone());
-                }
+                    idl_cnt += 1;
+                    break;
+                } 
             }
+
+            if idl_cnt == 0 {
+                ic_cdk::println!("Sync userinfos from univoice push {}",item.user_id);
+                tmp_userinfo.push(item.clone());
+            }
+            idl_cnt = 0;
 
         }
 
-        let userinfo_size:usize = s.borrow().unv_user_infos.len();
+        for add_item in tmp_userinfo {
+            s.borrow_mut().unv_user_infos.push(add_item);
+        }
 
+        let userinfo_size:usize = s.borrow().unv_user_infos.len();
         Ok(userinfo_size)
     } 
-
     )
 
 }

@@ -18,6 +18,7 @@ pub struct UserIdentityInfo {
     pub user_nick:String
 }
 
+
 #[derive(Clone, Debug, CandidType,Default, Deserialize)]
 pub struct NftUnivoicePricipal {
     pub owners:Vec<String>

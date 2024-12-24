@@ -14,7 +14,7 @@ set -ex
 
 #dfx stop
 #dfx start --clean --background
-dfx identity use univoicetest
+dfx identity use univoicerun
 
 echo "===========Prepared Univoice Tokens===================="
 

@@ -59,6 +59,14 @@ fn greet(name: String) -> String {
     format!("Hello, {}!", name)
 }
 
+fn get_total_minner()->Result<Vec<Account>,String> {
+    STATE.with(
+        |s|{
+             Ok(s.borrow().unv_nft_owners.clone())
+        }
+    )
+}
+
 
 #[ic_cdk::update]
 async fn call_unvoice_for_ext_nft( nft_owners:NftUnivoicePricipal)->Result<usize,String>{
@@ -66,15 +74,15 @@ async fn call_unvoice_for_ext_nft( nft_owners:NftUnivoicePricipal)->Result<usize
     STATE.with(|s| {
         s.borrow_mut().unv_nft_owners.clear();
         for owner_principal in nft_owners.owners {
+            ic_cdk::println!("Current principal id is {}",owner_principal);
             s.borrow_mut().unv_nft_owners.push(
                 Account::from_str(owner_principal.as_str()).expect(
                     "Error principal refered"
                 )
             );          
     };
-    Ok( s.borrow_mut().unv_nft_owners.len())
+        Ok( s.borrow_mut().unv_nft_owners.len())
     })
-  
 }
 #[ic_cdk::update]
 async fn query_poll_balance() -> Result<NumTokens, String> {
@@ -149,7 +157,7 @@ async fn setup_subscribe(publisher_id: Principal, topic: String) {
 }
 
 #[ic_cdk::update]
-async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
+async fn publish_0301008_nft(event: Event0301008) -> Result<TxIndex, String> {
     let ledger_item = event.payload;
 
     ic_cdk::println!("Init Nft owners");
@@ -209,6 +217,41 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
     Ok(TxIndex::from(blockindex))
 }
 
+#[ic_cdk::update]
+async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
+    let ledger_item = event.payload;
+    let mut blockindex:Nat = Nat::from(0 as u128);
+
+    let mut blockindex_vec:Vec<Nat> = Vec::new();
+    let mut tx_index:Nat = Nat::from(0 as u128);
+
+    ic_cdk::println!("Init Nft owners");
+    STATE.with(
+        |s|{
+            let miner_set = get_total_minner().unwrap();
+            let sharding_size = miner_set.len();
+            let block_tokens = ledger_item.clone().block_tokens/sharding_size;
+            ic_cdk::println!("Per-nft sharing of {} tokens", block_tokens);
+            
+            for miner in miner_set {
+                blockindex = produce_unv_miner_ledger(&ledger_item, &miner,&block_tokens);
+                blockindex_vec.push(blockindex.clone());
+                ic_cdk::println!(
+                                "NFT owner is {}, blockindex is {}",
+                                miner.owner.to_text(),
+                                blockindex.clone()
+                            );
+            }   
+        }
+    );
+    for idx_ledger in blockindex_vec {
+        tx_index = claim_to_account_from_index(idx_ledger.clone()).await
+                             .expect("fail to call claim");
+    }
+    
+    Ok(TxIndex::from(tx_index))
+
+}
 
 #[ic_cdk::query]
 fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
@@ -428,8 +471,6 @@ async  fn init_nft_tokens(ledger:&WorkLoadLedgerItem ) -> Vec<Vec<Nat>> {
 }
 
 
-
-
 fn produce_unv_miner_ledger(
     workloadledger: &WorkLoadLedgerItem,
     nft_owner: &Account,
@@ -439,16 +480,16 @@ fn produce_unv_miner_ledger(
         let top_block = s.borrow_mut().unv_tx_leger.len();
         let block_index = BlockIndex::from(top_block + 1);
         let minner_ledger = UnvMinnerLedgerRecord {
-            minner: nft_owner.clone(),
-            meta_workload: workloadledger.clone(),
-            block_index: Some(block_index.clone()),
-            tokens: block_tokens.clone(),
-            trans_tx_index: Option::None,
-            gmt_datetime: ic_cdk::api::time(),
-            biz_state: TransferTxState::WaitClaim,
+           minner: nft_owner.clone(),
+           meta_workload: workloadledger.clone(),
+           block_index: Some(block_index.clone()),
+           tokens: block_tokens.clone(),
+           trans_tx_index: Option::None,
+           gmt_datetime: ic_cdk::api::time(),
+           biz_state: TransferTxState::WaitClaim,
         };
-        s.borrow_mut().borrow_mut().unv_tx_leger.push(minner_ledger);
-        return block_index;
+        s.borrow_mut().unv_tx_leger.push(minner_ledger);
+    return block_index;
     })
 }
 

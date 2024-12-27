@@ -51,7 +51,7 @@ const TopBar = () => {
 
   return (
     <div className="h-[88px] sm:px-[80px] flex flex-row items-center justify-between">
-      <img src={PLogoTop} className="w-[100px]" onClick={clickHome} />
+      <img src={PLogoTop} className="w-[100px] cursor-pointer" onClick={clickHome} />
       <div className="flex flex-row items-center">
         <a href="https://x.com/UNIVOICE_" target='_blank'><div className="btn-link-2">
           <img src={ImgTwitter} alt="" className="w-[18px]" />

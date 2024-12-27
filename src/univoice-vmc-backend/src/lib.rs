@@ -1,6 +1,7 @@
 mod ledgertype;
 mod types;
 
+use candid::types::principal;
 use candid::{candid_method, export_service, CandidType, Deserialize, Encode, Nat, Principal};
 use ic_cdk::storage;
 use std::borrow::{Borrow, BorrowMut};
@@ -18,7 +19,7 @@ use serde::{Serialize};
 use serde_json::{self, Value};
 use ledgertype::{
     ApproveResult, MinerTxState, TransferArgs, TransferTxState, TxIndex, UnvMinnerLedgerRecord,
-    WorkLoadLedgerItem,
+    WorkLoadLedgerItem,MinerWaitClaimBalance
 };
 use types::{NftUnivoicePricipal, UserIdentityInfo};
 
@@ -322,6 +323,26 @@ async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex,
     };
     Ok(TxIndex::from(0 as u128))
 }
+
+#[ic_cdk::query]
+fn gener_nft_owner_wait_claims(principal:String) ->MinerWaitClaimBalance {
+    STATE.with(|s|{
+        let miner_account:Account = Account::from(Principal::from_text(principal).unwrap());
+        let mut balance:NumTokens = NumTokens::from(0);
+        for unv_miner_ledger in s.borrow().unv_tx_leger.inter() {
+            if(miner_account == unv_miner_ledger.miner) {
+                balance += unv_miner_ledger.tokens;
+            }
+
+        }
+        return MinerWaitClaimBalance {
+            pricipalid_txt : miner_account.owner.to_text();
+            tokens : balance
+        } 
+    })
+}
+
+
 
 fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord> {
     STATE.with(|s| {

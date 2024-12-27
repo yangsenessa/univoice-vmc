@@ -68,6 +68,12 @@ pub struct UnvMinnerLedgerRecord{
     pub biz_state:TransferTxState
 }
 
+#[derive(Clone, CandidType, Deserialize)]
+pub struct MinerWaitClaimBalance {
+    pub pricipalid_txt:String,
+    pub tokens:NumTokens
+}
+
 #[derive(CandidType, Deserialize, Serialize)]
 pub struct TransferArgs {
     pub amount: NumTokens,

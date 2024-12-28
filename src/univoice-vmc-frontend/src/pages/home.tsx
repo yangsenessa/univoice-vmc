@@ -241,7 +241,7 @@ function UvHomePage() {
               <p>context</p>
             </div>
             <img src={ ImgBgBack } className="min-w-[1280px] w-full img-fixed" />
-            <div onClick={fnClickFlip} className="fixed top-[30px] right-[50px] cursor-pointer">回到正面</div>
+            <div onClick={fnClickFlip} className="fixed top-[30px] right-[50px] cursor-pointer">BACK</div>
           </div>
         </div>
       </div>

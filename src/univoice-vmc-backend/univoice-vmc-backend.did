@@ -70,6 +70,10 @@ type UserIdentityInfo = record {
     user_nick:text;
 };
 
+type MinerWaitClaimBalance = record {
+  
+}
+
 
 service : {
     "greet": (text) -> (text) query;

@@ -25,7 +25,7 @@ const TopBar = () => {
   const clickWallet = () => {
     const pReady = plugReady();
     if (!pReady) {
-      alert('请先安装plug钱包插件');
+      alert('Please install plug-wallet extension first');
     } else {
       loginPlug();
     }

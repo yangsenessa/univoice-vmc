@@ -328,15 +328,15 @@ async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex,
 fn gener_nft_owner_wait_claims(principal:String) ->MinerWaitClaimBalance {
     STATE.with(|s|{
         let miner_account:Account = Account::from(Principal::from_text(principal).unwrap());
-        let mut balance:NumTokens = NumTokens::from(0);
-        for unv_miner_ledger in s.borrow().unv_tx_leger.inter() {
-            if(miner_account == unv_miner_ledger.miner) {
-                balance += unv_miner_ledger.tokens;
+        let mut balance:NumTokens = NumTokens::from(0 as u128);
+        for unv_miner_ledger in s.borrow().unv_tx_leger.iter() {
+            if miner_account == unv_miner_ledger.minner {
+                balance = unv_miner_ledger.tokens.clone() + balance;
             }
 
         }
         return MinerWaitClaimBalance {
-            pricipalid_txt : miner_account.owner.to_text();
+            pricipalid_txt : miner_account.owner.to_text(),
             tokens : balance
         } 
     })

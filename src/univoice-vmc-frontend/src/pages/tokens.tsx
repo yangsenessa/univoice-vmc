@@ -1,9 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function UvTokensPage() {
+  const [selectedTab, setSelectedTab] = useState('1');
   useEffect(() => {
     window.scrollTo(0, 0)
   }, []);
+
+  const clickTab = (tabName: string) => {
+    if (selectedTab === tabName) {
+      return;
+    }
+    setSelectedTab(tabName); 
+  }
 
   return (
     <div className="uv-container-1 pb-[28px] pg-token" style={{flexBasis: '100%'}}>
@@ -14,11 +22,35 @@ function UvTokensPage() {
       <div className="sub-block-split mt-[120px] mb-[110px]"></div>
       <div className="sub-qa-block tabs">
         <div className="tab-bar">
-          <div className="tab-bar-item tab-bar-item-selected">Mining</div>
-          <div className="tab-bar-item">License</div>
+          <div className={`tab-bar-item ${selectedTab === '1' ? 'tab-bar-item-selected' : ''}`} onClick={()=>clickTab('1')}>Mining</div>
+          <div className={`tab-bar-item ${selectedTab === '2' ? 'tab-bar-item-selected' : ''}`} onClick={()=>clickTab('2')}>License</div>
         </div>
         <div className="tab-content">
-          <div className="tbl"></div>
+          {selectedTab === '1' &&
+          <div></div>}
+          {selectedTab === '2' &&
+          <div className="tbl-wrap"><div className="tbl grid grid-cols-4">
+            <div className="tbl-cell-title tbl-cell-row-start">Datetime</div>
+            <div className="tbl-cell-title">NFT</div>
+            <div className="tbl-cell-title">BlockIndex</div>
+            <div className="tbl-cell-title">Tokens</div>
+            <div className="tbl-cell tbl-cell-row-start">2024-12-27 18:18:18</div>
+            <div className="tbl-cell">ewrtertwertw</div>
+            <div className="tbl-cell">dsfsadfasdg</div>
+            <div className="tbl-cell">12.3456</div>
+            <div className="tbl-cell tbl-cell-row-start">2024-12-26 18:18:18</div>
+            <div className="tbl-cell">ewrtertwertw</div>
+            <div className="tbl-cell">dsfsadfasdg</div>
+            <div className="tbl-cell">12.3456</div>
+            <div className="tbl-cell tbl-cell-row-start">2024-12-25 18:18:18</div>
+            <div className="tbl-cell">ewrtertwertw</div>
+            <div className="tbl-cell">dsfsadfasdg</div>
+            <div className="tbl-cell">12.3456</div>
+            <div className="tbl-cell tbl-cell-row-start">2024-12-24 18:18:18</div>
+            <div className="tbl-cell">ewrtertwertw</div>
+            <div className="tbl-cell">dsfsadfasdg</div>
+            <div className="tbl-cell">12.3456</div>
+          </div></div>}
         </div>
       </div>
       {/* <div className="sub-qa-block">

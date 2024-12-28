@@ -1,9 +1,33 @@
-export const plugReady = (): boolean => {
-  const w = window as any;
-  if (!w.ic || !w.ic.plug) {
-    return false;
+import { PlugMobileProvider } from '@funded-labs/plug-mobile-sdk'
+import { isLocalNet } from '@/utils/env';
+import MobileProvider from '@funded-labs/plug-mobile-sdk/dist/src/MobileProvider';
+
+const isDev = isLocalNet();
+const isMobile = PlugMobileProvider.isMobileBrowser()
+const walletConnectProjectId = '1e0a755a594cfe1d94e3617f12f5ae64'
+if (isMobile) {
+  const provider = new PlugMobileProvider({
+    debug: isDev, // If you want to see debug logs in console
+    walletConnectProjectId: walletConnectProjectId, // Project ID from WalletConnect console
+    window: window,
+  })
+  provider.initialize().catch(console.log)
+  if (!provider.isPaired()) {
+    provider.pair().catch(console.log)
   }
-  return true;
+}
+
+export const plugReady = (): boolean => {
+  if (isMobile) {
+    return true;
+  } else {
+    const w = window as any;
+    if (!w.ic || !w.ic.plug) {
+      alert('请先安装plug钱包插件');
+      return false;
+    }
+    return true;
+  }
 }
 
 // Canister Ids

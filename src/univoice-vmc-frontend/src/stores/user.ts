@@ -24,6 +24,7 @@ interface AccountState {
   setUserByPlugWallet: (principal_id: string) => void;
   clearAccount: () => void;
   getUid: () => string | number;
+  getPrincipal: () => string;
   hasExpired: () => boolean;
 }
 
@@ -67,6 +68,9 @@ export const useAcountStore = create<AccountState>()(
         },
         getUid: () => {
           return get().hasExpired() ? '' : get().uid;
+        },
+        getPrincipal: () => {
+          return get().hasExpired() ? '' : get().principal;
         },
         hasExpired: (): boolean => {
           return get().expire < new Date().getTime();

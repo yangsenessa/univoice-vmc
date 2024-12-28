@@ -48,13 +48,14 @@ const FootBar = (option:any) => {
   const clickListening = () => {
     clickLink('/listening')
   }
+  const clickCoCreating = () => {
+    clickLink('/cocreating')
+  }
   const clickAiAgent = () => {
     clickLink('/aiagent')
   }
   const clickToken = () => {
     clickLink('/tokens')
-  }
-  const clickCoCreating = () => {
   }
 
   return (
@@ -72,15 +73,15 @@ const FootBar = (option:any) => {
                 <img src={ImgTelegram} alt="" className="w-[18px]" />
               </div></a>
               <div className="btn-link-2-split"></div>
-              <div className="btn-link-2">
+              <div className="btn-link-2 disable">
                 <img src={ImgDiscord} alt="" className="w-[18px]" />
               </div>
               <div className="btn-link-2-split"></div>
-              <div className="btn-link-2">
+              <div className="btn-link-2 disable">
                 <img src={ImgMedium} alt="" className="w-[18px]" />
               </div>
               <div className="btn-link-2-split"></div>
-              <div className="btn-link-2">
+              <div className="btn-link-2 disable">
                 <img src={ImgGitHub} alt="" className="w-[18px]" />
               </div>
             </div>

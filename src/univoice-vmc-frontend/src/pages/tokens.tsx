@@ -6,6 +6,7 @@ function UvTokensPage() {
   const [accountId, setAccountId] = useState("");
   const [balance, setBalance] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [oldestTxId, setOldestTxId] = useState<bigint | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,9 +22,14 @@ function UvTokensPage() {
   }
 
   const fetchBalance = async () => {
+    if(!accountId) {
+      setError("Please enter a valid Account ID.");
+      return;
+    }
+
     try {
-      setLoading(true);
       setError(null);
+      setLoading(true);
       const userBalance = await getBalance(accountId);
       setBalance(userBalance);
     } catch (err) {
@@ -34,11 +40,17 @@ function UvTokensPage() {
   };
 
   const fetchTransactions = async () => {
+    if(!accountId) {
+      setError("Please enter a valid Account ID.");
+      return;
+    }
+
     try {
-      setLoading(true);
       setError(null);
-      const txns = await getTransactions(accountId);
-      setTransactions(txns);
+      setLoading(true);
+      const txns = await getTransactions(accountId, BigInt(10), BigInt(10));
+      setTransactions(txns.transactions);
+      setOldestTxId(txns.oldest_tx_id.length > 0 ? txns.oldest_tx_id[0] : null);
     } catch (err) {
       setError("Failed to fetch transactions. Please check the accountId.");
     } finally {

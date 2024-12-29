@@ -14,5 +14,12 @@
   "type": "module",
   "workspaces": [
     "src/univoice-vmc-frontend"
-  ]
+  ],
+  "dependencies": {
+    "@dfinity/agent": "^2.2.0",
+    "@dfinity/candid": "^2.2.0",
+    "@dfinity/ledger-icrc": "^2.7.0",
+    "@dfinity/principal": "^2.2.0",
+    "@dfinity/utils": "^2.8.0"
+  }
 }

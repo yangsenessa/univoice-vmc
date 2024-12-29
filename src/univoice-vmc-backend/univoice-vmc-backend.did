@@ -71,8 +71,9 @@ type UserIdentityInfo = record {
 };
 
 type MinerWaitClaimBalance = record {
-  
-}
+     pricipalid_txt:text;
+     tokens:NumTokens; 
+};
 
 
 service : {
@@ -85,4 +86,5 @@ service : {
     "claim_to_account_from_index":(BlockIndex) ->(Result);
     "call_unvoice_for_ext_nft":(NftUnivoicePricipal) ->(Result);
     "sync_userinfo_identity":(vec UserIdentityInfo) ->(Result);
+    "gener_nft_owner_wait_claims":(text)->(MinerWaitClaimBalance) query;
 };

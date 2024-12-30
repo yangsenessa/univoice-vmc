@@ -1,7 +1,5 @@
 import { univoice_vmc_backend } from 'declarations/univoice-vmc-backend';
-import type {Result} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
-import { IcrcLedgerCanister } from "@dfinity/ledger-icrc";
-import { createAgent } from "@dfinity/utils";
+import type {Result,MinerWaitClaimBalance} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
 import { isLocalNet } from '@/utils/env';
 
 
@@ -18,10 +16,17 @@ export const poll_balance = async () =>{
     result = await univoice_vmc_backend.query_poll_balance();
 
     console.log("Poll balance is:"+ result);
-    if(result.Ok){
-       return result.Ok;
-    }
-    return "Null";
+    return result;
+}
 
+/**
+ * query custom should claimed
+ * @param principalId 
+ * @returns 
+ */
+export const gener_nft_owner_wait_claims = async(principalId:string) => {
+  let result:MinerWaitClaimBalance;
+  result = await univoice_vmc_backend.gener_nft_owner_wait_claims(principalId);
+  return result;  
 }
 

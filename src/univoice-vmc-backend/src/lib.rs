@@ -342,6 +342,38 @@ fn gener_nft_owner_wait_claims(principal:String) ->MinerWaitClaimBalance {
     })
 }
 
+#[ic_cdk::update]
+async fn claim_to_account_by_principal(principalid:String) -> Result<TxIndex, String> {
+    let miner_ledger_vec = get_unclaimed_mint_ledger_by_principal(principalid);
+    match miner_ledger_vec {
+        Some(ledger_item_vec) => {
+
+            for ledger_item in ledger_item_vec.iter() {
+                let transfer_result = call_transfer(&ledger_item).await;
+                match transfer_result {
+                    Result::Ok(i) => {
+                        let mut claimed_ledger = ledger_item.clone();
+                        claimed_ledger.biz_state = TransferTxState::Claimed;
+                        claimed_ledger.meta_workload.mining_status =
+                            MinerTxState::Claimed(String::from("claimed"));
+                        let block_index:Nat = claimed_ledger.block_index.unwrap();
+                        claimed_mint_ledger(&block_index, &i)
+                                         .map_err(|e|{format!("fail to call ledger:{:?}", e)});
+                        ic_cdk::println!("Transfer Success {}", i);
+                    }
+                    Result::Err(e) => {
+                        ic_cdk::println!("Transfer fail {}", e);
+                        return Err(String::from(e.to_string()));
+                    }
+                }
+            }
+            
+        }
+        None => return Err(String::from("None ledger need to be claimed")),
+    };
+    Ok(TxIndex::from(0 as u128))
+}
+
 
 
 fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord> {
@@ -356,6 +388,21 @@ fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord
             }
         }
         None
+    })
+}
+
+fn get_unclaimed_mint_ledger_by_principal(principalid:String) ->Option<Vec<UnvMinnerLedgerRecord>> {
+    STATE.with(|s| {
+        let mut ledgerRecord:Vec<UnvMinnerLedgerRecord> = Vec::new();
+        for item in s.borrow().unv_tx_leger.iter() {
+            if principalid == item.clone().minner.owner.to_text() {
+                if item.biz_state == TransferTxState::Claimed{
+                    ledgerRecord.push(item.clone());
+                }
+
+            }
+        }
+        return Some(ledgerRecord)
     })
 }
 

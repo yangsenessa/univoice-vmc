@@ -20,6 +20,10 @@
     "@dfinity/candid": "^2.2.0",
     "@dfinity/ledger-icrc": "^2.7.0",
     "@dfinity/principal": "^2.2.0",
-    "@dfinity/utils": "^2.8.0"
+    "@dfinity/utils": "^2.8.0",
+    "@ethersproject/bytes": "^5.7.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.6"
   }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {getBalance, getTransactions} from "@/utils/icrcService";
+import type {TransactionWithId, GetTransactions} from "@/utils/icrcService";
 
 function UvTokensPage() {
   const [selectedTab, setSelectedTab] = useState('1');

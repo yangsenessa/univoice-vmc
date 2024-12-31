@@ -6,9 +6,19 @@ const canisterId = Principal.fromText("jfqe5-daaaa-aaaai-aqwvq-cai");
 const indexCanisterId = Principal.fromText("qoctq-giaaa-aaaaa-aaaea-cai");
 const agent = new HttpAgent({host: "https://ic0.app"});
 
+// get Main ICP Account ID when connect wallet
+const getMainAccountId = (principal: Principal): string => {
+    const account = IcrcLedgerCanister.accountIdentifier({
+        owner: principal,
+        subaccount: null,
+    });
+
+    return account;
+}
+
 // 初始化
 const ledger = IcrcLedgerCanister.create({canisterId, agent});
-const indexCanister = IcrcIndexCanister.create({canisterId, agent})
+const indexCanister = IcrcIndexCanister.create({canisterId: indexCanisterId, agent})
 
 // 获取用户余额
 export const getBalance = async (accountId: string): Promise<string> => {

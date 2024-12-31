@@ -3,25 +3,27 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import PLogoTop from '@/assets/svg/logo_top.svg'
 import ImgTwitter from '@/assets/svg/X_w.svg'
 import ImgTelegram from '@/assets/svg/telegram_w.svg'
-import { plugReady, reConnectPlug } from '@/utils/icplug';
+import { plugReady, reConnectPlug, callBalance } from '@/utils/icplug';
 import { useAcountStore } from '@/stores/user';
 
 const TopBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [currentPath, setCurrentPath] = useState('');
+  const [isLinkWallet,setIsLinkWallet]= useState<boolean>();
   const { setUserByPlugWallet, clearAccount, getUid, getPrincipal } = useAcountStore();
 
   useEffect(() => {
     setCurrentPath(location.pathname);
   }, [location]);
 
+
   const clickHome = () => {
     if (currentPath === '/') return
     navigate('/')
     // navigate('/', { replace: true })
   }
-  
+
   const clickWallet = () => {
     if (getUid()) {
       return;
@@ -36,14 +38,17 @@ const TopBar = () => {
 
   const loginPlug = () => {
     reConnectPlug()
-    .then((principal_id)=>{
-      console.log('reConnectPlug done, pid:', principal_id)
-      if (principal_id) {
-        setUserByPlugWallet(principal_id);
-      }
-    }).catch((e)=>{
-      console.log('reConnectPlug exception!', e)
-    })
+      .then((principal_id) => {
+        console.log('reConnectPlug done, pid:', principal_id)
+        if (principal_id) {
+          setIsLinkWallet(true);
+          var tokenstr = callBalance();
+          console.log('callBalance done, tokens:', tokenstr);
+          setUserByPlugWallet(principal_id);
+        }
+      }).catch((e) => {
+        console.log('reConnectPlug exception!', e)
+      })
   }
   // const clickA = () => {
   //   console.log('uid:', getUid())
@@ -70,9 +75,9 @@ const TopBar = () => {
           <img src={ImgTelegram} alt="" className="w-[18px]" />
         </div></a>
         <div className="ml-[-5px] lnk-wallet w-[166px] h-[84px] flex items-center justify-center">
-          { getPrincipal() === ''? 
-          <div className="text-[14px] cursor-pointer px-[10px] py-[10px]" onClick={clickWallet}>Connect wallet</div>
-          :<div className="text-[14px] cursor-pointer px-[10px] py-[10px]">{getWalletStr()}</div>
+          {getPrincipal() === '' ?
+            <div className="text-[14px] cursor-pointer px-[10px] py-[10px]" onClick={clickWallet}>Connect wallet</div>
+            : <div className="text-[14px] cursor-pointer px-[10px] py-[10px]">{getWalletStr()}</div>
           }
         </div>
         {/* <div className="m-[10px]" onClick={clickA}>A</div>

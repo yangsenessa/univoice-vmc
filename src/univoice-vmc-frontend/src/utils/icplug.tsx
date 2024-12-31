@@ -1,5 +1,7 @@
 import { PlugMobileProvider } from '@funded-labs/plug-mobile-sdk'
 import { isLocalNet } from '@/utils/env';
+import {tokenLedegerIdlFactory} from '@/idl/icrc1.did.js';
+
 import MobileProvider from '@funded-labs/plug-mobile-sdk/dist/src/MobileProvider';
 
 const isDev = isLocalNet();
@@ -17,6 +19,8 @@ if (isMobile) {
   }
 }
 
+ 
+
 export const plugReady = (): boolean => {
   if (isMobile) {
     return true;
@@ -31,11 +35,12 @@ export const plugReady = (): boolean => {
 }
 
 // Canister Ids
-const nnsCanisterId  = 'qoctq-giaaa-aaaaa-aaaea-cai';
+const tokenCanisterId  = 'jfqe5-daaaa-aaaai-aqwvq-cai';
 // Whitelist
 const whitelist = [
-  nnsCanisterId,
+  tokenCanisterId,
 ];
+
 // Host
 const host = "https://mainnet.dfinity.network";
 
@@ -62,6 +67,36 @@ export const reConnectPlug = async (): Promise<string> => {
     return '';
   }
 }
+
+export const callBalance = async (): Promise<String> => {
+
+   console.log('ICRC ledger call begin');    
+
+   if (!plugReady()) return "";
+   const plug = (window as any).ic.plug;
+   const principal = plug.agent.getPrincipal() ;
+   const account =  {'owner' : principal,'subaccount' : [] };
+   var tokensStr = "";
+   // requestConnect callback function
+   const onConnectionUpdate = async () => {
+
+          // rebuild actor and test by getting Sonic info
+         const tokenActor = await plug.createActor({
+               canisterId: tokenCanisterId,
+               interfaceFactory: tokenLedegerIdlFactory,
+         });
+          // use our actors getSwapInfo method
+         const tokens = await tokenActor.icrc1_balance_of();
+         console.log('ICRC ledger call: ', tokens);    
+         tokensStr = tokens.toString();
+    }
+    // Initialise Agent, expects no return value
+    await plug.requestConnect({
+        whitelist,
+        onConnectionUpdate ,
+    }); 
+    return tokensStr;
+} 
 
 // const getPrincipal = async (): Promise<string> => {
 //   if (!plugReady()) return '';

@@ -5,13 +5,14 @@ import ImgTwitter from '@/assets/svg/X_w.svg'
 import ImgTelegram from '@/assets/svg/telegram_w.svg'
 import { plugReady, reConnectPlug, callBalance } from '@/utils/icplug';
 import { useAcountStore } from '@/stores/user';
+import { number } from 'echarts';
 
 const TopBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [currentPath, setCurrentPath] = useState('');
   const [isLinkWallet,setIsLinkWallet]= useState<boolean>();
-  const { setUserByPlugWallet, clearAccount, getUid, getPrincipal } = useAcountStore();
+  const { setUserByPlugWallet, clearAccount, getUid, getPrincipal,getBalance,setBalance } = useAcountStore();
 
   useEffect(() => {
     setCurrentPath(location.pathname);
@@ -25,6 +26,7 @@ const TopBar = () => {
   }
 
   const clickWallet = () => {
+    //miss, let user can reconnect 
     if (getUid()) {
       return;
     }
@@ -42,8 +44,12 @@ const TopBar = () => {
         console.log('reConnectPlug done, pid:', principal_id)
         if (principal_id) {
           setIsLinkWallet(true);
-          var tokenstr = callBalance();
-          console.log('callBalance done, tokens:', tokenstr);
+           callBalance(principal_id).then(
+               (tokenstr) =>{
+                   console.log('callBalance done, tokens:', tokenstr);
+                   setBalance(Number(tokenstr));
+               }
+          );          
           setUserByPlugWallet(principal_id);
         }
       }).catch((e) => {
@@ -59,7 +65,12 @@ const TopBar = () => {
   // }
 
   const getWalletStr = () => {
-    const pid = getPrincipal()
+    const pid = getPrincipal();
+    callBalance(pid).then((token_str) =>{
+         console.log('callBalance done, tokens:', token_str);
+        }
+    );
+    
     return pid.substring(0, 8) + '...' + pid.substring(pid.length - 4);
   }
 
@@ -79,6 +90,7 @@ const TopBar = () => {
             <div className="text-[14px] cursor-pointer px-[10px] py-[10px]" onClick={clickWallet}>Connect wallet</div>
             : <div className="text-[14px] cursor-pointer px-[10px] py-[10px]">{getWalletStr()}</div>
           }
+          Balance:{getBalance()}
         </div>
         {/* <div className="m-[10px]" onClick={clickA}>A</div>
         <div className="m-[10px]" onClick={clickC}>logout</div> */}

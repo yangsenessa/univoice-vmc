@@ -18,13 +18,16 @@ interface AccountState {
   uid: string | number;
   wallet: string;
   principal: string;
+  balance:number;
   expire: number; // 登录有效时间截止(ms)
   setUser: (user_id: string | number) => void;
   setUserByWallet: (wallet_type: string, principal_id: string) => void;
   setUserByPlugWallet: (principal_id: string) => void;
+  setBalance:(tokens:number) => void;
   clearAccount: () => void;
   getUid: () => string | number;
   getPrincipal: () => string;
+  getBalance: () => string|number;
   hasExpired: () => boolean;
 }
 
@@ -35,6 +38,7 @@ export const useAcountStore = create<AccountState>()(
         uid: '',
         wallet: WALLET_TYPE_PLUG,
         principal: '',
+        balance:0,
         expire: 0,
         setUser: (user_id) => {
           set({
@@ -55,6 +59,14 @@ export const useAcountStore = create<AccountState>()(
         setUserByPlugWallet: (principal_id) => {
           get().setUserByWallet(WALLET_TYPE_PLUG, principal_id);
         },
+        setBalance:(tokens) => {
+           set(
+                {   
+                    balance:tokens,
+                    expire: buildExpire()
+                } 
+           );
+        },
         clearAccount: () => {
           if (get().principal) {
             if (get().wallet === WALLET_TYPE_PLUG) {}
@@ -71,6 +83,9 @@ export const useAcountStore = create<AccountState>()(
         },
         getPrincipal: () => {
           return get().hasExpired() ? '' : get().principal;
+        },
+        getBalance: () => {
+          return get().hasExpired() ? '' : get().balance;
         },
         hasExpired: (): boolean => {
           return get().expire < new Date().getTime();

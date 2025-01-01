@@ -577,7 +577,7 @@ fn post_upgrade() {
 
 #[ic_cdk::update]
 async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {
-    let ledger_canister_id = Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai")
+    let ledger_canister_id = Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
         .expect("Invalid Ledger Canister ID");
 
     let account = Account { owner: account_owner, subaccount: None };
@@ -592,7 +592,7 @@ async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {
 #[ic_cdk::update]
 async fn get_user_transactions (account_owner: Principal, max_results: u64, start_tx_id: Option<Nat>)
     -> Result<Vec<TransactionRecord>, String> {
-    let ledger_canister_id = Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai").expect("Invalid Ledger Canister ID");
+    let ledger_canister_id = Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai").expect("Invalid Ledger Canister ID");
 
     let account = Account { owner: account_owner, subaccount: None };
     let result: Result<(Vec<TransactionRecord>, ), _> = ic_cdk::call(ledger_canister_id,

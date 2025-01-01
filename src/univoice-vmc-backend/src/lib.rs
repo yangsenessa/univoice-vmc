@@ -188,8 +188,22 @@ async fn setup_subscribe(publisher_id: Principal, topic: String) {
     let _call_result: Result<(), _> = ic_cdk::call(publisher_id, "subscribe", (subscriber, )).await;
 }
 
+#[ic_cdk::query]
+async fn get_miner_license(user_principal:String,pre:Nat, take:Nat) ->Vec<Nat> {
+    let account:Account = Account::from_str(&user_principal).expect("Could not decode the principal");
+    ic_cdk::call::<(Account,Nat,Nat, ), (Vec<Nat>, )>(
+        Principal::from_str("bkyz2-fmaaa-aaaaa-qaaaq-cai")
+            .expect("Could not decode the principal."),
+        "icrc7_tokens_of",
+        (account, pre, take ),
+    ).await
+    .map_err(|e| format!("failed to call ledger: {:?}", e))
+    .unwrap()
+    .0
+}
+
 #[ic_cdk::update]
-async fn publish_0301008_nft(event: Event0301008) -> Result<TxIndex, String> {
+async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
     let ledger_item = event.payload;
 
     ic_cdk::println!("Init Nft owners");
@@ -247,7 +261,7 @@ async fn publish_0301008_nft(event: Event0301008) -> Result<TxIndex, String> {
 }
 
 #[ic_cdk::update]
-async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
+async fn publish_0301008_EXT(event: Event0301008) -> Result<TxIndex, String> {
     let ledger_item = event.payload;
     let mut blockindex: Nat = Nat::from(0 as u128);
 
@@ -284,6 +298,21 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
 #[ic_cdk::query]
 fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
     STATE.with(|s| Some(s.borrow().unv_tx_leger.clone()))
+}
+
+#[ic_cdk::query]
+fn get_all_miner_jnl_with_principalid(principalid:String) -> Vec<UnvMinnerLedgerRecord> {
+    let mut minting_ledeger:Vec<UnvMinnerLedgerRecord> = Vec::new();
+    let account:Account = Account::from_str(&principalid).expect("Parse principal id err");
+
+    STATE.with( |s| 
+        for ledeger_item in s.borrow().unv_tx_leger.clone() {
+            if account == ledeger_item.minner {
+                minting_ledeger.push(ledeger_item);
+        }
+    }
+    );
+    return minting_ledeger;
 }
 
 #[ic_cdk::update]

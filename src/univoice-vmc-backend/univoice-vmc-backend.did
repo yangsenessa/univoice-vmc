@@ -104,10 +104,12 @@ service : {
     "setup_subscribe": (principal,text) -> ();
     "publish_0301008":(Event0301008) ->(Result);
     "get_all_miner_jnl":() ->(opt vec  UnvMinnerLedgerRecord) query;
+    "get_all_miner_jnl_with_principalid":(text) ->(opt vec UnvMinnerLedgerRecord) query;
     "claim_to_account_from_index":(BlockIndex) ->(Result);
     "call_unvoice_for_ext_nft":(NftUnivoicePricipal) ->(Result);
     "sync_userinfo_identity":(vec UserIdentityInfo) ->(Result);
     "gener_nft_owner_wait_claims":(text)->(MinerWaitClaimBalance) query;
     "get_user_balance": (principal) -> (Result) query;
     "get_transactions": (GetTransactionsRequest) -> (GetTransactionsResponse) query;
+    "get_miner_license":(text,nat,nat)->(vec nat) query;
 }

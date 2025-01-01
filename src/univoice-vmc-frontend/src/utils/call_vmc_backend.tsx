@@ -1,5 +1,5 @@
 import { univoice_vmc_backend } from 'declarations/univoice-vmc-backend';
-import type {Result,MinerWaitClaimBalance} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
+import type {Result,MinerWaitClaimBalance,UnvMinnerLedgerRecord} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
 import { isLocalNet } from '@/utils/env';
 
 
@@ -29,4 +29,5 @@ export const gener_nft_owner_wait_claims = async(principalId:string):Promise<Min
   result = await univoice_vmc_backend.gener_nft_owner_wait_claims(principalId);
   return result;  
 }
+
 

@@ -3,8 +3,8 @@ mod types;
 
 use candid::types::principal;
 use candid::{candid_method, export_service, CandidType, Deserialize, Encode, Nat, Principal};
-use ic_cdk::storage;
 use ic_cdk::api::call::call;
+use ic_cdk::storage;
 use ic_cdk_macros::{query, update};
 use std::borrow::{Borrow, BorrowMut};
 use std::future::IntoFuture;
@@ -17,12 +17,12 @@ use ic_cdk::api::management_canister::http_request::{
     http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
     TransformContext,
 };
-use serde::{Serialize};
-use serde_json::{self, Value};
 use ledgertype::{
-    ApproveResult, MinerTxState, TransferArgs, TransferTxState, TxIndex, UnvMinnerLedgerRecord,
-    WorkLoadLedgerItem, MinerWaitClaimBalance,
+    ApproveResult, MinerTxState, MinerWaitClaimBalance, TransferArgs, TransferTxState, TxIndex,
+    UnvMinnerLedgerRecord, WorkLoadLedgerItem,
 };
+use serde::Serialize;
+use serde_json::{self, Value};
 use types::{NftUnivoicePricipal, UserIdentityInfo};
 
 use icrc_ledger_types::icrc1::account::{self, Account, Subaccount};
@@ -92,13 +92,8 @@ fn greet(name: String) -> String {
 }
 
 fn get_total_minner() -> Result<Vec<Account>, String> {
-    STATE.with(
-        |s| {
-            Ok(s.borrow().unv_nft_owners.clone())
-        }
-    )
+    STATE.with(|s| Ok(s.borrow().unv_nft_owners.clone()))
 }
-
 
 #[ic_cdk::update]
 async fn call_unvoice_for_ext_nft(nft_owners: NftUnivoicePricipal) -> Result<usize, String> {
@@ -107,29 +102,27 @@ async fn call_unvoice_for_ext_nft(nft_owners: NftUnivoicePricipal) -> Result<usi
         for owner_principal in nft_owners.owners {
             ic_cdk::println!("Current principal id is {}", owner_principal);
             s.borrow_mut().unv_nft_owners.push(
-                Account::from_str(owner_principal.as_str()).expect(
-                    "Error principal refered"
-                )
+                Account::from_str(owner_principal.as_str()).expect("Error principal refered"),
             );
-        };
+        }
         Ok(s.borrow_mut().unv_nft_owners.len())
     })
 }
 
 #[ic_cdk::update]
 async fn query_poll_balance() -> Result<NumTokens, String> {
-    ic_cdk::println!("Query balance of mining pool {}", ic_cdk::id(), );
+    ic_cdk::println!("Query balance of mining pool {}", ic_cdk::id(),);
 
-    let balance = ic_cdk::call::<(Account, ), (Nat, )>(
+    let balance = ic_cdk::call::<(Account,), (Nat,)>(
         Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
             .expect("Could not decode the principal."),
         "icrc1_balance_of",
-        (Account::from(ic_cdk::id()), ),
+        (Account::from(ic_cdk::id()),),
     )
-        .await
-        .map_err(|e| format!("fail to call ledger:{:?}", e))?
-        .0
-        .clone();
+    .await
+    .map_err(|e| format!("fail to call ledger:{:?}", e))?
+    .0
+    .clone();
 
     Ok(balance)
 }
@@ -160,7 +153,7 @@ async fn transfer(args: TransferArgs) -> Result<BlockIndex, String> {
     };
 
     // 1. Asynchronously call another canister function using `ic_cdk::call`.
-    ic_cdk::call::<(TransferFromArgs, ), (Result<BlockIndex, TransferFromError>, )>(
+    ic_cdk::call::<(TransferFromArgs,), (Result<BlockIndex, TransferFromError>,)>(
         // 2. Convert a textual representation of a Principal into an actual `Principal` object. The principal is the one we specified in `dfx.json`.
         //    `expect` will panic if the conversion fails, ensuring the code does not proceed with an invalid principal.
         Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
@@ -169,34 +162,36 @@ async fn transfer(args: TransferArgs) -> Result<BlockIndex, String> {
         // 3. Specify the method name on the target canister to be called, in this case, "icrc1_transfer".
         "icrc2_transfer_from",
         // 4. Provide the arguments for the call in a tuple, here `transfer_args` is encapsulated as a single-element tuple.
-        (transfer_from_args, ),
+        (transfer_from_args,),
     )
-        .await // 5. Await the completion of the asynchronous call, pausing the execution until the future is resolved.
-        // 6. Apply `map_err` to transform any network or system errors encountered during the call into a more readable string format.
-        //    The `?` operator is then used to propagate errors: if the result is an `Err`, it returns from the function with that error,
-        //    otherwise, it unwraps the `Ok` value, allowing the chain to continue.
-        .map_err(|e| format!("failed to call ledger: {:?}", e))?
-        // 7. Access the first element of the tuple, which is the `Result<BlockIndex, TransferError>`, for further processing.
-        .0
-        // 8. Use `map_err` again to transform any specific ledger transfer errors into a readable string format, facilitating error handling and debugging.
-        .map_err(|e: TransferFromError| format!("ledger transfer error {:?}", e))
+    .await // 5. Await the completion of the asynchronous call, pausing the execution until the future is resolved.
+    // 6. Apply `map_err` to transform any network or system errors encountered during the call into a more readable string format.
+    //    The `?` operator is then used to propagate errors: if the result is an `Err`, it returns from the function with that error,
+    //    otherwise, it unwraps the `Ok` value, allowing the chain to continue.
+    .map_err(|e| format!("failed to call ledger: {:?}", e))?
+    // 7. Access the first element of the tuple, which is the `Result<BlockIndex, TransferError>`, for further processing.
+    .0
+    // 8. Use `map_err` again to transform any specific ledger transfer errors into a readable string format, facilitating error handling and debugging.
+    .map_err(|e: TransferFromError| format!("ledger transfer error {:?}", e))
 }
 
 #[ic_cdk::update]
 async fn setup_subscribe(publisher_id: Principal, topic: String) {
     let subscriber = Subscriber { topic };
-    let _call_result: Result<(), _> = ic_cdk::call(publisher_id, "subscribe", (subscriber, )).await;
+    let _call_result: Result<(), _> = ic_cdk::call(publisher_id, "subscribe", (subscriber,)).await;
 }
 
 #[ic_cdk::query]
-async fn get_miner_license(user_principal:String,pre:Nat, take:Nat) ->Vec<Nat> {
-    let account:Account = Account::from_str(&user_principal).expect("Could not decode the principal");
-    ic_cdk::call::<(Account,Nat,Nat, ), (Vec<Nat>, )>(
+async fn get_miner_license(user_principal: String, pre: Nat, take: Nat) -> Vec<Nat> {
+    let account: Account =
+        Account::from_str(&user_principal).expect("Could not decode the principal");
+    ic_cdk::call::<(Account, Nat, Nat), (Vec<Nat>,)>(
         Principal::from_str("bkyz2-fmaaa-aaaaa-qaaaq-cai")
             .expect("Could not decode the principal."),
         "icrc7_tokens_of",
-        (account, pre, take ),
-    ).await
+        (account, pre, take),
+    )
+    .await
     .map_err(|e| format!("failed to call ledger: {:?}", e))
     .unwrap()
     .0
@@ -212,18 +207,16 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
     ic_cdk::println!("Finish init Nft owners");
     let mut miner_acounts: Vec<Account> = Vec::new();
 
-
     //Build miner_collection
     for nft_vec in nft_vec_param {
         ic_cdk::println!("Call Nft collection params");
-        let miners_nft = ic_cdk::call::<(Vec<Nat>, ), (Vec<Option<Account>>, )>(
-            Principal::from_str(&ledger_item.nft_pool)
-                .expect("Could not decode the principal."),
+        let miners_nft = ic_cdk::call::<(Vec<Nat>,), (Vec<Option<Account>>,)>(
+            Principal::from_str(&ledger_item.nft_pool).expect("Could not decode the principal."),
             "icrc7_owner_of",
-            (nft_vec, ),
+            (nft_vec,),
         )
-            .await
-            .map_err(|e| format!("failed to call ledger: {:?}", e));
+        .await
+        .map_err(|e| format!("failed to call ledger: {:?}", e));
 
         match miners_nft {
             Ok(accounts_opt) => {
@@ -269,26 +262,25 @@ async fn publish_0301008_EXT(event: Event0301008) -> Result<TxIndex, String> {
     let mut tx_index: Nat = Nat::from(0 as u128);
 
     ic_cdk::println!("Init Nft owners");
-    STATE.with(
-        |s| {
-            let miner_set = get_total_minner().unwrap();
-            let sharding_size = miner_set.len();
-            let block_tokens = ledger_item.clone().block_tokens / sharding_size;
-            ic_cdk::println!("Per-nft sharing of {} tokens", block_tokens);
+    STATE.with(|s| {
+        let miner_set = get_total_minner().unwrap();
+        let sharding_size = miner_set.len();
+        let block_tokens = ledger_item.clone().block_tokens / sharding_size;
+        ic_cdk::println!("Per-nft sharing of {} tokens", block_tokens);
 
-            for miner in miner_set {
-                blockindex = produce_unv_miner_ledger(&ledger_item, &miner, &block_tokens);
-                blockindex_vec.push(blockindex.clone());
-                ic_cdk::println!(
-                    "NFT owner is {}, blockindex is {}",
-                    miner.owner.to_text(),
-                    blockindex.clone()
-                );
-            }
+        for miner in miner_set {
+            blockindex = produce_unv_miner_ledger(&ledger_item, &miner, &block_tokens);
+            blockindex_vec.push(blockindex.clone());
+            ic_cdk::println!(
+                "NFT owner is {}, blockindex is {}",
+                miner.owner.to_text(),
+                blockindex.clone()
+            );
         }
-    );
+    });
     for idx_ledger in blockindex_vec {
-        tx_index = claim_to_account_from_index(idx_ledger.clone()).await
+        tx_index = claim_to_account_from_index(idx_ledger.clone())
+            .await
             .expect("fail to call claim");
     }
 
@@ -301,17 +293,17 @@ fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
 }
 
 #[ic_cdk::query]
-fn get_all_miner_jnl_with_principalid(principalid:String) -> Vec<UnvMinnerLedgerRecord> {
-    let mut minting_ledeger:Vec<UnvMinnerLedgerRecord> = Vec::new();
-    let account:Account = Account::from_str(&principalid).expect("Parse principal id err");
+fn get_all_miner_jnl_with_principalid(principalid: String) -> Vec<UnvMinnerLedgerRecord> {
+    let mut minting_ledeger: Vec<UnvMinnerLedgerRecord> = Vec::new();
+    let account: Account = Account::from_str(&principalid).expect("Parse principal id err");
 
-    STATE.with( |s| 
+    STATE.with(|s| {
         for ledeger_item in s.borrow().unv_tx_leger.clone() {
             if account == ledeger_item.minner {
                 minting_ledeger.push(ledeger_item);
+            }
         }
-    }
-    );
+    });
     return minting_ledeger;
 }
 
@@ -347,8 +339,7 @@ fn sync_userinfo_identity(user_infos: Vec<UserIdentityInfo>) -> Result<usize, St
 
         let userinfo_size: usize = s.borrow().unv_user_infos.len();
         Ok(userinfo_size)
-    }
-    )
+    })
 }
 
 #[ic_cdk::update]
@@ -364,7 +355,7 @@ async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex,
                     claimed_ledger.meta_workload.mining_status =
                         MinerTxState::Claimed(String::from("claimed"));
                     claimed_mint_ledger(&block_index, &i)
-                        .map_err(|e| { format!("fail to call ledger:{:?}", e) });
+                        .map_err(|e| format!("fail to call ledger:{:?}", e));
                     ic_cdk::println!("Transfer Success {}", i);
                 }
                 Result::Err(e) => {
@@ -410,7 +401,7 @@ async fn claim_to_account_by_principal(principalid: String) -> Result<TxIndex, S
                             MinerTxState::Claimed(String::from("claimed"));
                         let block_index: Nat = claimed_ledger.block_index.unwrap();
                         claimed_mint_ledger(&block_index, &i)
-                            .map_err(|e| { format!("fail to call ledger:{:?}", e) });
+                            .map_err(|e| format!("fail to call ledger:{:?}", e));
                         ic_cdk::println!("Transfer Success {}", i);
                     }
                     Result::Err(e) => {
@@ -424,7 +415,6 @@ async fn claim_to_account_by_principal(principalid: String) -> Result<TxIndex, S
     };
     Ok(TxIndex::from(0 as u128))
 }
-
 
 fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord> {
     STATE.with(|s| {
@@ -441,7 +431,9 @@ fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord
     })
 }
 
-fn get_unclaimed_mint_ledger_by_principal(principalid: String) -> Option<Vec<UnvMinnerLedgerRecord>> {
+fn get_unclaimed_mint_ledger_by_principal(
+    principalid: String,
+) -> Option<Vec<UnvMinnerLedgerRecord>> {
     STATE.with(|s| {
         let mut ledgerRecord: Vec<UnvMinnerLedgerRecord> = Vec::new();
         for item in s.borrow().unv_tx_leger.iter() {
@@ -454,7 +446,6 @@ fn get_unclaimed_mint_ledger_by_principal(principalid: String) -> Option<Vec<Unv
         return Some(ledgerRecord);
     })
 }
-
 
 fn claimed_mint_ledger(index: &BlockIndex, trans_index: &TxIndex) -> Result<(), String> {
     STATE.with(|s| {
@@ -481,18 +472,18 @@ async fn call_approve_with_block_tokens(account: &Account, tokens: &NumTokens) -
         expires_at: None,
         spender: account.clone(),
     };
-    ic_cdk::call::<(ApproveArgs, ), (ApproveResult, )>(
+    ic_cdk::call::<(ApproveArgs,), (ApproveResult,)>(
         Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
             .expect("Could not decode the principal."),
         // 3. Specify the method name on the target canister to be called, in this case, "icrc1_transfer".
         "icrc2_approve",
         // 4. Provide the arguments for the call in a tuple, here `transfer_args` is encapsulated as a single-element tuple.
-        (approve_args, ),
+        (approve_args,),
     )
-        .await
-        .map_err(|e| format!("fail to call ledger:{:?}", e))
-        .unwrap()
-        .0
+    .await
+    .map_err(|e| format!("fail to call ledger:{:?}", e))
+    .unwrap()
+    .0
 }
 
 //Call icrc1_ledger
@@ -500,7 +491,8 @@ async fn call_transfer(miner_ledger: &UnvMinnerLedgerRecord) -> Result<BlockInde
     ic_cdk::println!("Begin transfer {} tokens", miner_ledger.tokens);
     let transfer_from_args = TransferFromArgs {
         // the account we want to transfer tokens from (in this case we assume the caller approved the canister to spend funds on their behalf)
-        from: Account::from_str(&miner_ledger.meta_workload.token_pool).expect("Get token pool error"),
+        from: Account::from_str(&miner_ledger.meta_workload.token_pool)
+            .expect("Get token pool error"),
         // can be used to distinguish between transactions
         memo: None,
         // the amount we want to transfer
@@ -516,7 +508,7 @@ async fn call_transfer(miner_ledger: &UnvMinnerLedgerRecord) -> Result<BlockInde
     };
 
     // 1. Asynchronously call another canister function using `ic_cdk::call`.
-    ic_cdk::call::<(TransferFromArgs, ), (Result<BlockIndex, TransferFromError>, )>(
+    ic_cdk::call::<(TransferFromArgs,), (Result<BlockIndex, TransferFromError>,)>(
         // 2. Convert a textual representation of a Principal into an actual `Principal` object. The principal is the one we specified in `dfx.json`.
         //    `expect` will panic if the conversion fails, ensuring the code does not proceed with an invalid principal.
         Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
@@ -524,37 +516,41 @@ async fn call_transfer(miner_ledger: &UnvMinnerLedgerRecord) -> Result<BlockInde
         // 3. Specify the method name on the target canister to be called, in this case, "icrc2_transfer_from".
         "icrc2_transfer_from",
         // 4. Provide the arguments for the call in a tuple, here `transfer_args` is encapsulated as a single-element tuple.
-        (transfer_from_args, ),
+        (transfer_from_args,),
     )
-        .await // 5. Await the completion of the asynchronous call, pausing the execution until the future is resolved.
-        // 6. Apply `map_err` to transform any network or system errors encountered during the call into a more readable string format.
-        //    The `?` operator is then used to propagate errors: if the result is an `Err`, it returns from the function with that error,
-        //    otherwise, it unwraps the `Ok` value, allowing the chain to continue.
-        .map_err(|e| format!("failed to call ledger: {:?}", e))?
-        // 7. Access the first element of the tuple, which is the `Result<BlockIndex, TransferError>`, for further processing.
-        .0
-        // 8. Use `map_err` again to transform any specific ledger transfer errors into a readable string format, facilitating error handling and debugging.
-        .map_err(|e: TransferFromError| format!("ledger transfer error {:?}", e))
+    .await // 5. Await the completion of the asynchronous call, pausing the execution until the future is resolved.
+    // 6. Apply `map_err` to transform any network or system errors encountered during the call into a more readable string format.
+    //    The `?` operator is then used to propagate errors: if the result is an `Err`, it returns from the function with that error,
+    //    otherwise, it unwraps the `Ok` value, allowing the chain to continue.
+    .map_err(|e| format!("failed to call ledger: {:?}", e))?
+    // 7. Access the first element of the tuple, which is the `Result<BlockIndex, TransferError>`, for further processing.
+    .0
+    // 8. Use `map_err` again to transform any specific ledger transfer errors into a readable string format, facilitating error handling and debugging.
+    .map_err(|e: TransferFromError| format!("ledger transfer error {:?}", e))
 }
 
 async fn total_nft_supply(ledger: &WorkLoadLedgerItem) -> Nat {
-    ic_cdk::call::<(), (Nat, )>(
-        Principal::from_text(ledger.nft_pool.clone())
-            .expect("Could not decode the principal."),
+    ic_cdk::call::<(), (Nat,)>(
+        Principal::from_text(ledger.nft_pool.clone()).expect("Could not decode the principal."),
         "icrc7_total_supply",
         (),
-    ).await
-        .map_err(|e| format!("failed to call ledger: {:?}", e)).unwrap().0
+    )
+    .await
+    .map_err(|e| format!("failed to call ledger: {:?}", e))
+    .unwrap()
+    .0
 }
 
 async fn total_nft_supply_owner(ledger: &WorkLoadLedgerItem) -> Nat {
-    ic_cdk::call::<(), (Nat, )>(
-        Principal::from_text(ledger.nft_pool.clone())
-            .expect("Could not decode the principal."),
+    ic_cdk::call::<(), (Nat,)>(
+        Principal::from_text(ledger.nft_pool.clone()).expect("Could not decode the principal."),
         "icrc7_total_supply",
         (),
-    ).await
-        .map_err(|e| format!("failed to call ledger: {:?}", e)).unwrap().0
+    )
+    .await
+    .map_err(|e| format!("failed to call ledger: {:?}", e))
+    .unwrap()
+    .0
 }
 
 async fn init_nft_tokens(ledger: &WorkLoadLedgerItem) -> Vec<Vec<Nat>> {
@@ -586,7 +582,6 @@ async fn init_nft_tokens(ledger: &WorkLoadLedgerItem) -> Vec<Vec<Nat>> {
     return nft_tokens_param;
 }
 
-
 fn produce_unv_miner_ledger(
     workloadledger: &WorkLoadLedgerItem,
     nft_owner: &Account,
@@ -614,13 +609,13 @@ fn pre_upgrade() {
     let state = STATE.with(|state: &RefCell<State>| mem::take(&mut *state.borrow_mut()));
     let stable_state: StableState = StableState { state };
     ic_cdk::println!("pre_upgrade");
-    storage::stable_save((stable_state, )).unwrap();
+    storage::stable_save((stable_state,)).unwrap();
 }
 
 #[ic_cdk::post_upgrade]
 fn post_upgrade() {
     ic_cdk::println!("post_upgrade");
-    let (StableState { state }, ) =
+    let (StableState { state },) =
         storage::stable_restore().expect("failed to restore stable state");
     STATE.with(|state0| *state0.borrow_mut() = state);
     ic_cdk::println!("post_upgrade");
@@ -630,29 +625,32 @@ fn post_upgrade() {
 async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {
     ic_cdk::println!("Received account_owner: {}", account_owner.to_text());
 
-    let ledger_canister_id = Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
-        .expect("Invalid Ledger Canister ID");
+    let ledger_canister_id =
+        Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai").expect("Invalid Ledger Canister ID");
 
-    let account = Account { owner: account_owner, subaccount: None };
+    let account = Account {
+        owner: account_owner,
+        subaccount: None,
+    };
 
-    let result: Result<(Nat, ), _> = ic_cdk::call(ledger_canister_id, "icrc1_balance_of", (account, )).await;
+    let result: Result<(Nat,), _> = call(ledger_canister_id, "icrc1_balance_of", (account,)).await;
 
     match result {
-        Ok((balance, )) => Ok(balance),
-        Err(err) => Err(format!("Failed to fetch balance: {:?}", err))
+        Ok((balance,)) => Ok(balance),
+        Err(err) => Err(format!("Failed to fetch balance: {:?}", err)),
     }
 }
 
 #[query]
 async fn get_transactions(request: GetTransactionsRequest) -> GetTransactionsResponse {
-    let ledger_canister_id = Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai")
-        .expect("Invalid Ledger Canister ID");
+    let ledger_canister_id =
+        Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai").expect("Invalid Ledger Canister ID");
 
-    let result: Result<(GetTransactionsResponse, ), _> = ic_cdk::call(ledger_canister_id,
-                                                                      "get_transactions", (request, ), ).await;
+    let result: Result<(GetTransactionsResponse,), _> =
+        call(ledger_canister_id, "get_transactions", (request,)).await;
 
     match result {
-        Ok((response, )) => {
+        Ok((response,)) => {
             ic_cdk::println!("Received response: {:?}", response);
             response
         }

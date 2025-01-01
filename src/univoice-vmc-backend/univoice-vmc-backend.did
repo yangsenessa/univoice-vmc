@@ -1,13 +1,11 @@
 
 type TransferArgs = record { to_account : Account; amount : nat };
 type Account = record { owner : principal; subaccount : opt blob };
-type Tokens = record { amount: nat };
 type Result = variant { Ok : nat; Err : text };
 type BlockIndex = nat;
 type NumTokens = nat;
 type TxIndex = nat;
 type Timestamp = nat64;
-type TxId = nat;
 
 type Subscriber = record {
     topic:text;
@@ -89,6 +87,6 @@ service : {
     "call_unvoice_for_ext_nft":(NftUnivoicePricipal) ->(Result);
     "sync_userinfo_identity":(vec UserIdentityInfo) ->(Result);
     "gener_nft_owner_wait_claims":(text)->(MinerWaitClaimBalance) query;
-    get_user_balance: (Account) -> (Tokens) query;
-    get_user_transactions: (Account, nat, opt TxId) -> (vec record {id: TxId; amount: Tokens; timestamp: int});
+    get_user_balance: (principal) -> (Result) query;
+    get_user_transactions: (principal, nat, opt nat) -> (vec record { id: nat; amount: nat; timestamp: int }) query;
 }

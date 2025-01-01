@@ -53,11 +53,11 @@ struct StableState {
     state: State,
 }
 
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct TransactionRecord {
-    pub id: Nat,
-    pub amount: Nat,
-    pub timestamp: i64,
+#[derive(CandidType, Deserialize, Debug)]
+struct TransactionRecord {
+    id: Nat,
+    amount: Nat,
+    timestamp: i64,
 }
 
 thread_local! {
@@ -575,30 +575,37 @@ fn post_upgrade() {
     ic_cdk::println!("post_upgrade");
 }
 
-#[ic_cdk::update]
+#[ic_cdk::query]
 async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {
+    ic_cdk::println!("Received account_owner: {}", account_owner.to_text());
+
     let ledger_canister_id = Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
         .expect("Invalid Ledger Canister ID");
 
     let account = Account { owner: account_owner, subaccount: None };
-    let result: Result<(Nat, ), _> = ic_cdk::call(ledger_canister_id,
-                                                  "icrc1_balance_of", (account, )).await;
+
+    let result: Result<(Nat, ), _> = ic_cdk::call(ledger_canister_id, "icrc1_balance_of", (account, )).await;
+
     match result {
-        Ok((balance,)) => Ok(balance),
+        Ok((balance, )) => Ok(balance),
         Err(err) => Err(format!("Failed to fetch balance: {:?}", err))
     }
 }
 
-#[ic_cdk::update]
-async fn get_user_transactions (account_owner: Principal, max_results: u64, start_tx_id: Option<Nat>)
-    -> Result<Vec<TransactionRecord>, String> {
-    let ledger_canister_id = Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai").expect("Invalid Ledger Canister ID");
+#[ic_cdk::query]
+async fn get_user_transactions(account_owner: Principal, max_results: Nat, start_tx_id: Option<Nat>)
+                               -> Result<Vec<TransactionRecord>, String> {
+    let ledger_canister_id = Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
+        .expect("Invalid Ledger Canister ID");
 
     let account = Account { owner: account_owner, subaccount: None };
     let result: Result<(Vec<TransactionRecord>, ), _> = ic_cdk::call(ledger_canister_id,
                                                                      "icrc1_get_transactions", (account, max_results, start_tx_id)).await;
-    match result { Ok((transactions,)) => Ok(transactions),
-        Err(err) => Err(format!("Failed to fetch transactions: {:?}", err)), }
+
+    match result {
+        Ok((transactions, )) => Ok(transactions),
+        Err(err) => Err(format!("Failed to fetch transactions: {:?}", err))
+    }
 }
 
 ic_cdk::export_candid!();

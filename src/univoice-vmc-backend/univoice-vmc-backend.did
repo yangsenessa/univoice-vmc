@@ -89,6 +89,6 @@ service : {
     "call_unvoice_for_ext_nft":(NftUnivoicePricipal) ->(Result);
     "sync_userinfo_identity":(vec UserIdentityInfo) ->(Result);
     "gener_nft_owner_wait_claims":(text)->(MinerWaitClaimBalance) query;
-    icrc1_balance_of: (Account) -> (Tokens) query;
-    icrc1_get_transactions: (Account, nat, opt TxId) -> (vec record {id: TxId; amount: Tokens; timestamp: int});
+    get_user_balance: (Account) -> (Tokens) query;
+    get_user_transactions: (Account, nat, opt TxId) -> (vec record {id: TxId; amount: Tokens; timestamp: int});
 }

@@ -54,10 +54,32 @@ struct StableState {
 }
 
 #[derive(CandidType, Deserialize, Debug)]
-struct TransactionRecord {
+struct GetTransactionsRequest {
+    start: Nat,
+    length: Nat,
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+struct Transaction {
     id: Nat,
     amount: Nat,
     timestamp: i64,
+    memo: Option<String>,
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+struct ArchivedTransaction {
+    callback: Principal,
+    start: Nat,
+    length: Nat,
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+struct GetTransactionsResponse {
+    first_index: Nat,
+    log_length: Nat,
+    transactions: Vec<Transaction>,
+    archived_transactions: Vec<ArchivedTransaction>,
 }
 
 thread_local! {
@@ -592,19 +614,28 @@ async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {
     }
 }
 
-#[ic_cdk::query]
-async fn get_user_transactions(account_owner: Principal, max_results: Nat, start_tx_id: Option<Nat>)
-                               -> Result<Vec<TransactionRecord>, String> {
+#[query]
+async fn get_transactions(request: GetTransactionsRequest) -> GetTransactionsResponse {
     let ledger_canister_id = Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
         .expect("Invalid Ledger Canister ID");
 
-    let account = Account { owner: account_owner, subaccount: None };
-    let result: Result<(Vec<TransactionRecord>, ), _> = ic_cdk::call(ledger_canister_id,
-                                                                     "icrc1_get_transactions", (account, max_results, start_tx_id)).await;
+    let result: Result<(GetTransactionsResponse, ), _> = ic_cdk::call(ledger_canister_id,
+                                                                      "get_transactions", (request, ), ).await;
 
     match result {
-        Ok((transactions, )) => Ok(transactions),
-        Err(err) => Err(format!("Failed to fetch transactions: {:?}", err))
+        Ok((response, )) => {
+            ic_cdk::println!("Received response: {:?}", response);
+            response
+        }
+        Err(err) => {
+            ic_cdk::println!("Error calling ledger canister: {:?}", err);
+            GetTransactionsResponse {
+                first_index: Nat::default(),
+                log_length: Nat::default(),
+                transactions: vec![],
+                archived_transactions: vec![],
+            }
+        }
     }
 }
 

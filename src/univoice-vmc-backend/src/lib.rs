@@ -616,7 +616,7 @@ async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {
 
 #[query]
 async fn get_transactions(request: GetTransactionsRequest) -> GetTransactionsResponse {
-    let ledger_canister_id = Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
+    let ledger_canister_id = Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai")
         .expect("Invalid Ledger Canister ID");
 
     let result: Result<(GetTransactionsResponse, ), _> = ic_cdk::call(ledger_canister_id,

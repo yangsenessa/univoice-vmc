@@ -24,7 +24,7 @@ export const poll_balance = async () =>{
  * @param principalId 
  * @returns 
  */
-export const gener_nft_owner_wait_claims = async(principalId:string) => {
+export const gener_nft_owner_wait_claims = async(principalId:string):Promise<MinerWaitClaimBalance> => {
   let result:MinerWaitClaimBalance;
   result = await univoice_vmc_backend.gener_nft_owner_wait_claims(principalId);
   return result;  

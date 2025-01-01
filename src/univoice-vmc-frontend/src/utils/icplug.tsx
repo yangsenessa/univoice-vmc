@@ -82,8 +82,8 @@ export const callBalance = async (principal_id:string): Promise<String> => {
    }); 
 
    const tokenActor = await plug.createActor({
-    canisterId: tokenCanisterId,
-    interfaceFactory: tokenLedegerIdlFactory,
+      canisterId: tokenCanisterId,
+      interfaceFactory: tokenLedegerIdlFactory,
    });
    // use our actors getSwapInfo method
    console.log('ICRC ledger call agent begin');    

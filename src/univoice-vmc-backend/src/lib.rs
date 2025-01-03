@@ -54,32 +54,86 @@ struct StableState {
 }
 
 #[derive(CandidType, Deserialize, Debug)]
-struct GetTransactionsRequest {
-    start: Nat,
-    length: Nat,
+struct GetAccountTransactionsArgs {
+    account: Account,
+    start: Option<Nat>,
+    max_results: Nat,
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+struct GetTransactions {
+    balance: Nat,
+    // Tokens
+    transactions: Vec<TransactionWithId>,
+    oldest_tx_id: Option<Nat>, // BlockIndex
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+struct TransactionWithId {
+    id: Nat,
+    // BlockIndex
+    transaction: Transaction,
 }
 
 #[derive(CandidType, Deserialize, Debug)]
 struct Transaction {
-    id: Nat,
+    burn: Option<Burn>,
+    kind: String,
+    mint: Option<Mint>,
+    approve: Option<Approve>,
+    timestamp: u64,
+    transfer: Option<Transfer>,
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+struct Burn {
+    from: Account,
+    memo: Option<Vec<u8>>,
+    created_at_time: Option<u64>,
     amount: Nat,
-    timestamp: i64,
-    memo: Option<String>,
+    spender: Option<Account>,
 }
 
 #[derive(CandidType, Deserialize, Debug)]
-struct ArchivedTransaction {
-    callback: Principal,
-    start: Nat,
-    length: Nat,
+struct Mint {
+    to: Account,
+    memo: Option<Vec<u8>>,
+    created_at_time: Option<u64>,
+    amount: Nat,
 }
 
 #[derive(CandidType, Deserialize, Debug)]
-struct GetTransactionsResponse {
-    first_index: Nat,
-    log_length: Nat,
-    transactions: Vec<Transaction>,
-    archived_transactions: Vec<ArchivedTransaction>,
+struct Approve {
+    fee: Option<Nat>,
+    from: Account,
+    memo: Option<Vec<u8>>,
+    created_at_time: Option<u64>,
+    amount: Nat,
+    expected_allowance: Option<Nat>,
+    expires_at: Option<u64>,
+    spender: Account,
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+struct Transfer {
+    to: Account,
+    fee: Option<Nat>,
+    from: Account,
+    memo: Option<Vec<u8>>,
+    created_at_time: Option<u64>,
+    amount: Nat,
+    spender: Option<Account>,
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+struct GetTransactionsErr {
+    message: String,
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+enum GetTransactionsResult {
+    Ok(GetTransactions),
+    Err(GetTransactionsErr),
 }
 
 thread_local! {
@@ -642,12 +696,13 @@ async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {
 }
 
 #[query]
-async fn get_transactions(request: GetTransactionsRequest) -> GetTransactionsResponse {
+async fn get_account_transactions(args: GetAccountTransactionsArgs) -> GetTransactionsResult {
+    // TODO: replace the Canister ID
     let ledger_canister_id =
         Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai").expect("Invalid Ledger Canister ID");
 
-    let result: Result<(GetTransactionsResponse,), _> =
-        call(ledger_canister_id, "get_transactions", (request,)).await;
+    let result: Result<(GetTransactionsResult,), _> =
+        call(ledger_canister_id, "get_account_transactions", (args,)).await;
 
     match result {
         Ok((response,)) => {
@@ -656,12 +711,9 @@ async fn get_transactions(request: GetTransactionsRequest) -> GetTransactionsRes
         }
         Err(err) => {
             ic_cdk::println!("Error calling ledger canister: {:?}", err);
-            GetTransactionsResponse {
-                first_index: Nat::default(),
-                log_length: Nat::default(),
-                transactions: vec![],
-                archived_transactions: vec![],
-            }
+            GetTransactionsResult::Err(GetTransactionsErr {
+                message: format!("Failed to fetch transactions: {:?}", err),
+            })
         }
     }
 }

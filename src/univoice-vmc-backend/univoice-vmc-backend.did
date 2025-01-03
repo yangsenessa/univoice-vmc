@@ -6,6 +6,7 @@ type BlockIndex = nat;
 type NumTokens = nat;
 type TxIndex = nat;
 type Timestamp = nat64;
+type Tokens = nat;
 
 type Subscriber = record {
     topic:text;
@@ -43,6 +44,51 @@ type WorkLoadLedgerItem =
     mining_status : MinerTxState;
   };
 
+type Burn = record {
+    from : Account;
+    memo : opt vec nat8;
+    created_at_time : opt nat64;
+    amount : nat;
+    spender : opt Account;
+};
+
+type Mint = record {
+    to : Account;
+    memo : opt vec nat8;
+    created_at_time : opt nat64;
+    amount : nat;
+};
+
+type Approve = record {
+    fee : opt nat;
+    from : Account;
+    memo : opt vec nat8;
+    created_at_time : opt nat64;
+    amount : nat;
+    expected_allowance : opt nat;
+    expires_at : opt nat64;
+    spender : Account;
+};
+
+type Transfer = record {
+    to : Account;
+    fee : opt nat;
+    from : Account;
+    memo : opt vec nat8;
+    created_at_time : opt nat64;
+    amount : nat;
+    spender : opt Account;
+};
+
+type Transaction = record {
+    burn : opt Burn;
+    kind : text;
+    mint : opt Mint;
+    approve : opt Approve;
+    timestamp : nat64;
+    transfer : opt Transfer;
+};
+
 type Event0301008 = record {
   topic:text;
   payload:WorkLoadLedgerItem;
@@ -75,25 +121,30 @@ type MinerWaitClaimBalance = record {
      tokens:NumTokens; 
 };
 
-type GetTransactionsRequest = record {
-    start: nat;
-    length: nat;
+type TransactionWithId = record {
+    id : BlockIndex;
+    transaction : Transaction;
 };
 
-type GetTransactionsResponse = record {
-    first_index: nat;
-    log_length: nat;
-    transactions: vec record {
-        id: nat;
-        amount: nat;
-        timestamp: int;
-        memo: opt text;
-    };
-    archived_transactions: vec record {
-        callback: principal;
-        start: nat;
-        length: nat;
-    };
+type GetTransactions = record {
+    balance : Tokens;
+    transactions : vec TransactionWithId;
+    oldest_tx_id : opt BlockIndex;
+};
+
+type GetTransactionsErr = record {
+    message : text;
+};
+
+type GetAccountTransactionsArgs = record {
+    account : Account;
+    start : opt BlockIndex;
+    max_results : nat;
+};
+
+type GetTransactionsResult = variant {
+    Ok : GetTransactions;
+    Err : GetTransactionsErr;
 };
 
 
@@ -110,6 +161,6 @@ service : {
     "sync_userinfo_identity":(vec UserIdentityInfo) ->(Result);
     "gener_nft_owner_wait_claims":(text)->(MinerWaitClaimBalance) query;
     "get_user_balance": (principal) -> (Result) query;
-    "get_transactions": (GetTransactionsRequest) -> (GetTransactionsResponse) query;
+    "get_account_transactions": (GetAccountTransactionsArgs) -> (GetTransactionsResult) query;
     "get_miner_license":(text,nat,nat)->(vec nat) query;
 }

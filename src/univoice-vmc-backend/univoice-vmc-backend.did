@@ -163,4 +163,5 @@ service : {
     "get_user_balance": (principal) -> (Result) query;
     "get_account_transactions": (GetAccountTransactionsArgs) -> (GetTransactionsResult) query;
     "get_miner_license":(text,nat,nat)->(vec nat) query;
+    "sum_unclaimed_mint_ledger_onceday":(text) ->(nat) query;
 }

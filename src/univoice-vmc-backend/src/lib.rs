@@ -485,6 +485,27 @@ fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord
     })
 }
 
+#[ic_cdk::query]
+fn sum_unclaimed_mint_ledger_onceday(principalid: String) -> NumTokens {
+
+    STATE.with(|s| {
+        let account:Account = Account::from_str(&principalid).expect("pack into  principal err" );
+        let mut tokens:NumTokens = NumTokens::from(0 as u128);
+        let day_of_nano_millsecond:u64 = 24*3600*1000;
+        let nowtime = ic_cdk::api::time();
+        for item in s.borrow().unv_tx_leger.iter() {
+            if (item.biz_state == TransferTxState::Claimed) 
+                 || (day_of_nano_millsecond > nowtime - item.gmt_datetime)
+                 || (item.minner != account) {
+                continue;
+            }
+            tokens+= item.clone().tokens;
+            
+        }
+        return tokens;
+    })
+}
+
 fn get_unclaimed_mint_ledger_by_principal(
     principalid: String,
 ) -> Option<Vec<UnvMinnerLedgerRecord>> {
@@ -500,6 +521,7 @@ fn get_unclaimed_mint_ledger_by_principal(
         return Some(ledgerRecord);
     })
 }
+
 
 fn claimed_mint_ledger(index: &BlockIndex, trans_index: &TxIndex) -> Result<(), String> {
     STATE.with(|s| {

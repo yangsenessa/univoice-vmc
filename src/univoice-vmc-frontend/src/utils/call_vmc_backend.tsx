@@ -30,4 +30,15 @@ export const gener_nft_owner_wait_claims = async(principalId:string):Promise<Min
   return result;  
 }
 
+export const get_miner_jnl = async(principalid:string):Promise<[] | [Array<UnvMinnerLedgerRecord>]> =>{
+  console.log("get_miner_jnl with principalid of:"+ principalid);
+  if(principalid) {
+    return await univoice_vmc_backend.get_all_miner_jnl_with_principalid(principalid);
+
+  } else {
+    return await univoice_vmc_backend.get_all_miner_jnl();
+  }
+
+}
+
 

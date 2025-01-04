@@ -721,7 +721,7 @@ async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {
 async fn get_account_transactions(args: GetAccountTransactionsArgs) -> GetTransactionsResult {
     // TODO: replace the Canister ID
     let ledger_canister_id =
-        Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai").expect("Invalid Ledger Canister ID");
+        Principal::from_text("jqxvq-ciaaa-aaaai-aqwwa-cai").expect("Invalid Ledger Canister ID");
 
     let result: Result<(GetTransactionsResult,), _> =
         call(ledger_canister_id, "get_account_transactions", (args,)).await;

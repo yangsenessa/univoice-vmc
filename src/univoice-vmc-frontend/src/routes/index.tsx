@@ -5,7 +5,8 @@ import SpeakingPage from '../pages/speaking';
 import ListeningPage from '../pages/listening';
 import CoCreatingPage from '../pages/cocreating';
 import AiAgentPage from '../pages/aiagent';
-import TokensPage from '../pages/tokens';
+import DashboardPage from '../pages/dashboard';
+import MyUnivoicePage from '../pages/myunivoice';
 import ActivityPage from '../pages/activity';
 
 const routes: RouteObject[] = [{
@@ -27,8 +28,11 @@ const routes: RouteObject[] = [{
         path: '/aiagent',
         element: <AiAgentPage />
       }, {
-        path: '/tokens',
-        element: <TokensPage />
+        path: '/dashboard',
+        element: <DashboardPage />
+      }, {
+        path: '/myunivoice',
+        element: <MyUnivoicePage />
       }, {
         path: '/activity',
         element: <ActivityPage />

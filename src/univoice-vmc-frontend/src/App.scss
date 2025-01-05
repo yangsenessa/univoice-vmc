@@ -58,6 +58,11 @@ html, body, #root {
   padding: 0 40px;
   margin-bottom: 70px;
 }
+@media (min-width: 768px) {
+  .sub-qa-block {
+    padding: 0 140px;
+  }
+}
 .qa-block-title {
   color: #FFFFFF;
   font-size: 40px;
@@ -72,13 +77,156 @@ html, body, #root {
 .sub-block-split {
   border: 1px solid #4D5155;
 }
-
+.paging {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.paging .paging-item {
+  height: 40px;
+  min-width: 40px;
+  background-color: #2b2736;
+  border-radius: 5px;
+  margin: 0 5px;
+  color: #b1b1b1;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.paging .paging-item.paging-item-txt {
+  cursor: auto;
+}
+.paging .paging-item.paging-item-current {
+  background-color: #5c26d8;
+  color: #fff;
+  cursor: auto;
+}
+// topbar connect wallet
 .lnk-wallet {
   background-image: url("@/assets/imgs/Botton@2x.png");
   background-size: cover;
   background-position: center center;
 }
-
+.wallet-linked {
+  border: 1px solid #a1a1a1;
+  border-radius: 100px;
+  height: 40px;
+  margin-left: 20px;
+  color: #ffffff;
+  padding: 0 20px;
+}
+.wallet-linked .wallet-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 20px;
+  border: 1px solid #a1a1a1;
+}
+.wallet-linked .arrow-down {
+  margin-top: -3px;
+  transform: rotate(45deg);
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+}
+.wallet-linked .arrow-up {
+  margin-top: 6px;
+  transform: rotate(-135deg);
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #ccc;
+  border-bottom: 2px solid #ccc;
+}
+// topbar wallet dropdown
+.wallet-profile {
+  position: absolute;
+  z-index: 1;
+  top: 48px;
+  right: 0;
+  border-radius: 15px;
+  padding: 17px;
+  color: #989898;
+  background-color: rgb(37, 32, 52, 0.9);// #252034;
+  font-size: 16px;
+  cursor: auto;
+}
+.wallet-profile .profile-r {
+  margin-bottom: 15px;
+}
+.wallet-profile .split {
+  border-top: 1px solid #666666;
+}
+.wallet-profile .principal-info {
+  background-color: #14111d;
+  border-radius: 5px;
+  padding: 3px 12px;
+  font-size: 14px;
+  color: #ffffff;
+  white-space: nowrap;
+  display: inline-flex;
+}
+.wallet-profile .profile-label {
+  margin-bottom: 5px;
+}
+.wallet-profile .btn-copy-account-id {
+  margin-left: 10px;
+  width: 15px;
+  height: 15px;
+  background-color: #ccc;
+  cursor: pointer;
+}
+.wallet-profile .profile-uv-balance {
+  width: 260px;
+  height: 66px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #8048ff 0%, #6C2CFD 100%);
+  color: #ffffff;
+  font-size: 20px;
+}
+.wallet-profile .lnk-mytokens-border {
+  border-radius: 5px;
+  background: linear-gradient(-10deg, #282729 0%, #aeaeae 100%);
+  background-clip: padding-box;
+  padding: 1px;
+  width: 100%;
+  height: 46px;
+  margin-bottom: 25px;
+  cursor: pointer;
+}
+.wallet-profile .lnk-mytokens {
+  border-radius: 5px;
+  width: 100%;
+  height: 44px;
+  background-color: #121212;
+  color: #ffffff;
+  font-size: 18px;
+}
+.wallet-profile .lnk-mytokens::after {
+  border: 1px solid #ffffff;
+}
+.wallet-profile .lnk-mytokens .icon-arrow-right {
+  width: 18px;
+  height: 18px;
+  background-color: #ccc;
+  margin-left: 10px;
+}
+.wallet-profile .btn-disconnect {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 3px 20px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+.wallet-profile .btn-disconnect .icon-disconnect {
+  width: 18px;
+  height: 18px;
+  background-color: #ccc;
+  margin-right: 15px;
+}
+// footbar
 .foot-lbar {
   background-image: url("@/assets/imgs/bg_foot_lbar.png");
   background-size: cover;
@@ -88,11 +236,10 @@ html, body, #root {
   margin-top: 40px;
   margin-bottom: 30px;
 }
-
+// home 翻转
 .flip-card {
   perspective: 1000px; /* 为3D效果提供深度感 */
 }
- 
 .flip-card-inner {
   transition: transform 1.6s;
   transform-style: preserve-3d; /* flat保留3D效果 */
@@ -101,15 +248,12 @@ html, body, #root {
   /* backface-visibility: hidden; */
   /* perspective-origin: top right; */
 }
-
 .flip-card-inner-flipped {
   transform: rotateY(180deg);
 }
- 
 .flip-card-front, .flip-card-back {
   backface-visibility: hidden;
 }
-
 .flip-card-back {
   transform: rotateY(180deg);
   position: absolute;
@@ -117,45 +261,7 @@ html, body, #root {
   height: 100%;
   width: 100%;
 }
-  
-.uv-home-1 {
-  // background-image: url("@/assets/imgs/BG@1x.png");
-  // background-size: cover;
-  // background-position: center center;
-  // background-repeat: no-repeat;
-  position: relative;
-  min-height: 860px;
-}
-.uv-home-1-bg {
-  min-height: 670px;
-}
-.uv-home-1-ctx {
-  position: absolute;
-  top: 0;
-  width: 100%;
-}
-
-.uv-home-2 {
-  background-image: url("@/assets/imgs/bg_cycle.png");
-  background-size: cover;
-  background-position: top center;
-  background-repeat: no-repeat;
-}
-  
-.uv-home-vision-1 {
-  background-image: url("@/assets/imgs/lamp.png");
-  background-size: contain;
-  background-position: top center;
-  background-repeat: no-repeat;
-}
-  
-.uv-home-vision-2 {
-  background-image: url("@/assets/imgs/bg_cycle2.png");
-  background-size: contain;
-  background-position: bottom center;
-  background-repeat: no-repeat;
-}
-
+// 白色圆角按钮
 .btn-link-1 {
   border-radius: 100px;
   background: #E8E8EE;
@@ -170,7 +276,7 @@ html, body, #root {
   opacity: 0.8;
   cursor: pointer;
 }
-
+// top foot 圆形按钮
 .btn-link-2 {
   width: 32px;
   height: 32px;
@@ -192,87 +298,27 @@ html, body, #root {
   border-radius: 6px;
   background-color: #221C5B;
 }
-
-.btn-join-us {
-  background-image: url("@/assets/imgs/Joinus.png");
-  background-size: cover;
+// home page
+// home menu+intro+ip
+.uv-home-1 {
+  position: relative;
+  min-height: 910px;
+}
+.uv-home-1-bg {
+  min-height: 670px;
+}
+.uv-home-1-ctx {
   position: absolute;
-  cursor: pointer;
-}
-.btn-join-us .btn-txt {
-  transform: rotate(7deg);
-  text-align: center;
-}
-.ip-uv-home {
-  background-image: url("@/assets/imgs/IPcard.png");
-  background-size: contain;
-  background-position: top right;
-  background-repeat: no-repeat;
+  top: 0;
+  width: 100%;
 }
 
-.txt-wwd {
-  background: -webkit-linear-gradient(90deg, #FFFFFF 67%, #A7A7A7 100%); /* Chrome, Safari */
-  background: linear-gradient(90deg, #FFFFFF 67%, #A7A7A7 100%); /* 标准语法 */
-  -webkit-background-clip: text; /* Chrome, Safari */
-  background-clip: text;
-  -webkit-text-fill-color: transparent; /* Chrome, Safari */
-  color: transparent; /* 标准语法, 也可以用这个属性 */
-}
-
-.txt-vision {
-  background: -webkit-linear-gradient(-180deg, #FFFFFF 32%, #A7A7A7 100%); /* Chrome, Safari */
-  background: linear-gradient(-180deg, #FFFFFF 32%, #A7A7A7 100%); /* 标准语法 */
-  -webkit-background-clip: text; /* Chrome, Safari */
-  background-clip: text;
-  -webkit-text-fill-color: transparent; /* Chrome, Safari */
-  color: transparent; /* 标准语法, 也可以用这个属性 */
-}
-  
-.pannel-bg-1 {
-  border-radius: 10px;
-  background-image: url("@/assets/imgs/Speaking@2x.png");
-  background-size: cover;
-  background-position: top left;
-  background-repeat: no-repeat;
-}
-  
-.pannel-bg-2 {
-  border-radius: 10px;
-  background-image: url("@/assets/imgs/AIAgent@2x.png");
-  background-size: cover;
-  background-position: top left;
-  background-repeat: no-repeat;
-}
-  
-.pannel-bg-3 {
-  border-radius: 30px;
-  background: linear-gradient(-35.13deg, #110E19 70%, #FFF 100%);
-  background-clip: padding-box;
-  padding: 1px;
-  width: 180px;
-  height: 180px;
-}
-.pannel-bg-3 .pannel-ctx {
-  border-radius: 30px;
-  background-color: #110E19;
-  width: 180px;
-  height: 180px;
-}
-
-@media (min-width: 768px) {
-  .sub-qa-block {
-    padding: 0 140px;
-  }
-}
 .uv-container-0 {
   position: relative;
 }
 .uv-container-0 .pannel-info {
-  position: relative;
-  z-index: 100;
-  padding-top: 60px;
-  min-width: 300px;
-  padding-left: 40px;
+  min-width: 360px;
+  padding: 60px 40px 0 40px;
 }
 .uv-container-0 .t1 {
   font-family: PlayfairDisplay;
@@ -283,7 +329,7 @@ html, body, #root {
   line-height: 30px;
 }
 .uv-container-0 .txtlink {
-  padding-top: 28px;
+  margin-top: 28px;
 }
 .uv-container-0 .btn-link-1 {
   width: 120px;
@@ -298,26 +344,29 @@ html, body, #root {
   margin-top: -20px;
 }
 .btn-join-us {
+  background-image: url("@/assets/imgs/Joinus.png");
+  background-size: cover;
+  position: absolute;
+  cursor: pointer;
   position: relative;
   margin: 0 auto;
   margin-top: -40px;
-  z-index: 200;
   width: 129px;
   height: 64px;
 }
 .btn-join-us .btn-txt {
+  transform: rotate(7deg);
+  text-align: center;
   padding-top: 24px;
   font-size: 12px;
 }
-.lnk-learn-more {
-  cursor: pointer;
-  color: #6C2CFD;
-  padding-top: 10px;
+.ip-uv-home {
+  background-image: url("@/assets/imgs/IPcard.png");
+  background-size: contain;
+  background-position: top right;
+  background-repeat: no-repeat;
 }
-.lnk-learn-more:hover {
-  color: #673ab7;
-}
-@media (min-width: 500px) {
+@media (min-width: 600px) {
   .uv-home-1 {
     min-height: 500px;
   }
@@ -343,7 +392,6 @@ html, body, #root {
   }
   .ipcard {
     position: absolute;
-    z-index: 50;
     top: -20px;
     right: 0;
     width: 320px;
@@ -353,7 +401,6 @@ html, body, #root {
     position: absolute;
     top: 350px;
     right: 100px;
-    z-index: 200;
     width: 129px;
     height: 64px;
   }
@@ -362,10 +409,7 @@ html, body, #root {
     font-size: 12px;
   }
 }
-@media (min-width: 768px) {
-  .uv-home-1 {
-    min-height: 708px;
-  }
+@media (min-width: 880px) {
   .uv-container-0 {
     max-width: 1000px;
   }
@@ -389,7 +433,6 @@ html, body, #root {
   }
   .ipcard {
     position: absolute;
-    z-index: 50;
     top: -20px;
     right: 0;
     width: 426px;
@@ -399,7 +442,6 @@ html, body, #root {
     position: absolute;
     top: 468px;
     right: 136px;
-    z-index: 200;
     width: 172px;
     height: 85px;
   }
@@ -409,9 +451,9 @@ html, body, #root {
   }
 }
 @media (min-width: 1280px) {
-  // .uv-home-1 {
-  //   min-height: 996px;
-  // }
+  .uv-home-1 {
+    min-height: 996px;
+  }
   .uv-container-0 {
     max-width: 1500px;
   }
@@ -435,7 +477,6 @@ html, body, #root {
   }
   .ipcard {
     position: absolute;
-    z-index: 50;
     top: -20px;
     right: 0;
     width: 639px;
@@ -445,7 +486,6 @@ html, body, #root {
     position: absolute;
     top: 698px;
     right: 200px;
-    z-index: 200;
     width: 258px;
     height: 128px;
   }
@@ -454,113 +494,377 @@ html, body, #root {
     font-size: 16px;
   }
 }
-/* @media (max-width: 900px) {
-  .uv-home-1 {
-    color: #f00;
-  }
-} */
-.pg-token .tab-bar {
-  display: inline-flex;
-  border: 1px solid #332c49;
-  border-radius: 40px;
-  background-color: #211c30;
-  height: 46px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 0 6px;
-  margin-bottom: 30px;
+// home service
+.uv-home-2 {
+  background-image: url("@/assets/imgs/bg_cycle.png");
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
 }
-.pg-token .tab-bar .tab-bar-item {
-  font-size: 16px;
-  padding: 0 20px;
-  height: 34px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  color: #B4B4B4;
+// home vision
+.uv-home-vision-1 {
+  background-image: url("@/assets/imgs/lamp.png");
+  background-size: contain;
+  background-position: top center;
+  background-repeat: no-repeat;
+}
+.uv-home-vision-2 {
+  background-image: url("@/assets/imgs/bg_cycle2.png");
+  background-size: contain;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+}
+
+// 渐变色标题
+.txt-wwd {
+  background: -webkit-linear-gradient(90deg, #FFFFFF 67%, #A7A7A7 100%); /* Chrome, Safari */
+  background: linear-gradient(90deg, #FFFFFF 67%, #A7A7A7 100%); /* 标准语法 */
+  -webkit-background-clip: text; /* Chrome, Safari */
+  background-clip: text;
+  -webkit-text-fill-color: transparent; /* Chrome, Safari */
+  color: transparent; /* 标准语法, 也可以用这个属性 */
+}
+.txt-vision {
+  background: -webkit-linear-gradient(-180deg, #FFFFFF 32%, #A7A7A7 100%); /* Chrome, Safari */
+  background: linear-gradient(-180deg, #FFFFFF 32%, #A7A7A7 100%); /* 标准语法 */
+  -webkit-background-clip: text; /* Chrome, Safari */
+  background-clip: text;
+  -webkit-text-fill-color: transparent; /* Chrome, Safari */
+  color: transparent; /* 标准语法, 也可以用这个属性 */
+}
+.lnk-learn-more {
   cursor: pointer;
+  color: #6C2CFD;
+  padding-top: 10px;
 }
-.pg-token .tab-bar .tab-bar-item-selected {
-  border-radius: 100px;
-  background: #E8E8EE;
+.lnk-learn-more:hover {
+  color: #673ab7;
+}
+// home service 3个分块背景
+.pannel-bg-1 {
+  border-radius: 10px;
+  background-image: url("@/assets/imgs/Speaking@2x.png");
+  background-size: cover;
+  background-position: top left;
+  background-repeat: no-repeat;
+}
+// home service 2个分块背景
+.pannel-bg-2 {
+  border-radius: 10px;
+  background-image: url("@/assets/imgs/AIAgent@2x.png");
+  background-size: cover;
+  background-position: top left;
+  background-repeat: no-repeat;
+}
+// home partner 分块背景
+.pannel-bg-3 {
+  border-radius: 30px;
+  background: linear-gradient(-35.13deg, #110E19 70%, #FFF 100%);
+  background-clip: padding-box;
+  padding: 1px;
+  width: 180px;
+  height: 180px;
+}
+.pannel-bg-3 .pannel-ctx {
+  border-radius: 30px;
+  background-color: #110E19;
+  width: 180px;
+  height: 180px;
+}
+// home 背面脉轮
+.bg-chakra {
+  position: absolute;
+  top: 100px;
+  min-width: 700px;
+}
+.chakra {
+  position: absolute;
+}
+.chakra-1 {
+  top: 124px;
+  right: 186px;
+}
+.chakra-2 {
+  top: 150px;
+  left: 184px;
+}
+.chakra-3 {
+  top: 180px;
+  right: 186px;
+}
+.chakra-4 {
+  top: 206px;
+  left: 184px;
+}
+.chakra-5 {
+  top: 236px;
+  right: 186px;
+}
+.chakra-6 {
+  top: 262px;
+  left: 184px;
+}
+.chakra-7 {
+  top: 292px;
+  right: 186px;
+}
+.chakra-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 1000px;
+  cursor: pointer;
   box-shadow: inset -3px -3px 7px 0px #FFFFFF,inset 4px 4px 7px 0px #8896A393,0px 0px 24px 0px #FFFFFF66;
-  color: #333;
 }
-.pg-token .tab-bar .tab-bar-item.tab-bar-item-selected {
-  cursor: auto;
+.chakra-click-count {
+  font-size: 12px;
+  line-height: 24px;
+  margin: 0 5px;
 }
-.pg-token .tab-content {
-  width: 100%;
-  padding: 40px;
-  border-radius: 20px;
-  border: 1px solid #393939;
-  background: linear-gradient(135deg, #110E19 50%, #340f2b 100%);
+@media (min-width: 700px) {
+  .bg-chakra {
+    min-width: 1100px;
+  }
+  .chakra-circle {
+    width: 61px;
+    height: 61px;
+  }
+  .chakra-1 {
+    top: 194px;
+    right: 292px;
+  }
+  .chakra-2 {
+    top: 235px;
+    left: 289px;
+  }
+  .chakra-3 {
+    top: 283px;
+    right: 292px;
+  }
+  .chakra-4 {
+    top: 324px;
+    left: 289px;
+  }
+  .chakra-5 {
+    top: 372px;
+    right: 292px;
+  }
+  .chakra-6 {
+    top: 413px;
+    left: 289px;
+  }
+  .chakra-7 {
+    top: 461px;
+    right: 292px;
+  }
+  .chakra-click-count {
+    font-size: 18px;
+    margin: 5px 10px;
+  }
 }
-.pg-token .tbl-wrap {
+@media (min-width: 1100px) {
+  .bg-chakra {
+    min-width: 1280px;
+  }
+  .chakra-circle {
+    width: 70px;
+    height: 70px;
+  }
+  .chakra-1 {
+    top: 226px;
+    right: 340px;
+  }
+  .chakra-2 {
+    top: 273px;
+    left: 337px;
+  }
+  .chakra-3 {
+    top: 329px;
+    right: 340px;
+  }
+  .chakra-4 {
+    top: 376px;
+    left: 337px;
+  }
+  .chakra-5 {
+    top: 432px;
+    right: 340px;
+  }
+  .chakra-6 {
+    top: 479px;
+    left: 337px;
+  }
+  .chakra-7 {
+    top: 535px;
+    right: 340px;
+  }
+  .chakra-click-count {
+    font-size: 22px;
+    margin: 5px 15px;
+  }
+}
+// home 背面脉轮点击后提示+1淡出
+.fade-out-text {
   position: relative;
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid #393939;
+  animation: fadeOutMove 1s forwards;
+  font-size: 20px;
 }
-.pg-token .tbl-wrap::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 10px;
-  border-radius: 10px;
-  background-image: linear-gradient(to top, rgb(57,57,57, 0), rgb(57,57,57, 0.4));
+@keyframes fadeOutMove {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px); /* Adjust the movement distance as needed */
+  }
 }
-.pg-token .tbl-wrap::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 10px;
-  border-radius: 10px;
-  background-image: linear-gradient(to bottom, rgb(57,57,57, 0), rgb(57,57,57, 0.4));
+// 二级页面
+// dashboard
+.pg-dashboard .sub-qa-block {
+  padding-left: 20px;
+  padding-right: 20px;
 }
-.pg-token .tbl {
-  position: relative;
-  width: 100%;
-  border-radius: 10px;
+@media (min-width: 1480px) {
+  .pg-dashboard .sub-qa-block {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
-.pg-token .tbl::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  width: 10px;
-  height: 100%;
-  border-radius: 10px;
-  background-image: linear-gradient(to left, rgb(57,57,57, 0), rgb(57,57,57, 0.4));
+.pg-dashboard .txt-title {
+  background: -webkit-linear-gradient(90deg, #FFFFFF 67%, #A7A7A7 100%); /* Chrome, Safari */
+  background: linear-gradient(90deg, #FFFFFF 67%, #A7A7A7 100%); /* 标准语法 */
+  -webkit-background-clip: text; /* Chrome, Safari */
+  background-clip: text;
+  -webkit-text-fill-color: transparent; /* Chrome, Safari */
+  color: transparent; /* 标准语法, 也可以用这个属性 */
 }
-.pg-token .tbl::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  width: 10px;
-  height: 100%;
-  border-radius: 10px;
-  background-image: linear-gradient(to right, rgb(57,57,57, 0), rgb(57,57,57, 0.4));
+.dashboard-summary .pannel-dashboard-summary {
+  margin-bottom: 10px;
 }
-.pg-token .tbl .tbl-cell, .pg-token .tbl .tbl-cell-title {
-  height: 55px;
+.dashboard-summary .label {
+  color: #88878c;
+}
+.dashboard-summary .data {
   display: flex;
   flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  border-top: 1px solid #393939;
-  border-left: 1px solid #393939;
+  justify-content: flex-start;
+  align-items: flex-end;
+  margin-top: 14px;
 }
-.pg-token .tbl .tbl-cell-title {
+.dashboard-summary .data .val {
+  font-size: 30px;
+}
+.dashboard-summary .data .unit {
   font-size: 14px;
-  color: #818181;
+  color: #88878c;
+  margin-bottom: 5px;
+  margin-left: 8px;
 }
-.pg-token .tbl .tbl-cell {
+// .pg-dashboard .dashboard-transactions {
+//   min-width: 1440px;
+// }
+.pg-dashboard .tbl-paged {
+  background-color: #191521;
+  border-radius: 10px;
+}
+.pg-dashboard .tbl-r {
+  border-bottom: 1px solid #2f2c35;
+  padding: 20px 10px;
+}
+.pg-dashboard .tbl-cell-title {
+  font-size: 20px;
+  color: #605e66;
+  padding: 0 10px;
+}
+.pg-dashboard .tbl-cell {
+  font-size: 18px;
+  color: #cccccc;
+  word-break: break-all;
+  padding: 0 10px;
+}
+.pg-dashboard .dashboard-transactions .tbl-r {
+  display: inline-grid;
+  width: 100%;
+  // grid-template-columns: 280px 200px 300px 300px 280px;
+  grid-template-columns: 30% 10% 20% 15% 25%;
+}
+.pg-dashboard .paging {
+  margin-top: 60px;
+  padding-bottom: 30px;
+}
+.pg-dashboard .token-unit {
+  margin-left: 5px;
+  color: #666666;
   font-size: 16px;
 }
-.pg-token .tbl .tbl-cell-row-start {
-  border-left: none;
+// myunivoice
+.pannel-myunivoice-summary {
+  background-color: #191521;
+  border-radius: 10px;
+  padding: 40px 50px;
+}
+.pannel-myunivoice-summary .rewards-panel {
+  border-right: none;
+}
+.pannel-myunivoice-summary .label {
+  color: #88878c;
+}
+.pannel-myunivoice-summary .data {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-end;
+  margin-top: 14px;
+}
+.pannel-myunivoice-summary .data .val {
+  font-size: 30px;
+}
+.pannel-myunivoice-summary .claimable-panel {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 0;
+  margin-top: 30px;
+}
+.pannel-myunivoice-summary .claimable-panel .label {
+  color: #6129df;
+}
+.pannel-myunivoice-summary .claimable-panel .data {
+  color: #6c2cfd;
+}
+.pannel-myunivoice-summary .btn-link-1 {
+  width: 106px;
+  height: 46px;
+  font-size: 18px;
+  box-shadow: none;
+}
+@media (min-width: 1024px) {
+  .pannel-myunivoice-summary .rewards-panel {
+    border-right: 1px solid #34313a;
+  }
+  .pannel-myunivoice-summary .claimable-panel {
+    padding-left: 100px;
+    margin-top: 0;
+  }
+}
+.pg-dashboard .myunivoice-transactions .tbl-r {
+  display: inline-grid;
+  width: 100%;
+  // grid-template-columns: 280px 200px 300px 300px 280px;
+  grid-template-columns: 30% 25% 15% 20% 10%;
+}
+.myunivoice-license .license-block {
+  display: grid;
+
+}
+.myunivoice-license .license-block .license {
+  background: linear-gradient(45deg, #702dfd, #ef4cfb);
+  border-radius: 10px;
+  padding: 2px;
+}
+.myunivoice-license .license-img {
+  // width: 370px;
+  // height: 370px;
+  border-radius: 10px;
 }

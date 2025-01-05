@@ -1,26 +1,37 @@
 import { PlugMobileProvider } from '@funded-labs/plug-mobile-sdk'
 import { isLocalNet } from '@/utils/env';
-import {tokenLedegerIdlFactory} from '@/idl/icrc1.did.js';
+import { tokenLedegerIdlFactory } from '@/idl/icrc1.did.js';
 
 import MobileProvider from '@funded-labs/plug-mobile-sdk/dist/src/MobileProvider';
 import { Principal } from '@dfinity/principal';
 
 const isDev = isLocalNet();
 const isMobile = PlugMobileProvider.isMobileBrowser()
-const walletConnectProjectId = '1e0a755a594cfe1d94e3617f12f5ae64'
-if (isMobile) {
-  const provider = new PlugMobileProvider({
-    debug: isDev, // If you want to see debug logs in console
-    walletConnectProjectId: walletConnectProjectId, // Project ID from WalletConnect console
-    window: window,
-  })
-  provider.initialize().catch(console.log)
-  if (!provider.isPaired()) {
-    provider.pair().catch(console.log)
+
+export const initPlug = () => {
+  const walletConnectProjectId = '1e0a755a594cfe1d94e3617f12f5ae64'
+  if (isMobile) {
+    const provider = new PlugMobileProvider({
+      debug: isDev, // If you want to see debug logs in console
+      walletConnectProjectId: walletConnectProjectId, // Project ID from WalletConnect console
+      window: window,
+    })
+    console.log('provider.initialize()')
+    // provider.initialize().catch(console.log)
+    provider.initialize().then(()=>{
+      console.log('provider.initialize ok')
+      if (!provider.isPaired()) {
+        console.log('!provider.isPaired')
+        provider.pair().catch((e) => {
+          console.log('provider.pair exception', e)
+        })
+      }
+    }).catch((e) => {
+      console.log('provider.initialize exception', e)
+    })
+    console.log('inited')
   }
 }
-
- 
 
 export const plugReady = (): boolean => {
   if (isMobile) {
@@ -47,7 +58,6 @@ const host = "https://mainnet.dfinity.network";
 
 export const reConnectPlug = async (): Promise<string> => {
   if (!plugReady()) return '';
-  console.log("Reconnect Plug wallet");
   const plug = (window as any).ic.plug;
   // 断开旧的连接
   try{

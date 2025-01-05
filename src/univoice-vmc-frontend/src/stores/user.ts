@@ -28,6 +28,7 @@ interface AccountState {
   getUid: () => string | number;
   getPrincipal: () => string;
   getBalance: () => string|number;
+  getWalletType: () => string;
   hasExpired: () => boolean;
 }
 
@@ -86,6 +87,9 @@ export const useAcountStore = create<AccountState>()(
         },
         getBalance: () => {
           return get().hasExpired() ? '' : get().balance;
+        },
+        getWalletType: () => {
+          return get().hasExpired() ? '' : get().wallet;
         },
         hasExpired: (): boolean => {
           return get().expire < new Date().getTime();

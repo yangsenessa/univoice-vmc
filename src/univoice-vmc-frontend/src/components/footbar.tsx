@@ -55,7 +55,7 @@ const FootBar = (option:any) => {
     clickLink('/aiagent')
   }
   const clickToken = () => {
-    clickLink('/tokens')
+    clickLink('/dashboard')
   }
 
   return (

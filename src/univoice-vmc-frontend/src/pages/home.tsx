@@ -10,14 +10,17 @@ import ImgCoCreatingIcon from '@/assets/imgs/creatingicon@2x.png'
 import ImgAiAgentIcon from '@/assets/imgs/AIAgenticon@2x.png'
 import ImgTokenIcon from '@/assets/imgs/Tokenicon@2x.png'
 import ImgArrowRIcon from '@/assets/imgs/icon_arrow_r.png'
+import ImgPlugLogo from '@/assets/imgs/plug.png'
 import ImgICPLogo from '@/assets/imgs/ICP_logo@2x.png'
 import ImgZonliLogo from '@/assets/imgs/zonli.png'
 import ImgMixlabLogo from '@/assets/imgs/Mixlab_logo@2x.png'
 import ImgYukuLogo from '@/assets/svg/YUKU.svg'
 import ImgUVbottomLogo from '@/assets/imgs/logo_homebottom@2x.png'
 import ImgBgBack from '@/assets/imgs/bg_homeback.png'
+import ImgChakra from '@/assets/imgs/bg_chakra.png'
 // import { getPrincipal, goLogin } from '@/utils/icplug';
-import { readStorage, writeStorage, removeStorage } from '@/utils';
+// import { readStorage, writeStorage, removeStorage } from '@/utils';
+import Chakra from '@/components/chakra'
 
 function UvHomePage() {
   const location = useLocation();
@@ -26,6 +29,23 @@ function UvHomePage() {
   const refPartner:any = useRef(null);
   const refVision:any = useRef(null);
   const [isFlipped, setIsFlipped] = useState(false);
+
+  const [chakraClickStat, setChakraClickStat] = useState({
+    cnt1: 0,
+    cnt2: 0,
+    cnt3: 0,
+    cnt4: 0,
+    cnt5: 0,
+    cnt6: 0,
+    cnt7: 0,
+  });
+
+  const topbarRef = useRef<{ hideProfile: () => void }>(null)
+  const handleHideProfile = () => {
+    if (topbarRef.current) {
+      topbarRef.current.hideProfile()
+    }
+  }
 
   const fnClickFlip = () => {
     setIsFlipped(!isFlipped)
@@ -50,9 +70,9 @@ function UvHomePage() {
     refVision.current.scrollIntoView(true)
   }
 
-  const goWhitePaper = () => {
-    navigate('/whitepaper.pdf')
-  }
+  // const goWhitePaper = () => {
+  //   navigate('/whitepaper.pdf')
+  // }
 
   const goActivity = () => {
     navigate('/activity')
@@ -71,16 +91,28 @@ function UvHomePage() {
     navigate('/aiagent')
   }
   const goToken = () => {
-    navigate('/tokens')
+    navigate('/dashboard')
   }
 
   const startSpeaking = () => {}
   const startListening = () => {}
   const startCoCreating = () => {}
 
+  const loadChakraClickStat = () => {
+    setChakraClickStat({
+      cnt1: 1,
+      cnt2: 2,
+      cnt3: 3,
+      cnt4: 4,
+      cnt5: 5,
+      cnt6: 6,
+      cnt7: 7,
+    })
+  }
+
   useEffect(() => {
     goAnchor(location.hash)
-    // goWhitePaper()
+    loadChakraClickStat()
   }, []);
   return (
     <div className="flip-card bg-[#110E19] overflow-hidden" ref={refHome}>
@@ -88,8 +120,8 @@ function UvHomePage() {
         <div className="flip-card-front uv-container">
           <div className="uv-home-1">
             <img src={ImgBg} className="uv-home-1-bg img-fixed w-full" />
-            <div className="uv-home-1-ctx">
-              <TopBar/>
+            <div className="uv-home-1-ctx" onClick={handleHideProfile}>
+              <TopBar ref={topbarRef}/>
               <div className="uv-container-0">
                 <div className="pannel-info">
                   <div className="t1">I'm Univoice</div>
@@ -185,7 +217,7 @@ function UvHomePage() {
                   <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
                 </div>
                 <div className="btn-link-1 w-[260px] h-[48px] text-[16px] absolute bottom-[30px]" onClick={goToken}>
-                  <div>Get Token Now</div>
+                  <div>View Dashboard</div>
                   <img src={ImgArrowRIcon} className="w-[18px] h-[18px] ml-[10px]" />
                 </div>
               </div>
@@ -205,6 +237,13 @@ function UvHomePage() {
               <div className="pannel-bg-3">
                 <div className="pannel-ctx flex flex-col items-center justify-center">
                   <img src={ ImgMixlabLogo } className="w-[120px] h-[120px] mt-[21px]" />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <div className="pannel-bg-3">
+                <div className="pannel-ctx flex flex-col items-center justify-center">
+                  <img src={ ImgPlugLogo } className="w-[100px] h-[100px] mt-[21px]" />
                 </div>
               </div>
             </div>
@@ -252,17 +291,29 @@ function UvHomePage() {
           <FootBar homeGoAnchor={goAnchor} />
 
         </div>
-        <div className="flip-card-back uv-container">
+        <div className="flip-card-back uv-container bg-[#000000]">
           <div className="w-full h-full flex flex-col items-center justify-start">
             <div className="py-[20px] text-[28px] font-pf flex flex-col items-center justify-start">
-              <div className="flex flex-col items-center justify-start">
-                <p>"If you want to find the secrets of</p>
-                <p>the universe, think in terms of</p>
-                <p>energy, frequency and vibration."</p>
+              <div className="flex flex-col items-center justify-start text-center max-w-[760px] px-[50px]">
+                <p>"If you want to find the secrets of the universe, think in terms of energy, frequency and vibration."</p>
                 <div className="w-full text-right">- Nikola Tesla</div>
               </div>
             </div>
-            <img src={ ImgBgBack } className="min-w-[1280px] w-full img-fixed" />
+            <div className="relative w-full flex flex-col items-center justify-start">
+              <img src={ ImgBgBack } className="min-w-[1280px] w-full img-fixed" />
+              <div className="bg-chakra">
+                <div className="relative">
+                  <img src={ ImgChakra } className=" img-fixed" />
+                  <Chakra idx={1} clickcnt={chakraClickStat.cnt1}/>
+                  <Chakra idx={2} clickcnt={chakraClickStat.cnt2}/>
+                  <Chakra idx={3} clickcnt={chakraClickStat.cnt3}/>
+                  <Chakra idx={4} clickcnt={chakraClickStat.cnt4}/>
+                  <Chakra idx={5} clickcnt={chakraClickStat.cnt5}/>
+                  <Chakra idx={6} clickcnt={chakraClickStat.cnt6}/>
+                  <Chakra idx={7} clickcnt={chakraClickStat.cnt7}/>
+                </div>
+              </div>
+            </div>
             <div onClick={fnClickFlip} className="fixed top-[30px] right-[50px] cursor-pointer">BACK</div>
           </div>
         </div>

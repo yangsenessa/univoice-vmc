@@ -1,8 +1,14 @@
 import React from 'react';
+import eruda from 'eruda';
+import { isLocalNet } from '@/utils/env';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.scss';
+
+const isDev = isLocalNet();
+// 调试
+isDev && eruda.init();
 
 export const Root = () => {
   return (

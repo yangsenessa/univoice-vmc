@@ -168,7 +168,7 @@ async fn query_poll_balance() -> Result<NumTokens, String> {
     ic_cdk::println!("Query balance of mining pool {}", ic_cdk::id(),);
 
     let balance = ic_cdk::call::<(Account,), (Nat,)>(
-        Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
+        Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai")
             .expect("Could not decode the principal."),
         "icrc1_balance_of",
         (Account::from(ic_cdk::id()),),
@@ -264,10 +264,12 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
     //Build miner_collection
     for nft_vec in nft_vec_param {
         ic_cdk::println!("Call Nft collection params");
+        let nft_query_parm:Vec<Nat> = nft_vec;
+        ic_cdk::println!("Lenth :{}",nft_query_parm.clone().len());
         let miners_nft = ic_cdk::call::<(Vec<Nat>,), (Vec<Option<Account>>,)>(
             Principal::from_str(&ledger_item.nft_pool).expect("Could not decode the principal."),
             "icrc7_owner_of",
-            (nft_vec,),
+            (nft_query_parm,),
         )
         .await
         .map_err(|e| format!("failed to call ledger: {:?}", e));
@@ -290,6 +292,7 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
             }
             Err(e) => ic_cdk::println!("Call NFT err {}", e),
         }
+        
     }
     let sharding_size = miner_acounts.len();
     let block_tokens = ledger_item.clone().block_tokens / sharding_size;
@@ -636,15 +639,18 @@ async fn init_nft_tokens(ledger: &WorkLoadLedgerItem) -> Vec<Vec<Nat>> {
     ic_cdk::println!("Total Nft Supply is {}", &max_tokenid);
 
     let mut i: u128 = 0 as u128;
-    let tmp_tokennum: Nat = Nat::from(21_000 as u128);
+    let mut i_shard: u128 = 0 as u128;
+
     let glb_shard_size = 50;
     loop {
         tokens_shard.push(Nat::from(i.clone()));
         i += 1;
+        i_shard += 1;
 
-        if Nat::from(i).eq(&Nat::from(glb_shard_size as u128)) {
+        if Nat::from(i_shard).eq(&Nat::from(glb_shard_size as u128)) {
             nft_tokens_param.push(tokens_shard.clone());
             tokens_shard.clear();
+            i_shard = 0;
             ic_cdk::println!("Init Nft shard to Index of {}", i);
         }
 
@@ -654,6 +660,7 @@ async fn init_nft_tokens(ledger: &WorkLoadLedgerItem) -> Vec<Vec<Nat>> {
     }
     if tokens_shard.len() > 0 {
         nft_tokens_param.push(tokens_shard.clone());
+        tokens_shard.clear();
     }
     return nft_tokens_param;
 }

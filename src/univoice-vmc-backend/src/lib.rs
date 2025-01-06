@@ -256,7 +256,10 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
     let ledger_item = event.payload;
 
     ic_cdk::println!("Init Nft owners");
-
+    /*
+    TODO: The sharding logic in init_nft_tokens can be optimized for efficiency to minimize
+     the number of icrc7_owner_of method calls, thereby reducing cycles consumption.
+    */
     let nft_vec_param = init_nft_tokens(&ledger_item).await;
     ic_cdk::println!("Finish init Nft owners");
     let mut miner_acounts: Vec<Account> = Vec::new();
@@ -264,8 +267,8 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
     //Build miner_collection
     for nft_vec in nft_vec_param {
         ic_cdk::println!("Call Nft collection params");
-        let nft_query_parm:Vec<Nat> = nft_vec;
-        ic_cdk::println!("Lenth :{}",nft_query_parm.clone().len());
+        let nft_query_parm: Vec<Nat> = nft_vec;
+        ic_cdk::println!("Lenth :{}", nft_query_parm.clone().len());
         let miners_nft = ic_cdk::call::<(Vec<Nat>,), (Vec<Option<Account>>,)>(
             Principal::from_str(&ledger_item.nft_pool).expect("Could not decode the principal."),
             "icrc7_owner_of",
@@ -292,7 +295,6 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
             }
             Err(e) => ic_cdk::println!("Call NFT err {}", e),
         }
-        
     }
     let sharding_size = miner_acounts.len();
     let block_tokens = ledger_item.clone().block_tokens / sharding_size;
@@ -490,20 +492,19 @@ fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord
 
 #[ic_cdk::query]
 fn sum_unclaimed_mint_ledger_onceday(principalid: String) -> NumTokens {
-
     STATE.with(|s| {
-        let account:Account = Account::from_str(&principalid).expect("pack into  principal err" );
-        let mut tokens:NumTokens = NumTokens::from(0 as u128);
-        let day_of_nano_millsecond:u64 = 24*3600*1000;
+        let account: Account = Account::from_str(&principalid).expect("pack into  principal err");
+        let mut tokens: NumTokens = NumTokens::from(0 as u128);
+        let day_of_nano_millsecond: u64 = 24 * 3600 * 1000;
         let nowtime = ic_cdk::api::time();
         for item in s.borrow().unv_tx_leger.iter() {
-            if (item.biz_state == TransferTxState::Claimed) 
-                 || (day_of_nano_millsecond > nowtime - item.gmt_datetime)
-                 || (item.minner != account) {
+            if (item.biz_state == TransferTxState::Claimed)
+                || (day_of_nano_millsecond > nowtime - item.gmt_datetime)
+                || (item.minner != account)
+            {
                 continue;
             }
-            tokens+= item.clone().tokens;
-            
+            tokens += item.clone().tokens;
         }
         return tokens;
     })
@@ -524,7 +525,6 @@ fn get_unclaimed_mint_ledger_by_principal(
         return Some(ledgerRecord);
     })
 }
-
 
 fn claimed_mint_ledger(index: &BlockIndex, trans_index: &TxIndex) -> Result<(), String> {
     STATE.with(|s| {

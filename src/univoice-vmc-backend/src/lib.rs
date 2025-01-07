@@ -9,9 +9,14 @@ use ic_cdk_macros::{query, update};
 use std::borrow::{Borrow, BorrowMut};
 use std::future::IntoFuture;
 use std::mem;
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{
+     DefaultMemoryImpl, StableVec, Storable,GrowFailed
+};
+
 use std::ops::{DerefMut, Index};
 use std::str::FromStr;
-use std::{cell::RefCell, result};
+use std::{borrow::Cow,cell::RefCell, result};
 
 use ic_cdk::api::management_canister::http_request::{
     http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
@@ -19,7 +24,7 @@ use ic_cdk::api::management_canister::http_request::{
 };
 use ledgertype::{
     ApproveResult, MinerTxState, MinerWaitClaimBalance, TransferArgs, TransferTxState, TxIndex,
-    UnvMinnerLedgerRecord, WorkLoadLedgerItem,
+    UnvMinnerLedgerRecord, WorkLoadLedgerItem,UnvMinnerLedgerState
 };
 use serde::Serialize;
 use serde_json::{self, Value};
@@ -29,6 +34,9 @@ use icrc_ledger_types::icrc1::account::{self, Account, Subaccount};
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
 use icrc_ledger_types::icrc2::approve::{ApproveArgs, ApproveError};
 use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromError};
+
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
 struct Subscriber {
@@ -41,16 +49,16 @@ struct Event0301008 {
     payload: WorkLoadLedgerItem,
 }
 
-#[derive(CandidType, Deserialize, Clone, Default)]
-pub struct State {
-    unv_tx_leger: Vec<UnvMinnerLedgerRecord>,
+
+
+#[derive(CandidType,Deserialize,Clone,Default)]
+pub struct StateHeap {
     unv_nft_owners: Vec<Account>,
     unv_user_infos: Vec<UserIdentityInfo>,
 }
-
-#[derive(CandidType, Default, Deserialize, Clone)]
+#[derive(CandidType, Default,Deserialize,Clone)]
 struct StableState {
-    state: State,
+    state: StateHeap,
 }
 
 #[derive(CandidType, Deserialize, Debug)]
@@ -137,7 +145,15 @@ enum GetTransactionsResult {
 }
 
 thread_local! {
-    static STATE: RefCell<State> = RefCell::new(State::default());
+    static STATEHEAP: RefCell<StateHeap> = RefCell::new(StateHeap::default());
+    //static STATE:RefCell<UnvMinnerLedgerState> = RefCell::new(UnvMinnerLedgerState::default());
+
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+                 RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+    static LEDGER_STATE: RefCell<StableVec<UnvMinnerLedgerRecord, Memory>> = RefCell::new(
+        StableVec::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
+    ).expect("Init stablemem error"));
 }
 
 #[ic_cdk::query]
@@ -146,12 +162,12 @@ fn greet(name: String) -> String {
 }
 
 fn get_total_minner() -> Result<Vec<Account>, String> {
-    STATE.with(|s| Ok(s.borrow().unv_nft_owners.clone()))
+    STATEHEAP.with(|s| Ok(s.borrow().unv_nft_owners.clone()))
 }
 
 #[ic_cdk::update]
 async fn call_unvoice_for_ext_nft(nft_owners: NftUnivoicePricipal) -> Result<usize, String> {
-    STATE.with(|s| {
+    STATEHEAP.with(|s| {
         s.borrow_mut().unv_nft_owners.clear();
         for owner_principal in nft_owners.owners {
             ic_cdk::println!("Current principal id is {}", owner_principal);
@@ -321,22 +337,21 @@ async fn publish_0301008_EXT(event: Event0301008) -> Result<TxIndex, String> {
     let mut tx_index: Nat = Nat::from(0 as u128);
 
     ic_cdk::println!("Init Nft owners");
-    STATE.with(|s| {
-        let miner_set = get_total_minner().unwrap();
-        let sharding_size = miner_set.len();
-        let block_tokens = ledger_item.clone().block_tokens / sharding_size;
-        ic_cdk::println!("Per-nft sharing of {} tokens", block_tokens);
+   
+    let miner_set = get_total_minner().unwrap();
+    let sharding_size = miner_set.len();
+    let block_tokens = ledger_item.clone().block_tokens / sharding_size;
+    ic_cdk::println!("Per-nft sharing of {} tokens", block_tokens);
 
-        for miner in miner_set {
-            blockindex = produce_unv_miner_ledger(&ledger_item, &miner, &block_tokens);
-            blockindex_vec.push(blockindex.clone());
-            ic_cdk::println!(
-                "NFT owner is {}, blockindex is {}",
-                miner.owner.to_text(),
-                blockindex.clone()
-            );
-        }
-    });
+    for miner in miner_set {
+        blockindex = produce_unv_miner_ledger(&ledger_item, &miner, &block_tokens);
+        blockindex_vec.push(blockindex.clone());
+        ic_cdk::println!(
+            "NFT owner is {}, blockindex is {}",
+            miner.owner.to_text(),
+            blockindex.clone()
+        );
+    }
     for idx_ledger in blockindex_vec {
         tx_index = claim_to_account_from_index(idx_ledger.clone())
             .await
@@ -348,7 +363,17 @@ async fn publish_0301008_EXT(event: Event0301008) -> Result<TxIndex, String> {
 
 #[ic_cdk::query]
 fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
-    STATE.with(|s| Some(s.borrow().unv_tx_leger.clone()))
+    LEDGER_STATE.with(|s| {
+        let mut res_vec:Vec<UnvMinnerLedgerRecord> = Vec::new();
+        ic_cdk::println!("get miner jnl begin");
+
+        for ledger_item in s.borrow().iter() {
+            ic_cdk::println!("get one miner jnl:{}", ledger_item.minner_principalid);
+            res_vec.push(ledger_item.clone());
+        }
+        return Some(res_vec);
+    }
+    )
 }
 
 #[ic_cdk::query]
@@ -356,9 +381,9 @@ fn get_all_miner_jnl_with_principalid(principalid: String) -> Vec<UnvMinnerLedge
     let mut minting_ledeger: Vec<UnvMinnerLedgerRecord> = Vec::new();
     let account: Account = Account::from_str(&principalid).expect("Parse principal id err");
 
-    STATE.with(|s| {
-        for ledeger_item in s.borrow().unv_tx_leger.clone() {
-            if account == ledeger_item.minner {
+    LEDGER_STATE.with(|s| {
+        for ledeger_item in s.borrow().iter() {
+            if principalid == ledeger_item.minner_principalid {
                 minting_ledeger.push(ledeger_item);
             }
         }
@@ -368,7 +393,7 @@ fn get_all_miner_jnl_with_principalid(principalid: String) -> Vec<UnvMinnerLedge
 
 #[ic_cdk::update]
 fn sync_userinfo_identity(user_infos: Vec<UserIdentityInfo>) -> Result<usize, String> {
-    STATE.with(|s| {
+    STATEHEAP.with(|s| {
         let mut tmp_userinfo: Vec<UserIdentityInfo> = Vec::new();
         let mut idl_cnt = 0;
 
@@ -416,6 +441,8 @@ async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex,
                     claimed_mint_ledger(&block_index, &i)
                         .map_err(|e| format!("fail to call ledger:{:?}", e));
                     ic_cdk::println!("Transfer Success {}", i);
+                    return Result::Ok(TxIndex::from(i));
+
                 }
                 Result::Err(e) => {
                     ic_cdk::println!("Transfer fail {}", e);
@@ -430,11 +457,11 @@ async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex,
 
 #[ic_cdk::query]
 fn gener_nft_owner_wait_claims(principal: String) -> MinerWaitClaimBalance {
-    STATE.with(|s| {
-        let miner_account: Account = Account::from(Principal::from_text(principal).unwrap());
+    LEDGER_STATE.with(|s| {
+        let miner_account: Account = Account::from(Principal::from_text(principal.clone()).unwrap());
         let mut balance: NumTokens = NumTokens::from(0 as u128);
-        for unv_miner_ledger in s.borrow().unv_tx_leger.iter() {
-            if miner_account == unv_miner_ledger.minner {
+        for unv_miner_ledger in s.borrow().iter() {
+            if principal == unv_miner_ledger.clone().minner_principalid {
                 balance = unv_miner_ledger.tokens.clone() + balance;
             }
         }
@@ -476,8 +503,8 @@ async fn claim_to_account_by_principal(principalid: String) -> Result<TxIndex, S
 }
 
 fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord> {
-    STATE.with(|s| {
-        for item in s.borrow().unv_tx_leger.iter() {
+    LEDGER_STATE.with(|s| {
+        for item in s.borrow().iter() {
             if *index == item.clone().block_index.unwrap() {
                 if item.biz_state == TransferTxState::Claimed {
                     return None;
@@ -492,15 +519,15 @@ fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord
 
 #[ic_cdk::query]
 fn sum_unclaimed_mint_ledger_onceday(principalid: String) -> NumTokens {
-    STATE.with(|s| {
+    LEDGER_STATE.with(|s| {
         let account: Account = Account::from_str(&principalid).expect("pack into  principal err");
         let mut tokens: NumTokens = NumTokens::from(0 as u128);
         let day_of_nano_millsecond: u64 = 24 * 3600 * 1000;
         let nowtime = ic_cdk::api::time();
-        for item in s.borrow().unv_tx_leger.iter() {
+        for item in s.borrow().iter() {
             if (item.biz_state == TransferTxState::Claimed)
                 || (day_of_nano_millsecond > nowtime - item.gmt_datetime)
-                || (item.minner != account)
+                || (item.minner_principalid != principalid)
             {
                 continue;
             }
@@ -513,10 +540,10 @@ fn sum_unclaimed_mint_ledger_onceday(principalid: String) -> NumTokens {
 fn get_unclaimed_mint_ledger_by_principal(
     principalid: String,
 ) -> Option<Vec<UnvMinnerLedgerRecord>> {
-    STATE.with(|s| {
+    LEDGER_STATE.with(|s| {
         let mut ledgerRecord: Vec<UnvMinnerLedgerRecord> = Vec::new();
-        for item in s.borrow().unv_tx_leger.iter() {
-            if principalid == item.clone().minner.owner.to_text() {
+        for item in s.borrow().iter() {
+            if principalid == item.clone().minner_principalid {
                 if item.biz_state == TransferTxState::Claimed {
                     ledgerRecord.push(item.clone());
                 }
@@ -527,14 +554,19 @@ fn get_unclaimed_mint_ledger_by_principal(
 }
 
 fn claimed_mint_ledger(index: &BlockIndex, trans_index: &TxIndex) -> Result<(), String> {
-    STATE.with(|s| {
-        for item in s.borrow_mut().unv_tx_leger.iter_mut() {
+    LEDGER_STATE.with(|s| {
+        let mut mem_index:u64 = 0;
+        let stable_mem = s.borrow_mut();
+        for item in stable_mem.iter() {
             if *index == item.clone().block_index.unwrap() {
-                item.biz_state = TransferTxState::Claimed;
-                item.meta_workload.mining_status = MinerTxState::Claimed(String::from("claimed"));
-                item.trans_tx_index = Some(trans_index.clone());
+                let mut item_clone = item.clone();
+                item_clone.biz_state = TransferTxState::Claimed;
+                item_clone.meta_workload.mining_status = MinerTxState::Claimed(String::from("claimed"));
+                item_clone.trans_tx_index = Some(trans_index.clone());
+                stable_mem.set(mem_index,&item_clone);
                 return Ok(());
             }
+            mem_index+=1;
         }
         Err(String::from("Ledger is in blackhole"))
     })
@@ -568,6 +600,7 @@ async fn call_approve_with_block_tokens(account: &Account, tokens: &NumTokens) -
 //Call icrc1_ledger
 async fn call_transfer(miner_ledger: &UnvMinnerLedgerRecord) -> Result<BlockIndex, String> {
     ic_cdk::println!("Begin transfer {} tokens", miner_ledger.tokens);
+    let to_principalid = miner_ledger.clone().minner_principalid;
     let transfer_from_args = TransferFromArgs {
         // the account we want to transfer tokens from (in this case we assume the caller approved the canister to spend funds on their behalf)
         from: Account::from_str(&miner_ledger.meta_workload.token_pool)
@@ -581,7 +614,7 @@ async fn call_transfer(miner_ledger: &UnvMinnerLedgerRecord) -> Result<BlockInde
         // if not specified, the default fee for the canister is used
         fee: None,
         // the account we want to transfer tokens to
-        to: miner_ledger.minner.clone(),
+        to: Account::from_str(&to_principalid).unwrap(),
         // a timestamp indicating when the transaction was created by the caller; if it is not specified by the caller then this is set to the current ICP time
         created_at_time: None,
     };
@@ -670,11 +703,11 @@ fn produce_unv_miner_ledger(
     nft_owner: &Account,
     block_tokens: &Nat,
 ) -> BlockIndex {
-    STATE.with(|s| {
-        let top_block = s.borrow_mut().unv_tx_leger.len();
+    LEDGER_STATE.with(|s| {
+        let top_block = s.borrow_mut().len();
         let block_index = BlockIndex::from(top_block + 1);
         let minner_ledger = UnvMinnerLedgerRecord {
-            minner: nft_owner.clone(),
+            minner_principalid: nft_owner.clone().owner.to_text(),
             meta_workload: workloadledger.clone(),
             block_index: Some(block_index.clone()),
             tokens: block_tokens.clone(),
@@ -682,17 +715,19 @@ fn produce_unv_miner_ledger(
             gmt_datetime: ic_cdk::api::time(),
             biz_state: TransferTxState::WaitClaim,
         };
-        s.borrow_mut().unv_tx_leger.push(minner_ledger);
+        s.borrow_mut().push(&minner_ledger).expect("Push ledger error");
         return block_index;
     })
 }
-
+/* 
 #[ic_cdk::pre_upgrade]
 fn pre_upgrade() {
-    let state = STATE.with(|state: &RefCell<State>| mem::take(&mut *state.borrow_mut()));
+    let state = STATEHEAP.with(|state: &RefCell<StateHeap>| mem::take(&mut *state.borrow_mut()));
     let stable_state: StableState = StableState { state };
     ic_cdk::println!("pre_upgrade");
     storage::stable_save((stable_state,)).unwrap();
+
+
 }
 
 #[ic_cdk::post_upgrade]
@@ -700,9 +735,9 @@ fn post_upgrade() {
     ic_cdk::println!("post_upgrade");
     let (StableState { state },) =
         storage::stable_restore().expect("failed to restore stable state");
-    STATE.with(|state0| *state0.borrow_mut() = state);
-    ic_cdk::println!("post_upgrade");
+        STATEHEAP.with(|state0| *state0.borrow_mut() = state);
 }
+*/
 
 #[ic_cdk::query]
 async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {

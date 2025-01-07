@@ -3,8 +3,7 @@
     "univoice-vmc-backend": {
       "candid": "src/univoice-vmc-backend/univoice-vmc-backend.did",
       "package": "univoice-vmc-backend",
-      "type": "rust",
-      "specified_id": "b77ix-eeaaa-aaaaa-qaada-cai"
+      "type": "rust"
     },
     "univoice-vmc-frontend": {
       "dependencies": [

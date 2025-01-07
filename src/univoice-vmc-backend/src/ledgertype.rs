@@ -1,14 +1,18 @@
 use std::default;
+use std::{borrow::Cow, cell::RefCell};
 
-use candid::{CandidType, Principal,Deserialize,Nat};
+use ic_stable_structures::{ storable::Bound ,DefaultMemoryImpl, StableBTreeMap, Storable,};
+use candid::{CandidType, Principal,Deserialize,Nat,Encode,Decode};
 use serde::Serialize;
 use icrc_ledger_types::icrc1::account::{Account,Subaccount,DEFAULT_SUBACCOUNT};
 use icrc_ledger_types::icrc1::transfer::{BlockIndex, NumTokens};
 use icrc_ledger_types::icrc2::approve::ApproveError;
 
-
 pub type TxIndex = Nat;
 pub type Timestamp = u64;
+
+const MAX_VALUE_SIZE: u32 = 5120;
+
 
 #[derive(CandidType,Deserialize,Clone)]
 pub enum MinerTxState {
@@ -57,9 +61,9 @@ pub struct WorkLoadLedgerItem {
     pub mining_status:MinerTxState
 }
 
-#[derive(Clone, CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone)]
 pub struct UnvMinnerLedgerRecord{
-    pub minner:Account,
+    pub minner_principalid:String,
     pub meta_workload:WorkLoadLedgerItem,
     pub block_index:Option<BlockIndex>,
     pub trans_tx_index:Option<TxIndex>,
@@ -67,12 +71,47 @@ pub struct UnvMinnerLedgerRecord{
     pub gmt_datetime:Timestamp,
     pub biz_state:TransferTxState
 }
+impl Storable for UnvMinnerLedgerRecord {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE,
+        is_fixed_size: false,
+    };
+}
+
+
+#[derive(CandidType,Deserialize,Clone,Default)]
+pub struct UnvMinnerLedgerState {
+    pub unv_tx_leger:  Vec<UnvMinnerLedgerRecord>,  
+}
+impl Storable for UnvMinnerLedgerState {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_VALUE_SIZE,
+        is_fixed_size: false,
+    };
+}
 
 #[derive(Clone, CandidType, Deserialize)]
 pub struct MinerWaitClaimBalance {
     pub pricipalid_txt:String,
     pub tokens:NumTokens
 }
+
 
 #[derive(CandidType, Deserialize, Serialize)]
 pub struct TransferArgs {

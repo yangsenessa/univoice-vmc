@@ -6,15 +6,15 @@ function UvListeningPage() {
   }, []);
 
   return (
-    <div className="uv-container-1 pb-[28px]" style={{flexBasis: '100%'}}>
-      <div className="sub-qa-block pt-[148px]">
-        <div className="qa-block-title text-[48px]">What’s the Listener？</div>
-        <div className="qa-block-txt text-[24px]">
+    <div className="uv-container-1 container-subpg">
+      <div className="sub-qa-block">
+        <div className="qa-block-title bigtxt">What’s the Listener？</div>
+        <div className="qa-block-txt bigtxt">
           <p>“Let AI know you better,you be yourself ”.</p>
           <p>Univoice has always been listening and accompanying.</p>
         </div>
       </div>
-      <div className="sub-block-split mt-[120px] mb-[110px]"></div>
+      <div className="sub-block-split"></div>
       <div className="sub-qa-block">
         <div className="qa-block-title">Who is the listener?</div>
         <div className="qa-block-txt">Univoice ai agent and human.</div>

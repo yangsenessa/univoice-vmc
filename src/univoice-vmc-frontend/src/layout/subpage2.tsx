@@ -13,7 +13,7 @@ function MainLayout() {
   }
 
   return (
-    <div className="uv-container pg-sub" onClick={handleHideProfile}>
+    <div className="uv-container pg-sub2" onClick={handleHideProfile}>
       <div className="container-topbar"><TopBar ref={topbarRef}/></div>
       <Outlet/>
       <FootBar/>

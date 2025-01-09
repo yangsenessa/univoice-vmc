@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as echarts from "echarts"
+import style from './aiagent.module.scss'
 
 function UvAiAgentPage() {
   const refScatterChart:any = useRef(null);
@@ -112,14 +113,14 @@ function UvAiAgentPage() {
     getLineData()
   }, []);
   return (
-    <div className="uv-container-1 pb-[28px]" style={{flexBasis: '100%'}}>
-      <div className="sub-qa-block pt-[148px]">
-        <div className="qa-block-title text-[48px]">Univoice AI Agent</div>
-        <div className="qa-block-txt text-[24px]">
+    <div className="uv-container-1 container-subpg">
+      <div className="sub-qa-block">
+        <div className="qa-block-title bigtxt">Univoice AI Agent</div>
+        <div className="qa-block-txt bigtxt">
           <p>univoice AI Agent is a combination of the prototypes of Sun Wukong and Conan, possessing humor, wisdom, keenness, curiosity, empathy, and confidence. Fearless Explorer: This AI is like a curious child, eager to explore the audible world of Earth and understand human language and emotions. It is unafraid of challenges and believes in its ability to solve problems, much like Sun Wukong and Conan's thirst for knowledge and adventurous spirit.</p>
         </div>
       </div>
-      <div className="sub-block-split mt-[120px] mb-[110px]"></div>
+      <div className="sub-block-split"></div>
       <div className="sub-qa-block">
         <div className="qa-block-title">Principles of Training</div>
         <div className="qa-block-txt">The key is "learning from data," which means enabling AI to modify or adapt its behavior to make it more accurate. Through training, the univoice agent improves in recognizing human language (correct labeling) and responding appropriately in conversations (reaction).At the same time, this is also the focus of univoice's objectives on the computational network.</div>
@@ -134,60 +135,60 @@ function UvAiAgentPage() {
       </div>
       <div className="sub-qa-block">
         <div className="qa-block-title">Highlights of technological innovation</div>
-        <div className="bg-[#F2F2F2] rounded-[12px] px-[20px] sm:px-[72px] py-[36px] mt-[20px] grid grid-cols-1 xl:grid-cols-2 gap-[36px]">
-          <div className="md:flex md:flex-row">
-            <div className="w-[248px] h-[188px] bg-[#FAF0FF] border-[#A719F8] border-dashed border-[1px] rounded-[12px] mr-[10px] p-[10px]">
-              <div className="w-[228px] h-[168px] bg-[#FFF] rounded-[12px]">
-                <div className="w-full h-full" ref={refScatterChart}></div>
+        <div className={style.panel_chart}>
+          <div className={style.card}>
+            <div className={style.chart} style={{backgroundColor: '#FAF0FF',borderColor: '#A719F8'}}>
+              <div className={style.wrap}>
+                <div style={{width: '100%', height: '100%'}} ref={refScatterChart}></div>
               </div>
             </div>
             <div>
-              <p className="text-[16px] text-[#666666] mt-[10px] md:mt-[40px]">Dataset</p>
-              <p className="text-[18px] text-[#333333]">Scatter plot matrix</p>
+              <p className={style.label}>Dataset</p>
+              <p className={style.intro}>Scatter plot matrix</p>
             </div>
           </div>
-          <div className="md:flex md:flex-row">
-            <div className="w-[248px] h-[188px] bg-[#F0F2FF] border-[#BD5AFF] border-dashed border-[1px] rounded-[12px] mr-[10px] p-[10px]">
-              <div className="w-[228px] h-[168px] bg-[#FFF] rounded-[12px]">
-                <div className="w-full h-full" ref={refLineChart}></div>
+          <div className={style.card}>
+            <div className={style.chart} style={{backgroundColor: '#F0F2FF',borderColor: '#BD5AFF'}}>
+              <div className={style.wrap}>
+                <div style={{width: '100%', height: '100%'}} ref={refLineChart}></div>
               </div>
             </div>
             <div>
-              <p className="text-[16px] text-[#666666] mt-[10px] md:mt-[40px]">Training process</p>
-              <p className="text-[18px] text-[#333333]">The two lines correspond to the forward error and the backward gradient values.</p>
+              <p className={style.label}>Training process</p>
+              <p className={style.intro}>The two lines correspond to the forward error and the backward gradient values.</p>
             </div>
           </div>
         </div>
         <div className="qa-block-txt">
-          <p className="text-[#DDD] text-[24px]">1.Community-driven Intelligence: </p>
+          <p className="color-ddd txtsize-24">1.Community-driven Intelligence: </p>
           <p>Univoice is a Web3 project that harnesses AI to empower users, turning their voice into an integral part of the evolving communication landscape.</p>
         </div>
         <div className="qa-block-txt">
-          <p className="text-[#DDD] text-[24px]">2.Token-Backed Voice Experience: </p>
+          <p className="color-ddd txtsize-24">2.Token-Backed Voice Experience: </p>
           <p>Each contribution to Univoice through voices is rewarded with tokens, symbolizing ownership and rewards for participation in this decentralized network.</p>
         </div>
         <div className="qa-block-txt">
-          <p className="text-[#DDD] text-[24px]">3.In-Moment Rewards & Engagement: </p>
+          <p className="color-ddd txtsize-24">3.In-Moment Rewards & Engagement: </p>
           <p>Instant token incentives for valuable interactions or AI learning milestones foster a vibrant ecosystem where every voice counts.</p>
         </div>
         <div className="qa-block-txt">
-          <p className="text-[#DDD] text-[24px]">4.Equity for All, Growth for All: </p>
+          <p className="color-ddd txtsize-24">4.Equity for All, Growth for All: </p>
           <p>Univoice guarantees equitable rewards distribution, fostering an inclusive environment where users actively contribute to its growth.</p>
         </div>
         <div className="qa-block-txt">
-          <p className="text-[#DDD] text-[24px]">5.Voice-powered Ecosystem: </p>
+          <p className="color-ddd txtsize-24">5.Voice-powered Ecosystem: </p>
           <p>Users collaborate on and build projects around the platform, forming a Web3-driven community centered around voice technology.</p>
         </div>
         <div className="qa-block-txt">
-          <p className="text-[#DDD] text-[24px]">6.Transparency & Trust in the Digital Age: </p>
+          <p className="color-ddd txtsize-24">6.Transparency & Trust in the Digital Age: </p>
           <p>Using blockchain to manage token transactions, Univoice upholds transparency and trust among its users.</p>
         </div>
         <div className="qa-block-txt">
-          <p className="text-[#DDD] text-[24px]">7.Adaptive, AI-Powered Evolution: </p>
+          <p className="color-ddd txtsize-24">7.Adaptive, AI-Powered Evolution: </p>
           <p>Univoice constantly evolves, adapting to new demands through artificial intelligence, ensuring its relevance in an ever-changing world.</p>
         </div>
         <div className="qa-block-txt">
-          <p className="text-[#DDD] text-[24px]">8.Univoice: The Voice That Connects, Inspires & Revolutionizes</p>
+          <p className="color-ddd txtsize-24">8.Univoice: The Voice That Connects, Inspires & Revolutionizes</p>
           <p>In Univoice's narrative, the power of voice is amplified by Web3 principles, as a platform where every user's voice has a voice and drives change through collaborative token-driven efforts.</p>
         </div>
       </div>

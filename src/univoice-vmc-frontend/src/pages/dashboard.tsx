@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance } from '@/utils'
 import Paging from '@/components/paging';
+import style from './dashboard.module.scss'
+import ImgBgTopLight from '@/assets/imgs/bg_toplight.png'
+import ImgBgTopLight2 from '@/assets/imgs/bg_toplight_over.png'
 
 function DashboardPage() {
 
@@ -17,6 +20,7 @@ function DashboardPage() {
     pageNum: 0,
     totalPage: 0
   });
+  const [licenseData, setLicenseData] = useState<any>([]);
 
   const queryTransaction = (pagenum: number) => {
     let newData: any[] = [{
@@ -25,6 +29,7 @@ function DashboardPage() {
       block: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
       transactionType: 'Transfer',
       amount: '1024123450000',
+      from: 'ewqewqre...casd',
       to: 'ewqewqre...casd'
     },{
       id: 2,
@@ -32,6 +37,7 @@ function DashboardPage() {
       block: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
       transactionType: 'Transfer',
       amount: '1024123456700',
+      from: 'ewqewqre...casd',
       to: 'ewqewqre...casd'
     },{
       id: 3,
@@ -39,6 +45,7 @@ function DashboardPage() {
       block: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
       transactionType: 'Transfer',
       amount: '1024000000000',
+      from: 'ewqewqre...casd',
       to: 'ewqewqre...casd'
     },{
       id: 4,
@@ -46,6 +53,7 @@ function DashboardPage() {
       block: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
       transactionType: 'Transfer',
       amount: '1024123456789',
+      from: 'ewqewqre...casd',
       to: 'ewqewqre...casd'
     }];
     setTransactionData(newData);
@@ -58,6 +66,7 @@ function DashboardPage() {
   useEffect(() => {
     window.scrollTo(0, 0)
     loadSummary()
+    loadLicense()
     queryTransaction(1)
   }, []);
   
@@ -74,71 +83,122 @@ function DashboardPage() {
     // TODO
   }
 
+  const loadLicense = () => {
+    const data = [{
+      id: 1,
+      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
+      intro: 'Goodluck charm',
+      txt: 'hello world'
+    },{
+      id: 2,
+      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
+      intro: 'Goodluck charm Good luck charm Goodluck charm Goodluck charm',
+      txt: 'hello world hello world hello world hello world hello world'
+    },{
+      id: 3,
+      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
+      intro: 'Goodluck charm',
+      txt: 'hello world'
+    },{
+      id: 4,
+      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
+      intro: 'Goodluck charm',
+      txt: 'hello world'
+    },{
+      id: 5,
+      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
+      intro: 'Goodluck charm',
+      txt: 'hello world'
+    },]
+    setLicenseData(data)
+  }
+
   return (
-    <div className="uv-container-1 pb-[28px] pg-dashboard" style={{flexBasis: '100%'}}>
-      <div className="sub-qa-block pt-[148px] flex flex-col items-center justify-end">
-        <div className="txt-title text-[48px] text-center">Dashboard</div>
-        <div className="qa-block-txt text-[24px] text-center">The following is a presentation of some data regarding Univoice Token.</div>
+    <div className="uv-container-1 container-subpg pg-dashboard">
+      <img src={ImgBgTopLight} className={`img-fixed ${style.toplight}`} />
+      <img src={ImgBgTopLight2} className={`img-fixed ${style.toplight2}`} />
+      <div className={`sub-qa-block ${style.panel_0}`}>
+        <div className={style.pg_title}>Dashboard</div>
+        <div className={style.pg_intro}>The following is a presentation of some data regarding Univoice Token.</div>
       </div>
-      <div className="sub-qa-block dashboard-summary">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[30px]">
-          <div className="pannel-dashboard-summary">
-            <div className="label">Token Pool Amount</div>
-            <div className="data">
-              <div className="val">{fmtUvBalance(summaryData.tokenPoolAmount)}</div>
-              <div className="unit">Blocks</div>
+      <div className={`sub-qa-block ${style.summary}`}>
+          <div className={style.item}>
+            <div className={style.label}>Token Pool Amount</div>
+            <div className={style.data}>
+              <div className={style.val}>{fmtUvBalance(summaryData.tokenPoolAmount)}</div>
+              <div className={style.unit}>Blocks</div>
             </div>
           </div>
-          <div className="pannel-dashboard-summary">
-            <div className="label">Total Listener</div>
-            <div className="data">
-              <div className="val">{fmtInt(summaryData.totalListener)}</div>
+          <div className={style.item}>
+            <div className={style.label}>Total Listener</div>
+            <div className={style.data}>
+              <div className={style.val}>{fmtInt(summaryData.totalListener)}</div>
             </div>
           </div>
-          <div className="pannel-dashboard-summary">
-            <div className="label">Block Created Number</div>
-            <div className="data">
-              <div className="val">{fmtInt(summaryData.blockCreatedNumber)}</div>
-              <div className="unit">Blocks</div>
+          <div className={style.item}>
+            <div className={style.label}>Block Created Number</div>
+            <div className={style.data}>
+              <div className={style.val}>{fmtInt(summaryData.blockCreatedNumber)}</div>
+              <div className={style.unit}>Blocks</div>
             </div>
           </div>
-          <div className="pannel-dashboard-summary">
-            <div className="label">Total Transactions</div>
-            <div className="data">
-              <div className="val">{fmtInt(summaryData.totalTransactions)}</div>
-              <div className="unit">TX</div>
+          <div className={style.item}>
+            <div className={style.label}>Total Transactions</div>
+            <div className={style.data}>
+              <div className={style.val}>{fmtInt(summaryData.totalTransactions)}</div>
+              <div className={style.unit}>TX</div>
             </div>
           </div>
-          <div className="pannel-dashboard-summary">
-            <div className="label">Block Produce Speed</div>
-            <div className="data">
-              <div className="val">{fmtInt(summaryData.blockProduceSpeed)}</div>
+          <div className={style.item}>
+            <div className={style.label}>Block Produce Speed</div>
+            <div className={style.data}>
+              <div className={style.val}>{fmtInt(summaryData.blockProduceSpeed)}</div>
             </div>
           </div>
-          <div className="pannel-dashboard-summary">
-            <div className="label">Tokens Per-Blocks</div>
-            <div className="data">
-              <div className="val">{fmtUvBalance(summaryData.tokensPerBlocks)}</div>
+          <div className={style.item}>
+            <div className={style.label}>Tokens Per-Blocks</div>
+            <div className={style.data}>
+              <div className={style.val}>{fmtUvBalance(summaryData.tokensPerBlocks)}</div>
             </div>
           </div>
+      </div>
+      
+      <div className="sub-qa-block">
+        <div className={style.block_title}>Gallery of License</div>
+        <div className={style.nfts}>
+        {licenseData.map((el: { id: string; imgurl: string; intro: string; txt: string}) => (
+          <div key={el.id} className={style.nft}>
+            <img className={`img-fixed ${style.img}`} src={el.imgurl} />
+            <div className={style.info}>
+              <div className={style.iconimg}></div>
+              <div className={style.infoctx}>
+                <div className={style.intro}>{el.intro}</div>
+                <div className={style.txt}>{el.txt}</div>
+              </div>
+            </div>
+          </div>
+        ))}
         </div>
       </div>
-      <div className="sub-qa-block dashboard-transactions">
-        <div className="qa-block-title mb-[30px]">Transactions</div>
+
+      <div className="sub-qa-block transactions">
+        <div className={style.block_title}>Transactions</div>
         <div className="tbl-paged">
           <div className="tbl">
-            <div className="tbl-r tbl-r-title">
+            <div className={`tbl-r tbl-r-title ${style.transactions_row}`}>
               <div className="tbl-cell-title">Block ID</div>
               <div className="tbl-cell-title">Type</div>
               <div className="tbl-cell-title">Amount</div>
+              <div className="tbl-cell-title">From</div>
               <div className="tbl-cell-title">To</div>
               <div className="tbl-cell-title">Timestamp</div>
             </div>
-          {transactionData.map((el: { id: string; timestamp: string; block: string; transactionType: string; amount: string | number; to: string; }) => (
-            <div key={el.id} className="tbl-r">
+          {transactionData.map((el: { id: string; timestamp: string; block: string; transactionType: string; amount: string | number; from: string; to: string; }) => (
+            <div key={el.id} className={`tbl-r ${style.transactions_row}`}>
               <div className="tbl-cell">{el.block}</div>
-              <div className="tbl-cell">{el.transactionType}</div>
-              <div className="tbl-cell">{fmtUvBalance(el.amount)}<span className="token-unit">UV</span></div>
+              <div className="tbl-cell"><div className={style.trans_type}>{el.transactionType}</div></div>
+              <div className="tbl-cell">{fmtUvBalance(el.amount)}<span className="token-unit">UVC</span></div>
+              <div className="tbl-cell">{el.from}</div>
               <div className="tbl-cell">{el.to}</div>
               <div className="tbl-cell">{el.timestamp}</div>
             </div>

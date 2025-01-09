@@ -6,12 +6,12 @@ function UvSpeakingPage() {
   }, []);
 
   return (
-    <div className="uv-container-1 pb-[28px]" style={{flexBasis: '100%'}}>
-      <div className="sub-qa-block pt-[148px]">
-        <div className="qa-block-title text-[48px]">What’s the speaker？</div>
-        <div className="qa-block-txt text-[24px]">the essence of Univoice, where every individual can freely express themselves and contribute to the creation of a harmonious, voice-driven world.</div>
+    <div className="uv-container-1 container-subpg">
+      <div className="sub-qa-block">
+        <div className="qa-block-title bigtxt">What’s the speaker？</div>
+        <div className="qa-block-txt bigtxt">the essence of Univoice, where every individual can freely express themselves and contribute to the creation of a harmonious, voice-driven world.</div>
       </div>
-      <div className="sub-block-split mt-[120px] mb-[110px]"></div>
+      <div className="sub-block-split"></div>
       <div className="sub-qa-block">
         <div className="qa-block-title">Who is the speaker?</div>
         <div className="qa-block-txt">We are human.</div>

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance } from '@/utils'
 import Paging from '@/components/paging';
+import style from './myunivoice.module.scss'
+import ImgBgGetMoreNft from '@/assets/imgs/bg_getmorenft.png'
 
 function MyUnivoicePage() {
 
@@ -14,6 +16,7 @@ function MyUnivoicePage() {
     totalPage: 0
   });
   const [licenseData, setLicenseData] = useState<any>([]);
+  const [claimable, setClaimable] = useState(true)
 
   const queryTransaction = (pagenum: number) => {
     let newData: any[] = [{
@@ -71,69 +74,124 @@ function MyUnivoicePage() {
   const loadLicense = () => {
     const data = [{
       id: 1,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png'
+      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
+      idx: '01',
+      intro: 'Goodluck charm Goodluck charm Goodluck charm Goodluck charm Goodluck charm Goodluck charm',
+      owners: 21000,
+      quantity: 10,
+      myhashs: '#2001,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010'
     },{
       id: 2,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png'
+      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
+      idx: '02',
+      intro: 'Goodluck charm2',
+      owners: 21000,
+      quantity: 1,
+      myhashs: '#2001'
     },{
       id: 3,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png'
+      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
+      idx: '03',
+      intro: 'Goodluck charm3',
+      owners: 21000,
+      quantity: 8,
+      myhashs: '#2001,#2002,#2003,#2004,#2005,#2006,#2007,#2008'
     },]
     setLicenseData(data)
   }
 
   const clickClaim = () => {
+    setClaimable(false)
     // TODO
+  }
+
+  const clickCopyMyNftHashs = (str: string) => {
+    navigator.clipboard.writeText(str)
   }
   
   return (
-    <div className="uv-container-1 pb-[28px] pg-dashboard" style={{flexBasis: '100%'}}>
-      <div className="sub-qa-block pt-[148px] flex flex-col items-center justify-end">
-        <div className="txt-title text-[48px] text-center">My Univoice</div>
-        <div className="qa-block-txt text-[24px] text-center">Look at my data</div>
+    <div className="uv-container-1 container-subpg pg-dashboard">
+      <div className={`sub-qa-block ${style.panel_0}`}>
+        <div className={style.pg_title}>My Univoice</div>
+        <div className={style.pg_intro}>Look at my data</div>
       </div>
       <div className="sub-qa-block">
-        <div className="qa-block-title mb-[30px]">My Performance</div>
-        <div className="pannel-myunivoice-summary grid grid-cols-1 lg:grid-cols-2 gap-0">
-          <div className="rewards-panel">
-            <div className="label">Token Rewards</div>
-            <div className="data">
-              <div className="val">{fmtUvBalance(summaryData.rewards)}</div>
+        <div className={style.block_title}>My Performance</div>
+        <div className={style.summary}>
+          <div className={style.rewards_panel}>
+            <div className={style.label}>Token Rewards</div>
+            <div className={style.data}>
+              <div className={style.val}>{fmtUvBalance(summaryData.rewards)}</div>
+              <div className={style.unit}>UVC</div>
             </div>
           </div>
-          <div className="claimable-panel">
+          <div className={style.claimable_panel}>
             <div>
-              <div className="label">Rewards Claimable</div>
-              <div className="data">
-                <div className="val">{fmtUvBalance(summaryData.claimable)}</div>
+              <div className={style.label}>Rewards Claimable</div>
+              <div className={style.data}>
+                <div className={style.val}>{fmtUvBalance(summaryData.claimable)}</div>
+                <div className={style.unit}>UVC</div>
               </div>
             </div>
-            <div className="btn-link-1 ml-[20px]" onClick={clickClaim}>Claim</div>
+            {
+              claimable ?
+              <div className={`btn-link-1 ${style.btn_claim}`} onClick={clickClaim}>Claim</div>
+              :
+              <div className={style.btn_claim_disable}>Claim</div>
+            }
+            
           </div>
         </div>
       </div>
       
-      <div className="sub-qa-block myunivoice-license">
-        <div className="qa-block-title mb-[30px]">License</div>
+      <div className="sub-qa-block">
+        <div className={style.block_title}>License</div>
         {
         licenseData.length === 0 ? 
-        <div>no data</div>
+        <div className="nodata">
+          <div className="nodata-img"></div>
+          <div className="nodata-txt">No data</div>
+        </div>
         :
-        <div className="license-block grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[80px]">
-        {licenseData.map((el: { id: string; imgurl: string; }) => (
-          <div key={el.id} className="license">
-            <img className="license-img img-fixed" src={el.imgurl} />
+        <div className={style.licenses}>
+          <div className={style.tbl_r}>
+            <div className={style.title}>#</div>
+            <div className={style.title}>Collection</div>
+            <div className={style.title}>Owners</div>
+            <div className={style.title}>The number I hold</div>
+            <div className={style.title}>Quantity</div>
+          </div>
+        {licenseData.map((el: { id: string; idx: string; imgurl: string; intro: string; owners: number; quantity: number; myhashs: string}) => (
+          <div key={el.id} className={style.tbl_r}>
+            <div className={style.cell}>{el.idx}</div>
+            <div className={style.cell}>
+              <div className={style.img_wrap}><img className={`${style.img} img-fixed`} src={el.imgurl} /></div>
+              <div className={style.intro}>{el.intro}</div>
+            </div>
+            <div className={style.cell}>{fmtInt(el.owners)}</div>
+            <div className={style.cell}>
+              <div className={style.myhashs}>{el.myhashs}</div>
+              <div className={style.copy} onClick={() => {clickCopyMyNftHashs(el.myhashs)}}></div>
+            </div>
+            <div className={`${style.cell} ${style.quantity}`}>+{fmtInt(el.quantity)}</div>
           </div>
         ))}
         </div>
         }
       </div>
       
-      <div className="sub-qa-block myunivoice-transactions">
-        <div className="qa-block-title mb-[30px]">Transactions</div>
+      <div className="sub-qa-block transactions">
+        <div className={style.block_title}>Transactions</div>
+        {
+        transactionData.length === 0 ? 
+        <div className="nodata">
+          <div className="nodata-img"></div>
+          <div className="nodata-txt">No data</div>
+        </div>
+        :
         <div className="tbl-paged">
           <div className="tbl">
-            <div className="tbl-r tbl-r-title">
+            <div className={`tbl-r tbl-r-title ${style.transactions_row}`}>
               <div className="tbl-cell-title">Minner</div>
               <div className="tbl-cell-title">Timestamp</div>
               <div className="tbl-cell-title">Block Index</div>
@@ -141,22 +199,26 @@ function MyUnivoicePage() {
               <div className="tbl-cell-title">Claim State</div>
             </div>
           {transactionData.map((el: { id: string; minner: string; timestamp: string; block: string; amount: string | number; claimStat: string; }) => (
-            <div key={el.id} className="tbl-r">
+            <div key={el.id} className={`tbl-r ${style.transactions_row}`}>
               <div className="tbl-cell">{el.minner}</div>
               <div className="tbl-cell">{el.timestamp}</div>
               <div className="tbl-cell">{el.block}</div>
-              <div className="tbl-cell">{fmtUvBalance(el.amount)}<span className="token-unit">UV</span></div>
+              <div className="tbl-cell">{fmtUvBalance(el.amount)}<span className="token-unit">UVC</span></div>
               <div className="tbl-cell">{el.claimStat}</div>
             </div>
           ))}
           </div>
           <Paging pageNum={transactionPage.pageNum} totalPage={transactionPage.totalPage} queryHandler={queryTransaction} />
         </div>
+        }
       </div>
 
-      <div className="relative w-full rounded-[10px] bg-[#222] h-[440px] p-[50px]">
-        <div className="mt-[45px] text-[60px]">Get more License</div>
-        <div className="btn-link-1 absolute bottom-[50px] left-[50px] w-[320px] h-[60px]">Coming Soon</div>
+      <div className="sub-qa-block">
+        <div className={style.getmore_nft}>
+          <img src={ImgBgGetMoreNft} className={style.img}/>
+          <div className={style.title}>Get more License</div>
+          <div className={`${style.btn} btn-link-1`}>Coming Soon</div>
+        </div>
       </div>
     </div>
   )

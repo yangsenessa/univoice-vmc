@@ -6,12 +6,12 @@ function UvCoCreatingPage() {
   }, []);
 
   return (
-    <div className="uv-container-1 pb-[28px]" style={{flexBasis: '100%'}}>
-      <div className="sub-qa-block pt-[148px]">
-        <div className="qa-block-title text-[48px]">Co-Creating</div>
-        <div className="qa-block-txt text-[24px]"></div>
+    <div className="uv-container-1 container-subpg">
+      <div className="sub-qa-block">
+        <div className="qa-block-title bigtxt">Co-Creating</div>
+        <div className="qa-block-txt bigtxt"></div>
       </div>
-      {/* <div className="sub-block-split mt-[120px] mb-[110px]"></div>
+      {/* <div className="sub-block-split"></div>
       <div className="sub-qa-block">
         <div className="qa-block-title">What can we creat?</div>
         <div className="qa-block-txt">We are human.</div>

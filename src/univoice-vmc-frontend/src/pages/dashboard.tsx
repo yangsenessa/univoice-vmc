@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { fmtInt, fmtUvBalance } from '@/utils'
+import { fmtInt, fmtUvBalance } from '@/utils';
+import {poll_balance} from '@/utils/call_vmc_backend';
 import Paging from '@/components/paging';
 
 function DashboardPage() {
@@ -70,9 +71,23 @@ function DashboardPage() {
       blockProduceSpeed: 123.456,
       tokensPerBlocks: 12345600000000,
     }
+    loadTokenPoolAmount();
     setSummaryData(data)
     // TODO
   }
+
+  const loadTokenPoolAmount = async () => {
+    poll_balance().then(balance_result=>{
+      console.log("get poll balance is :" + balance_result);
+      summaryData.tokenPoolAmount = Number(balance_result) ;
+      setSummaryData(summaryData);
+
+    }).catch((e) => {
+      console.log('reConnectPlug exception!', e)
+    })
+
+  }
+      
 
   return (
     <div className="uv-container-1 pb-[28px] pg-dashboard" style={{flexBasis: '100%'}}>

@@ -156,6 +156,7 @@ thread_local! {
     ).expect("Init stablemem error"));
 }
 
+
 #[ic_cdk::query]
 fn greet(name: String) -> String {
     format!("Hello, {}!", name)

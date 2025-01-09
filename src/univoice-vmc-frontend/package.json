@@ -14,7 +14,9 @@
     "@dfinity/agent": "^2.2.0",
     "@dfinity/auth-client": "^2.2.0",
     "@dfinity/candid": "^2.2.0",
+    "@dfinity/ledger-icrc": "^2.7.0",
     "@dfinity/principal": "^2.2.0",
+    "@dfinity/utils": "^2.8.0",
     "@ethersproject/bytes": "^5.7.0",
     "@ethersproject/constants": "^5.7.0",
     "@funded-labs/plug-mobile-sdk": "^0.1.3",
@@ -31,11 +33,11 @@
     "react-router-dom": "^7.1.1",
     "react-scripts": "4.0.3",
     "simple-zustand-devtools": "^1.1.0",
+    "split-on-first": "^1.0.0",
     "viem": "^2.21.57",
     "vite-tsconfig-paths": "^5.1.3",
     "wagmi": "^2.14.5",
-    "zustand": "^5.0.2",
-    "split-on-first": "^1.0.0"
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",

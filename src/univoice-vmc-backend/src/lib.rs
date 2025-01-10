@@ -50,6 +50,7 @@ struct Event0301008 {
 pub struct StateHeap {
     unv_nft_owners: Vec<Account>,
     unv_user_infos: Vec<UserIdentityInfo>,
+    listener_count:usize,
 }
 #[derive(CandidType, Default, Deserialize, Clone)]
 struct StableState {
@@ -175,21 +176,28 @@ async fn call_unvoice_for_ext_nft(nft_owners: NftUnivoicePricipal) -> Result<usi
     })
 }
 
+
+
 #[ic_cdk::update]
 async fn query_poll_balance() -> Result<NumTokens, String> {
     ic_cdk::println!("Query balance of mining pool {}", ic_cdk::id(),);
 
+    let pool_account:Account=Account::from_str("6nimk-xpves-34bk3-zf7dp-nykqv-h3ady-iu3ze-xplot-vm4uy-ptbel-3qe")
+                                      .expect("pool principal unwarp err");
+
     let balance = ic_cdk::call::<(Account,), (Nat,)>(
-        Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai")
+        //todo: dev:mxzaz-hqaaa-aaaar-qaada-cai
+        //todo: prod:jfqe5-daaaa-aaaai-aqwvq-cai
+        Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
             .expect("Could not decode the principal."),
         "icrc1_balance_of",
-        (Account::from(ic_cdk::id()),),
+        (pool_account,),
     )
     .await
     .map_err(|e| format!("fail to call ledger:{:?}", e))?
     .0
     .clone();
-
+    ic_cdk::println!("Mining poll balance {}", balance);
     Ok(balance)
 }
 
@@ -310,6 +318,10 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
     }
     let sharding_size = miner_acounts.len();
     let block_tokens = ledger_item.clone().block_tokens / sharding_size;
+
+    STATEHEAP.with(|s|{
+        s.borrow_mut().listener_count += sharding_size;
+    });
     ic_cdk::println!("Per-nft sharing of {} tokens", block_tokens);
     let mut blockindex: Nat = Nat::from(0 as u128);
     for miner in miner_acounts {
@@ -368,6 +380,12 @@ fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
             res_vec.push(ledger_item.clone());
         }
         return Some(res_vec);
+    })
+}
+#[ic_cdk::query]
+fn get_total_listener() -> Option<usize>{
+    STATEHEAP.with(|s|{
+       return Some(s.borrow_mut().listener_count );
     })
 }
 

@@ -5,11 +5,13 @@ import Paging from '@/components/paging';
 import style from './dashboard.module.scss'
 import ImgBgTopLight from '@/assets/imgs/bg_toplight.png'
 import ImgBgTopLight2 from '@/assets/imgs/bg_toplight_over.png'
+import type {Result} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
+
 
 function DashboardPage() {
 
   const [summaryData, setSummaryData] = useState({
-    tokenPoolAmount: 0,
+    tokenPoolAmount:0,
     totalListener: 0,
     blockCreatedNumber: 0,
     totalTransactions: 0,
@@ -80,8 +82,9 @@ function DashboardPage() {
       blockProduceSpeed: 123.456,
       tokensPerBlocks: 12345600000000,
     }
-    loadTokenPoolAmount();
     setSummaryData(data)
+
+    loadTokenPoolAmount();
     // TODO
   }
 
@@ -116,14 +119,18 @@ function DashboardPage() {
   }
 
   const loadTokenPoolAmount = async () => {
-    poll_balance().then(balance_result=>{
-      console.log("get poll balance is :" + balance_result);
-      summaryData.tokenPoolAmount = Number(balance_result) ;
+   
+    let result = await poll_balance(); 
+    console.log("Call pool balance = "+ String(result));
+    if("Ok" in result) {
+      let balance = (result as {'Ok': BigInt}).Ok;
+      summaryData.tokenPoolAmount = Number(balance);
       setSummaryData(summaryData);
 
-    }).catch((e) => {
-      console.log('reConnectPlug exception!', e)
-    })
+    }
+    if("Err" in result) {
+      console.log("Balance result Err");
+    }
 
   }
       
@@ -141,7 +148,7 @@ function DashboardPage() {
             <div className={style.label}>Token Pool Amount</div>
             <div className={style.data}>
               <div className={style.val}>{fmtUvBalance(summaryData.tokenPoolAmount)}</div>
-              <div className={style.unit}>Blocks</div>
+              <div className={style.unit}>$UVC</div>
             </div>
           </div>
           <div className={style.item}>

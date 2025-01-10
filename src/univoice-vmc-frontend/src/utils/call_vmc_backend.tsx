@@ -12,11 +12,7 @@ const IDENTITY_PROVIDER = development
 
 
 export const poll_balance = async () =>{
-    let result :Result;
-    result = await univoice_vmc_backend.query_poll_balance();
-
-    console.log("Poll balance is:"+ result.Ok);
-    return result;
+     return await univoice_vmc_backend.query_poll_balance();
 }
 
 /**

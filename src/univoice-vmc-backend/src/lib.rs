@@ -22,7 +22,7 @@ use ic_cdk::api::management_canister::http_request::{
 };
 use ledgertype::{
     ApproveResult, MinerTxState, MinerWaitClaimBalance, TransferArgs, TransferTxState, TxIndex,
-    UnvMinnerLedgerRecord, UnvMinnerLedgerState, WorkLoadLedgerItem,
+    UnvMinnerLedgerRecord, UnvMinnerLedgerState, WorkLoadLedgerItem,MainSiteSummary,
 };
 use serde::Serialize;
 use serde_json::{self, Value};
@@ -50,7 +50,8 @@ struct Event0301008 {
 pub struct StateHeap {
     unv_nft_owners: Vec<Account>,
     unv_user_infos: Vec<UserIdentityInfo>,
-    listener_count:usize,
+    main_site_summary:MainSiteSummary
+
 }
 #[derive(CandidType, Default, Deserialize, Clone)]
 struct StableState {
@@ -255,12 +256,12 @@ async fn setup_subscribe(publisher_id: Principal, topic: String) {
     let _call_result: Result<(), _> = ic_cdk::call(publisher_id, "subscribe", (subscriber,)).await;
 }
 
-#[ic_cdk::query]
+#[ic_cdk::update]
 async fn get_miner_license(user_principal: String, pre: Nat, take: Nat) -> Vec<Nat> {
     let account: Account =
         Account::from_str(&user_principal).expect("Could not decode the principal");
     ic_cdk::call::<(Account, Nat, Nat), (Vec<Nat>,)>(
-        Principal::from_str("bkyz2-fmaaa-aaaaa-qaaaq-cai")
+        Principal::from_str("br5f7-7uaaa-aaaaa-qaaca-cai")
             .expect("Could not decode the principal."),
         "icrc7_tokens_of",
         (account, pre, take),
@@ -319,9 +320,7 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
     let sharding_size = miner_acounts.len();
     let block_tokens = ledger_item.clone().block_tokens / sharding_size;
 
-    STATEHEAP.with(|s|{
-        s.borrow_mut().listener_count += sharding_size;
-    });
+    
     ic_cdk::println!("Per-nft sharing of {} tokens", block_tokens);
     let mut blockindex: Nat = Nat::from(0 as u128);
     for miner in miner_acounts {
@@ -333,6 +332,15 @@ async fn publish_0301008(event: Event0301008) -> Result<TxIndex, String> {
             blockindex
         );
     }
+    STATEHEAP.with(|s|{
+        ic_cdk::println!("Update summary info");
+        s.borrow_mut().main_site_summary.listener_count = sharding_size.clone();
+        s.borrow_mut().main_site_summary.aigcblock_created_number = blockindex.clone();
+        s.borrow_mut().main_site_summary.token_per_block = block_tokens.clone();
+        ic_cdk::println!("Update summary info {}",s.borrow().main_site_summary.listener_count);
+        ic_cdk::println!("Update summary info {}",s.borrow().main_site_summary.aigcblock_created_number);
+        ic_cdk::println!("Update summary info {}",s.borrow().main_site_summary.token_per_block);
+    });
     Ok(TxIndex::from(blockindex))
 }
 
@@ -385,8 +393,60 @@ fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
 #[ic_cdk::query]
 fn get_total_listener() -> Option<usize>{
     STATEHEAP.with(|s|{
-       return Some(s.borrow_mut().listener_count );
+        let listener_count:usize =s.borrow().main_site_summary.listener_count;
+        ic_cdk::println!("get_total_listener:{}",listener_count);
+
+        return Some(listener_count );
     })
+}
+
+#[ic_cdk::update]
+async fn get_main_site_summary() ->MainSiteSummary{
+    let mut summary:MainSiteSummary = MainSiteSummary{
+        listener_count:0,
+        aigcblock_created_number:Nat::from(0 as u64),
+        token_per_block:Nat::from(0 as u64),
+        token_pool_balance:Nat::from(0 as u64)
+
+    };
+    STATEHEAP.with(
+        |s|{
+            ic_cdk::println!("get_main_site_summary {}",s.borrow().main_site_summary.listener_count);
+            ic_cdk::println!("get_main_site_summary {}",s.borrow().main_site_summary.aigcblock_created_number);
+            ic_cdk::println!("get_main_site_summary {}",s.borrow().main_site_summary.token_per_block);
+
+            ic_cdk::println!("Query balance of mining pool {}", ic_cdk::id(),);
+
+            
+            
+            summary = MainSiteSummary{
+                listener_count:s.borrow().main_site_summary.clone().listener_count,
+                aigcblock_created_number:s.borrow().main_site_summary.clone().aigcblock_created_number,
+                token_per_block:s.borrow().main_site_summary.clone().token_per_block,
+                token_pool_balance:NumTokens::from(0 as u128)
+
+            };
+        }
+    );
+
+    let pool_account:Account=Account::from_str("6nimk-xpves-34bk3-zf7dp-nykqv-h3ady-iu3ze-xplot-vm4uy-ptbel-3qe")
+                                              .expect("pool principal unwarp err");
+        
+    let balance = ic_cdk::call::<(Account,), (Nat,)>(
+    //todo: dev:mxzaz-hqaaa-aaaar-qaada-cai
+    //todo: prod:jfqe5-daaaa-aaaai-aqwvq-cai
+    Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
+                   .expect("Could not decode the principal."),
+                   "icrc1_balance_of",
+                   (pool_account,),
+            )
+            .await
+            .map_err(|e| format!("fail to call ledger:{:?}", e))
+            .unwrap()
+            .clone();
+    summary.token_pool_balance = balance.0;
+    return summary;
+    
 }
 
 #[ic_cdk::query]

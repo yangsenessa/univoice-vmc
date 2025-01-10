@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance } from '@/utils';
-import {poll_balance} from '@/utils/call_vmc_backend';
+import {call_tokens_of,reConnectPlug} from '@/utils/icplug';
+import {poll_balance,get_total_listener,get_main_site_summary,get_miner_license} from '@/utils/call_vmc_backend';
 import Paging from '@/components/paging';
 import style from './dashboard.module.scss'
 import ImgBgTopLight from '@/assets/imgs/bg_toplight.png'
 import ImgBgTopLight2 from '@/assets/imgs/bg_toplight_over.png'
-import type {Result} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
+import { useAcountStore } from '@/stores/user';
 
 
 function DashboardPage() {
@@ -24,6 +25,9 @@ function DashboardPage() {
     totalPage: 0
   });
   const [licenseData, setLicenseData] = useState<any>([]);
+
+  const { setUserByPlugWallet, getPrincipal, getWalletType } = useAcountStore();
+
 
   const queryTransaction = (pagenum: number) => {
     let newData: any[] = [{
@@ -73,64 +77,93 @@ function DashboardPage() {
     queryTransaction(1)
   }, []);
   
-  const loadSummary = () => {
-    const data = {
-      tokenPoolAmount: 211234567800000000,
-      totalListener: 123456789,
+  const loadSummary = async() => {
+    let data = {
+      tokenPoolAmount:2100000000000,
+      totalListener: 2100,
       blockCreatedNumber: 123456,
       totalTransactions: 123456789123456,
       blockProduceSpeed: 123.456,
       tokensPerBlocks: 12345600000000,
     }
-    setSummaryData(data)
+    setSummaryData(data);
+    get_main_site_summary().then(
+      mainsite_summary=>{
+        data = summaryData;
+        data.blockCreatedNumber = Number(mainsite_summary.aigcblock_created_number);
+        data.tokensPerBlocks = Number(mainsite_summary.token_per_block) ;
+        data.totalListener = Number(mainsite_summary.listener_count) ;
+        data.tokenPoolAmount = Number(mainsite_summary.token_pool_balance);
+        data.blockProduceSpeed = 900;
+        setSummaryData(data);
 
-    loadTokenPoolAmount();
+      }
+
+    );
+    
     // TODO
   }
 
+   
+
   const loadLicense = () => {
-    const data = [{
-      id: 1,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
-      intro: 'Goodluck charm',
-      txt: 'hello world'
-    },{
-      id: 2,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
-      intro: 'Goodluck charm Good luck charm Goodluck charm Goodluck charm',
-      txt: 'hello world hello world hello world hello world hello world'
-    },{
-      id: 3,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
-      intro: 'Goodluck charm',
-      txt: 'hello world'
-    },{
-      id: 4,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
-      intro: 'Goodluck charm',
-      txt: 'hello world'
-    },{
-      id: 5,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
-      intro: 'Goodluck charm',
-      txt: 'hello world'
-    },]
-    setLicenseData(data)
+    reConnectPlug()
+          .then((principal_id) => {
+            console.log('reConnectPlug done, pid:', principal_id)
+            if (principal_id) {
+              get_miner_license(principal_id,BigInt(0),BigInt(50)).then(tokenIds=>{
+                let index = 0;
+                for (let token_id in  tokenIds) {
+                    console.log("hold license of token_id", token_id);
+                    let data =[];
+                    let license_item = {
+                      id: token_id,
+                      imgurl: 'https://bafybeibhnv326rmac22wfcxsmtrbdbzjzn5mviykq3rbt4ltqkqqfgobga.ipfs.w3s.link/thum.jpg',
+                      intro: 'Univoice listener',
+                      txt: 'A liciense for identify as Univoice-Listener.'
+                    }
+                    data[index]=license_item;
+                    setLicenseData(data)
+
+                }
+              })      
+            }
+          }).catch((e) => {
+            console.log('reConnectPlug exception!', e)
+          })
+
   }
 
-  const loadTokenPoolAmount = async () => {
-   
-    let result = await poll_balance(); 
-    console.log("Call pool balance = "+ String(result));
-    if("Ok" in result) {
-      let balance = (result as {'Ok': BigInt}).Ok;
-      summaryData.tokenPoolAmount = Number(balance);
-      setSummaryData(summaryData);
+  const loadTokenPoolAmount =  (data) => {
+    let balance:BigInt =BigInt(0) ;
+     poll_balance().then(result=>{
+         console.log("Call pool balance = "+ String(result));
+         if("Ok" in result) {
+            balance = (result as {'Ok': BigInt}).Ok;
+            console.log("Call pool balance Ok ",balance);
+            let newData = data;
+            data.tokenPoolAmount= Number(balance);
+            setSummaryData(data);
+          }
+          if("Err" in result) {
+            console.log("Balance result Err");
+          }
+     }) 
+    
+  }
 
-    }
-    if("Err" in result) {
-      console.log("Balance result Err");
-    }
+  const load_total_listener =  (data):Number=>{
+    let count:number = 0;
+    get_total_listener().then(result =>{
+      console.log("get_total_listener pre =",result);
+      if(result) {
+          console.log("get_total_listener=",result)
+          count =  Number(result);
+          
+          data.totalListener = count;
+      }
+    })
+    return count;
 
   }
       

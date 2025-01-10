@@ -1,5 +1,5 @@
 import { univoice_vmc_backend } from 'declarations/univoice-vmc-backend';
-import type {Result,MinerWaitClaimBalance,UnvMinnerLedgerRecord} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
+import type {Result,MinerWaitClaimBalance,UnvMinnerLedgerRecord,MainSiteSummary} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
 import { isLocalNet } from '@/utils/env';
 
 
@@ -12,7 +12,12 @@ const IDENTITY_PROVIDER = development
 
 
 export const poll_balance = async () =>{
-     return await univoice_vmc_backend.query_poll_balance();
+  return await univoice_vmc_backend.query_poll_balance();
+}
+
+export const get_total_listener = async() =>{
+  console.log("Call backend get_total_listener");
+  return await univoice_vmc_backend.get_total_listener();
 }
 
 /**
@@ -34,7 +39,16 @@ export const get_miner_jnl = async(principalid:string):Promise<[] | [Array<UnvMi
   } else {
     return await univoice_vmc_backend.get_all_miner_jnl();
   }
+}
 
+export const get_main_site_summary = async():Promise<MainSiteSummary> =>{
+
+  return  univoice_vmc_backend.get_main_site_summary();
+
+}
+
+export const get_miner_license = async(user_principal: string, pre?: bigint, take?: bigint):Promise<Array<bigint>> =>  {
+   return univoice_vmc_backend.get_miner_license(user_principal,pre,take);
 }
 
 

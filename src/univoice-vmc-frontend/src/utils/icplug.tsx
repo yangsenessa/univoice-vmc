@@ -1,6 +1,7 @@
 import { PlugMobileProvider } from '@funded-labs/plug-mobile-sdk'
 import { isLocalNet } from '@/utils/env';
 import { tokenLedegerIdlFactory } from '@/idl/icrc1.did.js';
+import {icrc7IdlFactory} from '@/idl/icrc7.did.js';
 
 import { Principal } from '@dfinity/principal';
 
@@ -47,9 +48,12 @@ export const plugReady = (): boolean => {
 
 // Canister Ids
 const tokenCanisterId  = 'jfqe5-daaaa-aaaai-aqwvq-cai';
+// Nft canister ids
+const nftCanisterId = "3blo3-qqaaa-aaaam-ad3ea-cai";
 // Whitelist
 const whitelist = [
   tokenCanisterId,
+  nftCanisterId,
 ];
 
 // Host
@@ -122,7 +126,7 @@ export const callBalanceInstance= async (principal_id:string): Promise<String> =
 
    // rebuild actor and test by getting Sonic info
   const tokenActor = await plug.createActor({
-        anisterId: tokenCanisterId,
+        canisterId: tokenCanisterId,
         interfaceFactory: tokenLedegerIdlFactory,
   });
 // use our actors getSwapInfo method
@@ -134,6 +138,34 @@ export const callBalanceInstance= async (principal_id:string): Promise<String> =
   
   return tokensStr;
 } 
+
+export const call_tokens_of= async (principal_id:string) : Promise<Array<bigint>> =>{
+  if (!plugReady()) return null;
+  const plug = (window as any).ic.plug;
+  if(!plug) {
+     return null;
+  }
+  const principal = Principal.fromText(principal_id) ;
+  console.log('ICRC7 ledger call principal =' + principal);    
+
+  const account =  {'owner' : principal,'subaccount' : [] };
+  // requestConnect callback function
+  console.log('ICRC7 ledger call onConnectionUpdate');    
+
+   // rebuild actor and test by getting Sonic info
+  const tokenActor = await plug.createActor({
+        canisterId: nftCanisterId,
+        interfaceFactory: icrc7IdlFactory,
+  });
+// use our actors getSwapInfo method
+  console.log('ICRC7 ledger call agent');    
+
+  const tokenIds = await tokenActor.icrc7_tokens_of(account);
+  console.log('ICRC7 ledger call: ', tokenIds);    
+ 
+  return tokenIds;
+
+}
 
 // const getPrincipal = async (): Promise<string> => {
 //   if (!plugReady()) return '';

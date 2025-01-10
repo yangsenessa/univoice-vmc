@@ -111,6 +111,13 @@ pub struct MinerWaitClaimBalance {
     pub pricipalid_txt:String,
     pub tokens:NumTokens
 }
+#[derive(CandidType, Deserialize,Default, Serialize,Clone)]
+pub struct MainSiteSummary {
+    pub listener_count:usize,
+    pub aigcblock_created_number:BlockIndex,
+    pub token_per_block:NumTokens,
+    pub token_pool_balance:NumTokens
+}
 
 
 #[derive(CandidType, Deserialize, Serialize)]

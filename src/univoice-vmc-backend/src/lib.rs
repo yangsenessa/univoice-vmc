@@ -6,17 +6,15 @@ use candid::{candid_method, export_service, CandidType, Deserialize, Encode, Nat
 use ic_cdk::api::call::call;
 use ic_cdk::storage;
 use ic_cdk_macros::{query, update};
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{DefaultMemoryImpl, GrowFailed, StableVec, Storable};
 use std::borrow::{Borrow, BorrowMut};
 use std::future::IntoFuture;
 use std::mem;
-use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
-use ic_stable_structures::{
-     DefaultMemoryImpl, StableVec, Storable,GrowFailed
-};
 
 use std::ops::{DerefMut, Index};
 use std::str::FromStr;
-use std::{borrow::Cow,cell::RefCell, result};
+use std::{borrow::Cow, cell::RefCell, result};
 
 use ic_cdk::api::management_canister::http_request::{
     http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
@@ -24,7 +22,7 @@ use ic_cdk::api::management_canister::http_request::{
 };
 use ledgertype::{
     ApproveResult, MinerTxState, MinerWaitClaimBalance, TransferArgs, TransferTxState, TxIndex,
-    UnvMinnerLedgerRecord, WorkLoadLedgerItem,UnvMinnerLedgerState
+    UnvMinnerLedgerRecord, UnvMinnerLedgerState, WorkLoadLedgerItem,
 };
 use serde::Serialize;
 use serde_json::{self, Value};
@@ -37,7 +35,6 @@ use icrc_ledger_types::icrc2::transfer_from::{TransferFromArgs, TransferFromErro
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
-
 #[derive(Clone, Debug, CandidType, Deserialize)]
 struct Subscriber {
     topic: String,
@@ -49,14 +46,12 @@ struct Event0301008 {
     payload: WorkLoadLedgerItem,
 }
 
-
-
-#[derive(CandidType,Deserialize,Clone,Default)]
+#[derive(CandidType, Deserialize, Clone, Default)]
 pub struct StateHeap {
     unv_nft_owners: Vec<Account>,
     unv_user_infos: Vec<UserIdentityInfo>,
 }
-#[derive(CandidType, Default,Deserialize,Clone)]
+#[derive(CandidType, Default, Deserialize, Clone)]
 struct StableState {
     state: StateHeap,
 }
@@ -338,7 +333,7 @@ async fn publish_0301008_EXT(event: Event0301008) -> Result<TxIndex, String> {
     let mut tx_index: Nat = Nat::from(0 as u128);
 
     ic_cdk::println!("Init Nft owners");
-   
+
     let miner_set = get_total_minner().unwrap();
     let sharding_size = miner_set.len();
     let block_tokens = ledger_item.clone().block_tokens / sharding_size;
@@ -365,7 +360,7 @@ async fn publish_0301008_EXT(event: Event0301008) -> Result<TxIndex, String> {
 #[ic_cdk::query]
 fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
     LEDGER_STATE.with(|s| {
-        let mut res_vec:Vec<UnvMinnerLedgerRecord> = Vec::new();
+        let mut res_vec: Vec<UnvMinnerLedgerRecord> = Vec::new();
         ic_cdk::println!("get miner jnl begin");
 
         for ledger_item in s.borrow().iter() {
@@ -373,8 +368,7 @@ fn get_all_miner_jnl() -> Option<Vec<UnvMinnerLedgerRecord>> {
             res_vec.push(ledger_item.clone());
         }
         return Some(res_vec);
-    }
-    )
+    })
 }
 
 #[ic_cdk::query]
@@ -443,7 +437,6 @@ async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex,
                         .map_err(|e| format!("fail to call ledger:{:?}", e));
                     ic_cdk::println!("Transfer Success {}", i);
                     return Result::Ok(TxIndex::from(i));
-
                 }
                 Result::Err(e) => {
                     ic_cdk::println!("Transfer fail {}", e);
@@ -459,7 +452,8 @@ async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex,
 #[ic_cdk::query]
 fn gener_nft_owner_wait_claims(principal: String) -> MinerWaitClaimBalance {
     LEDGER_STATE.with(|s| {
-        let miner_account: Account = Account::from(Principal::from_text(principal.clone()).unwrap());
+        let miner_account: Account =
+            Account::from(Principal::from_text(principal.clone()).unwrap());
         let mut balance: NumTokens = NumTokens::from(0 as u128);
         for unv_miner_ledger in s.borrow().iter() {
             if principal == unv_miner_ledger.clone().minner_principalid {
@@ -556,18 +550,19 @@ fn get_unclaimed_mint_ledger_by_principal(
 
 fn claimed_mint_ledger(index: &BlockIndex, trans_index: &TxIndex) -> Result<(), String> {
     LEDGER_STATE.with(|s| {
-        let mut mem_index:u64 = 0;
+        let mut mem_index: u64 = 0;
         let stable_mem = s.borrow_mut();
         for item in stable_mem.iter() {
             if *index == item.clone().block_index.unwrap() {
                 let mut item_clone = item.clone();
                 item_clone.biz_state = TransferTxState::Claimed;
-                item_clone.meta_workload.mining_status = MinerTxState::Claimed(String::from("claimed"));
+                item_clone.meta_workload.mining_status =
+                    MinerTxState::Claimed(String::from("claimed"));
                 item_clone.trans_tx_index = Some(trans_index.clone());
-                stable_mem.set(mem_index,&item_clone);
+                stable_mem.set(mem_index, &item_clone);
                 return Ok(());
             }
-            mem_index+=1;
+            mem_index += 1;
         }
         Err(String::from("Ledger is in blackhole"))
     })
@@ -716,11 +711,13 @@ fn produce_unv_miner_ledger(
             gmt_datetime: ic_cdk::api::time(),
             biz_state: TransferTxState::WaitClaim,
         };
-        s.borrow_mut().push(&minner_ledger).expect("Push ledger error");
+        s.borrow_mut()
+            .push(&minner_ledger)
+            .expect("Push ledger error");
         return block_index;
     })
 }
-/* 
+/*
 #[ic_cdk::pre_upgrade]
 fn pre_upgrade() {
     let state = STATEHEAP.with(|state: &RefCell<StateHeap>| mem::take(&mut *state.borrow_mut()));
@@ -762,7 +759,6 @@ async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {
 
 #[query]
 async fn get_account_transactions(args: GetAccountTransactionsArgs) -> GetTransactionsResult {
-    // TODO: replace the Canister ID
     let ledger_canister_id =
         Principal::from_text("jqxvq-ciaaa-aaaai-aqwwa-cai").expect("Invalid Ledger Canister ID");
 

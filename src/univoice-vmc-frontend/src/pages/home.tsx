@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import style from './home.module.scss'
 import TopBar from '@/components/topbar'
 import FootBar from '@/components/footbar'
 import ImgBg from '@/assets/imgs/BG@1x.png'
@@ -111,178 +112,163 @@ function UvHomePage() {
   }
 
   useEffect(() => {
+    window.scrollTo(0, 0)
     goAnchor(location.hash)
     loadChakraClickStat()
   }, []);
   return (
-    <div className="flip-card bg-[#110E19] overflow-hidden" ref={refHome}>
-      <div className={`flip-card-inner ${isFlipped ? 'flip-card-inner-flipped' : ''}`}>
-        <div className="flip-card-front uv-container">
-          <div className="uv-home-1">
-            <img src={ImgBg} className="uv-home-1-bg img-fixed w-full" />
-            <div className="uv-home-1-ctx" onClick={handleHideProfile}>
+    <div className={`${style.flip_card} ${style.pg} uv-container`} ref={refHome}>
+      <div className={`${style.flip_card_inner} ${isFlipped ? style.flip_card_inner_flipped : ''}`}>
+        <div className={`${style.flip_card_front}`}>
+          <div className={style.home_1}>
+            <img src={ImgBg} className={`${style.bg} img-fixed`} />
+            <div className={style.ctx} onClick={handleHideProfile}>
               <TopBar ref={topbarRef}/>
-              <div className="uv-container-0">
-                <div className="pannel-info">
-                  <div className="t1">I'm Univoice</div>
-                  <div className="t1">I'm Undefined</div>
-                  <div className="t2">Hello,I’m univoice.I’m undefined.</div>
-                  <div className="t2">welcome to the new world created by voices.</div>
-                  <div className="t2">“Authentic Freedom Infinite is superpower”</div>
-                  <div className="flex flex-row txtlink">
-                    <a href="/whitepaper.pdf" target="_blank"><div className="btn-link-1">WHITE PAPER</div></a>
-                    <div className="btn-link-1 ml-[20px]" onClick={goActivity}>ACTIVITY</div>
+              <div className={style.mainpanel}>
+                <div className={style.info}>
+                  <div className={style.t1}>I'm Univoice</div>
+                  <div className={style.t1}>I'm Undefined</div>
+                  <div className={style.t2}>Hello,I’m univoice.I’m undefined.</div>
+                  <div className={style.t2}>welcome to the new world created by voices.</div>
+                  <div className={style.t2}>“Authentic Freedom Infinite is superpower”</div>
+                  <div className={style.links}>
+                    <a href="/whitepaper.pdf" target="_blank"><div className={`${style.btn} btn-link-1`}>WHITE PAPER</div></a>
+                    <div className={`${style.btn} btn-link-1`} onClick={goActivity}>ACTIVITY</div>
                   </div>
                 </div>
-                <div className="ipcard ip-uv-home"></div>
-                <div className="btn-join-us" onClick={fnClickFlip}><div className="btn-txt">JOIN US</div></div>
+                <div className={style.ipcard}></div>
+                <div className={style.joinus} onClick={fnClickFlip}><div className={style.txt}>JOIN US</div></div>
               </div>
             </div>
           </div>
 
-          <div className="uv-container-1 uv-home-2">
-            <div className="relative h-[300px] overflow-hidden mx-auto flex flex-col items-center justify-end">
-              <img src={ImgService} className="top-[100px] w-[180px] h-[50px]" />
-              <div className="text-[48px] txt-wwd pb-[75px] pt-[40px]">What We Do ?</div>
-            </div>
+          <div className={`${style.home_2} uv-container-1`}>
+              <img src={ImgService} className={style.img} />
+              <div className={style.txt_wwd}>What We Do ?</div>
           </div>
-          <div className="uv-container-1 grid grid-cols-1 lg:grid-cols-3 gap-[30px]">
-            <div className="pannel-bg-1 pb-[128px] relative">
-              <div className="flex flex-col items-center px-[35px]">
-                <img src={ImgSpeakingIcon} className="w-[52px] h-[52px] mt-[21px]" />
-                <div className="text-[24px] mt-[24px]">Speaking</div>
-                <div className="text-center mt-[30px] text-[16px] leading-[24px] max-w-[400px]">
-                  <p>the essence of Univoice, where every individual can freely express themselves and contribute to the creation of a harmonious, voice-driven world.</p>
-                  <div className="lnk-learn-more" onClick={goSpeaking}>learn more ...</div>
-                </div>
-                <div className="btn-link-1 w-[260px] h-[48px] text-[16px] absolute bottom-[30px]" onClick={startSpeaking}>
-                  <div>Start</div>
-                  <img src={ImgArrowRIcon} className="w-[18px] h-[18px] ml-[10px]" />
-                </div>
+
+          <div className={`${style.home_2_ctx} ${style.home_2_1} uv-container-1`}>
+            <div className={style.panel}>
+              <img src={ImgSpeakingIcon} className={style.img} />
+              <div className={style.title}>Speaking</div>
+              <div className={style.intro}>
+                <p>the essence of Univoice, where every individual can freely express themselves and contribute to the creation of a harmonious, voice-driven world.</p>
+                <div className={style.lnk_learn_more} onClick={goSpeaking}>learn more ...</div>
+              </div>
+              <div className={`${style.btn} btn-link-1`} onClick={startSpeaking}>
+                <div>Start</div>
+                <img src={ImgArrowRIcon} className={style.icon} />
               </div>
             </div>
-            <div className="pannel-bg-1 pb-[128px] relative">
-              <div className="flex flex-col items-center px-[35px]">
-                <img src={ImgListeningIcon} className="w-[52px] h-[52px] mt-[21px]" />
-                <div className="text-[24px] mt-[24px]">Listening</div>
-                <div className="text-center mt-[30px] text-[16px] leading-[24px] max-w-[400px]">
-                  <p>“ Let AI know you better,you be yourself ”.</p>
-                  <p>Univoice has always been listening and accompanying.</p>
-                  <div className="lnk-learn-more" onClick={goListening}>learn more ...</div>
-                </div>
-                <div className="btn-link-1 w-[260px] h-[48px] text-[16px] absolute bottom-[30px]" onClick={startListening}>
-                  <div>Start</div>
-                  <img src={ImgArrowRIcon} className="w-[18px] h-[18px] ml-[10px]" />
-                </div>
+            <div className={style.panel}>
+              <img src={ImgListeningIcon} className={style.img} />
+              <div className={style.title}>Listening</div>
+              <div className={style.intro}>
+                <p>“ Let AI know you better,you be yourself ”.</p>
+                <p>Univoice has always been listening and accompanying.</p>
+                <div className={style.lnk_learn_more} onClick={goListening}>learn more ...</div>
+              </div>
+              <div className={`${style.btn} btn-link-1`} onClick={startListening}>
+                <div>Start</div>
+                <img src={ImgArrowRIcon} className={style.icon} />
               </div>
             </div>
-            <div className="pannel-bg-1 pb-[128px] relative">
-              <div className="flex flex-col items-center px-[35px]">
-                <img src={ImgCoCreatingIcon} className="w-[52px] h-[52px] mt-[21px]" />
-                <div className="text-[24px] mt-[24px]">Co-creating</div>
-                <div className="text-center mt-[30px] text-[16px] leading-[24px] max-w-[400px]">
-                  <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
-                  <div className="lnk-learn-more" onClick={goCoCreating}>learn more ...</div>
-                </div>
-                <div className="btn-link-1 w-[260px] h-[48px] text-[16px] absolute bottom-[30px]" onClick={startCoCreating}>
-                  <div>Start</div>
-                  <img src={ImgArrowRIcon} className="w-[18px] h-[18px] ml-[10px]" />
-                </div>
-                {/* <div className="w-[260px] h-[48px] text-[16px] absolute bottom-[30px] flex flex-col justify-center">
-                  <div className="text-center text-[#666]">Coming soon</div>
-                </div> */}
+            <div className={style.panel}>
+              <img src={ImgCoCreatingIcon} className={style.img} />
+              <div className={style.title}>Co-creating</div>
+              <div className={style.intro}>
+                <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
+                <div className={style.lnk_learn_more} onClick={goCoCreating}>learn more ...</div>
+              </div>
+              <div className={`${style.btn} btn-link-1`} onClick={startCoCreating}>
+                <div>Start</div>
+                <img src={ImgArrowRIcon} className={style.icon} />
               </div>
             </div>
           </div>
 
-          <div className="uv-container-1 grid grid-cols-1 md:grid-cols-2 gap-[30px] pt-[30px]">
-            <div className="pannel-bg-2 pb-[128px] relative">
-              <div className="flex flex-col items-center px-[35px]">
-                <img src={ImgAiAgentIcon} className="w-[52px] h-[52px] mt-[21px]" />
-                <div className="text-[24px] mt-[24px]">AI Agent</div>
-                <div className="text-center mt-[30px] text-[16px] leading-[24px] max-w-[400px]">
-                  <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
-                </div>
-                <div className="btn-link-1 w-[260px] h-[48px] text-[16px] absolute bottom-[30px]" onClick={goAiAgent}>
-                  <div>Training Process</div>
-                  <img src={ImgArrowRIcon} className="w-[18px] h-[18px] ml-[10px]" />
+          <div className={`${style.home_2_ctx} ${style.home_2_2} uv-container-1`}>
+            <div className={style.panel}>
+              <img src={ImgAiAgentIcon} className={style.img} />
+              <div className={style.title}>AI Agent</div>
+              <div className={style.intro}>
+                <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
+              </div>
+              <div className={`${style.btn} btn-link-1`} onClick={goAiAgent}>
+                <div>Training Process</div>
+                <img src={ImgArrowRIcon} className={style.icon} />
+              </div>
+            </div>
+            <div className={style.panel}>
+              <img src={ImgTokenIcon} className={style.img} />
+              <div className={style.title}>Token</div>
+              <div className={style.intro}>
+                <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
+              </div>
+              <div className={`${style.btn} btn-link-1`} onClick={goToken}>
+                <div>View Dashboard</div>
+                <img src={ImgArrowRIcon} className={style.icon} />
+              </div>
+            </div>
+          </div>
+          
+          <div className={`${style.home_3} uv-container-1`} ref={refPartner}>
+              <div className={style.line}></div>
+              <div className={style.txt_wwd}>Partner Ship</div>
+              <div className={style.txt}>Our expanding networkof ecosystems</div>
+          </div>
+
+          <div className={`${style.home_3_1} uv-container-1`}>
+            <div className={style.card}>
+              <div className={style.panel}>
+                <div className={style.panel_ctx}>
+                  <img src={ ImgMixlabLogo } style={{ width:'120px', height:'120px', marginTop:'21px'}} />
                 </div>
               </div>
             </div>
-            <div className="pannel-bg-2 pb-[128px] relative">
-              <div className="flex flex-col items-center px-[35px]">
-                <img src={ImgTokenIcon} className="w-[52px] h-[52px] mt-[21px]" />
-                <div className="text-[24px] mt-[24px]">Token</div>
-                <div className="text-center mt-[30px] text-[16px] leading-[24px] max-w-[400px]">
-                  <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
+            <div className={style.card}>
+              <div className={style.panel}>
+                <div className={style.panel_ctx}>
+                  <img src={ ImgPlugLogo } style={{ width:'100px', height:'100px', marginTop:'21px'}} />
                 </div>
-                <div className="btn-link-1 w-[260px] h-[48px] text-[16px] absolute bottom-[30px]" onClick={goToken}>
-                  <div>View Dashboard</div>
-                  <img src={ImgArrowRIcon} className="w-[18px] h-[18px] ml-[10px]" />
+              </div>
+            </div>
+            <div className={style.card}>
+              <div className={style.panel}>
+                <div className={style.panel_ctx}>
+                  <img src={ ImgICPLogo } style={{ width:'159px', height:'29px', marginTop:'21px'}} />
+                </div>
+              </div>
+            </div>
+            <div className={style.card}>
+              <div className={style.panel}>
+                <div className={style.panel_ctx}>
+                  <img src={ ImgYukuLogo } style={{ width:'120px', height:'120px', marginTop:'21px'}} />
+                </div>
+              </div>
+            </div>
+            <div className={style.card}>
+              <div className={style.panel}>
+                <div className={style.panel_ctx}>
+                  <img src={ ImgZonliLogo } style={{ width:'85px', height:'35px', marginTop:'21px'}} />
                 </div>
               </div>
             </div>
           </div>
           
-          <div className="uv-container-1 mt-[180px] pb-[70px]" ref={refPartner}>
-            <div className="mx-auto flex flex-col items-center justify-end">
-              <div className="h-[1px] w-[600px]" style={{ background: 'linear-gradient(90deg, #FFFFFF00 0%, #FFFFFF 55%, #FFFFFF00 100%)' }}></div>
-              <div className="text-[48px] txt-wwd pt-[40px]">Partner Ship</div>
-              <div className="text-[24px] text-[#EEEEEE] pt-[30px] text-center">Our expanding networkof ecosystems</div>
-            </div>
-          </div>
-
-          <div className="uv-container-1 grid grid-cols-2 gap-[30px] lg:flex lg:flex-row lg:justify-between">
-            <div className="flex justify-center">
-              <div className="pannel-bg-3">
-                <div className="pannel-ctx flex flex-col items-center justify-center">
-                  <img src={ ImgMixlabLogo } className="w-[120px] h-[120px] mt-[21px]" />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <div className="pannel-bg-3">
-                <div className="pannel-ctx flex flex-col items-center justify-center">
-                  <img src={ ImgPlugLogo } className="w-[100px] h-[100px] mt-[21px]" />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <div className="pannel-bg-3">
-                <div className="pannel-ctx flex flex-col items-center justify-center">
-                  <img src={ ImgICPLogo } className="w-[159px] h-[29px] mt-[21px]" />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <div className="pannel-bg-3">
-                <div className="pannel-ctx flex flex-col items-center justify-center">
-                  <img src={ ImgYukuLogo } className="w-[120px] h-[120px] mt-[21px]" />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <div className="pannel-bg-3">
-                <div className="pannel-ctx flex flex-col items-center justify-center">
-                  <img src={ ImgZonliLogo } className="w-[85px] h-[35px] mt-[21px]" />
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="uv-container-1 mt-[180px] pb-[70px]" ref={refVision}>
-            <div className="w-full mx-auto flex flex-col items-center justify-end relative">
-              <div className="h-[1px] w-[600px]" style={{ background: 'linear-gradient(90deg, #FFFFFF00 0%, #FFFFFF 55%, #FFFFFF00 100%)' }}></div>
-              <div className="uv-home-vision-1 w-full h-[200px] mt-[-28px]"></div>
-              <div className="uv-home-vision-2 w-full h-[700px]"></div>
-              <div className="absolute w-full top-0">
-                <div className="relative flex flex-col items-center">
-                  <div className="text-[48px] txt-vision pt-[100px]">Vision</div>
-                  <div className="text-[24px] text-[#EEEEEE] pt-[30px] max-w-[1050px] p-[60px] text-center z-[200]">
+          <div className={`${style.home_4} uv-container-1`} ref={refVision}>
+            <div className={style.home_4_ctx}>
+              <div className={style.line}></div>
+              <div className={style.bg_1}></div>
+              <div className={style.bg_2}></div>
+              <div className={style.ctx}>
+                <div className={style.wrap}>
+                  <div className={style.txt_vision}>Vision</div>
+                  <div className={style.txt}>
                     <p>Together! let's co-create an univioce AI Agent that listens to all voices and understands our the best.</p>
                     <p>Create an AI agent that is unique to you. You are unique soul with Authentic Freedom Infinite.</p>
                   </div>
-                  <img src={ ImgUVbottomLogo } className="w-[277px] h-[277px] top-[310px] ml-[20px] absolute z-[100]" />
+                  <img src={ ImgUVbottomLogo } className={style.logo} />
                 </div>
               </div>
               
@@ -291,19 +277,19 @@ function UvHomePage() {
           <FootBar homeGoAnchor={goAnchor} />
 
         </div>
-        <div className="flip-card-back uv-container bg-[#000000]">
-          <div className="w-full h-full flex flex-col items-center justify-start">
-            <div className="py-[20px] text-[28px] font-pf flex flex-col items-center justify-start">
-              <div className="flex flex-col items-center justify-start text-center max-w-[760px] px-[50px]">
+        <div className={`${style.flip_card_back} ${style.side_back}`}>
+          <div className={style.home_b}>
+            <div className={style.home_b_1}>
+              <div className={`${style.ctx} font-pf`}>
                 <p>"If you want to find the secrets of the universe, think in terms of energy, frequency and vibration."</p>
-                <div className="w-full text-right">- Nikola Tesla</div>
+                <div className={style.sign}>- Nikola Tesla</div>
               </div>
             </div>
-            <div className="relative w-full flex flex-col items-center justify-start">
-              <img src={ ImgBgBack } className="min-w-[1280px] w-full img-fixed" />
-              <div className="bg-chakra">
-                <div className="relative">
-                  <img src={ ImgChakra } className=" img-fixed" />
+            <div className={style.home_b_2}>
+              <img src={ ImgBgBack } className={`${style.bg} img-fixed`} />
+              <div className={style.bg_chakra}>
+                <div className={style.ctx}>
+                  <img src={ ImgChakra } className="img-fixed" />
                   <Chakra idx={1} clickcnt={chakraClickStat.cnt1}/>
                   <Chakra idx={2} clickcnt={chakraClickStat.cnt2}/>
                   <Chakra idx={3} clickcnt={chakraClickStat.cnt3}/>
@@ -314,7 +300,7 @@ function UvHomePage() {
                 </div>
               </div>
             </div>
-            <div onClick={fnClickFlip} className="fixed top-[30px] right-[50px] cursor-pointer">BACK</div>
+            <div onClick={fnClickFlip} className={style.btn_turnback}>Back</div>
           </div>
         </div>
       </div>

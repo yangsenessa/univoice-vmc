@@ -1,4 +1,5 @@
 import { Key, useState } from 'react';
+import style from './chakra.module.scss'
 
 function ChakraComponent( props:{ idx: number, clickcnt: number } ) {
   const [totalClick, setTotalClick] = useState(0);
@@ -31,13 +32,13 @@ function ChakraComponent( props:{ idx: number, clickcnt: number } ) {
   };
 
   return (
-    <div className={`chakra chakra-${props.idx}`}>
-      <div className={`flex ${props.idx % 2 === 1 ? 'flex-row-reverse' : 'flex-row'} relative`}>
-        <div className="chakra-circle" onClick={clickChakra}></div>
-        <div className="chakra-click-count">🧡{props.clickcnt + totalClick}</div>
-        <div className="relative">
+    <div className={`${style.chakra} ${style['chakra_' + props.idx]}`}>
+      <div className={`${props.idx % 2 === 1 ? style.chakra_right : style.chakra_left}`}>
+        <div className={style.chakra_circle} onClick={clickChakra}></div>
+        <div className={style.chakra_click_count}>🧡{props.clickcnt + totalClick}</div>
+        <div className={style.fade_area}>
         {fadeElements.map((el: { id: Key | null | undefined; animating: any; }) => (
-          <div key={el.id} className="fade-out-text">+1</div>
+          <div key={el.id} className={style.fade_out_text}>+1</div>
         ))}
         </div>
       </div>

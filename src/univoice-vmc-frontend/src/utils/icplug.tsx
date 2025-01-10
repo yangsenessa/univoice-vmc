@@ -2,7 +2,6 @@ import { PlugMobileProvider } from '@funded-labs/plug-mobile-sdk'
 import { isLocalNet } from '@/utils/env';
 import { tokenLedegerIdlFactory } from '@/idl/icrc1.did.js';
 
-import MobileProvider from '@funded-labs/plug-mobile-sdk/dist/src/MobileProvider';
 import { Principal } from '@dfinity/principal';
 
 const isDev = isLocalNet();

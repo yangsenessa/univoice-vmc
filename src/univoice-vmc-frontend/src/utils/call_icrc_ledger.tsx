@@ -19,7 +19,7 @@ try {
 
     let ownerPrincipal = Principal.fromText("");
     // fetch ICRC1 token transactions
-    const fetchTransactions = async () => {
+    const icrc1Transactions = async () => {
         const account = {owner: ownerPrincipal, subaccount: null};
         const maxResults = 10n;
         const startIndex = BigInt(0);

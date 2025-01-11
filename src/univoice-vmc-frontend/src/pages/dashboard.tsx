@@ -6,6 +6,7 @@ import Paging from '@/components/paging';
 import style from './dashboard.module.scss'
 import ImgBgTopLight from '@/assets/imgs/bg_toplight.png'
 import ImgBgTopLight2 from '@/assets/imgs/bg_toplight_over.png'
+import ImgNftThum from '@/assets/imgs/nft_thum.png'
 import { useAcountStore } from '@/stores/user';
 
 
@@ -111,21 +112,28 @@ function DashboardPage() {
           .then((principal_id) => {
             console.log('reConnectPlug done, pid:', principal_id)
             if (principal_id) {
-              get_miner_license(principal_id,BigInt(0),BigInt(50)).then(tokenIds=>{
+              //get_miner_license(principal_id);
+              
+              call_tokens_of(principal_id).then(tokenIds=>{
                 let index = 0;
+                let data =[];
+                console.log("Origin nft tokens is",tokenIds);
+
                 for (let token_id in  tokenIds) {
-                    console.log("hold license of token_id", token_id);
-                    let data =[];
+                    console.log("hold license of token_id", tokenIds[token_id]);
+            
                     let license_item = {
-                      id: token_id,
+                      id: Number(tokenIds[token_id]),
                       imgurl: 'https://bafybeibhnv326rmac22wfcxsmtrbdbzjzn5mviykq3rbt4ltqkqqfgobga.ipfs.w3s.link/thum.jpg',
                       intro: 'Univoice listener',
                       txt: 'A liciense for identify as Univoice-Listener.'
                     }
                     data[index]=license_item;
-                    setLicenseData(data)
+                    index=index+1;
 
                 }
+                setLicenseData(data)
+
               })      
             }
           }).catch((e) => {

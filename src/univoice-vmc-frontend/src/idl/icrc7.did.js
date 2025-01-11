@@ -557,7 +557,7 @@ export const icrc7IdlFactory = ({ IDL }) => {
           ['query'],
         ),
       'icrc7_tokens_of' : IDL.Func(
-          [Account__2, IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+          [Account__2],
           [IDL.Vec(IDL.Nat)],
           ['query'],
         ),

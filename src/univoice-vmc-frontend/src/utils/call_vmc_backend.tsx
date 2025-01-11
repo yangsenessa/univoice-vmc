@@ -48,7 +48,9 @@ export const get_main_site_summary = async():Promise<MainSiteSummary> =>{
 }
 
 export const get_miner_license = async(user_principal: string, pre?: bigint, take?: bigint):Promise<Array<bigint>> =>  {
-   return univoice_vmc_backend.get_miner_license(user_principal,pre,take);
+   let res =  univoice_vmc_backend.get_miner_license(user_principal);
+   return res;
+
 }
 
 

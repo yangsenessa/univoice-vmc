@@ -257,14 +257,14 @@ async fn setup_subscribe(publisher_id: Principal, topic: String) {
 }
 
 #[ic_cdk::update]
-async fn get_miner_license(user_principal: String, pre: Nat, take: Nat) -> Vec<Nat> {
+async fn get_miner_license(user_principal: String) -> Vec<Nat> {
     let account: Account =
         Account::from_str(&user_principal).expect("Could not decode the principal");
-    ic_cdk::call::<(Account, Nat, Nat), (Vec<Nat>,)>(
+    ic_cdk::call::<(Account,), (Vec<Nat>,)>(
         Principal::from_str("br5f7-7uaaa-aaaaa-qaaca-cai")
             .expect("Could not decode the principal."),
         "icrc7_tokens_of",
-        (account, pre, take),
+        (account,),
     )
     .await
     .map_err(|e| format!("failed to call ledger: {:?}", e))

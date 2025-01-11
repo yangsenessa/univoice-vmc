@@ -169,7 +169,7 @@ service : {
     "gener_nft_owner_wait_claims":(text)->(MinerWaitClaimBalance) query;
     "get_user_balance": (principal) -> (Result);
     "get_account_transactions": (GetAccountTransactionsArgs) -> (GetTransactionsResult);
-    "get_miner_license":(text,nat,nat)->(vec nat) ;
+    "get_miner_license":(text)->(vec nat) ;
     "sum_unclaimed_mint_ledger_onceday":(text) ->(nat) query;
     "get_total_listener":() -> (opt nat64) query;
     "get_main_site_summary":() ->( MainSiteSummary);

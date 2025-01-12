@@ -195,12 +195,7 @@ export const call_get_transactions = async (principal_id:string,pre:number, take
          let transferInfo = element.transfer[0];
 
          if(element.transfer && transferInfo){
-            console.log('ICRC ledger call transaction to :' ,  transferInfo.to.toString());   
-            console.log('ICRC ledger call transaction from :' , transferInfo.from.toString());    
-            console.log('ICRC ledger call transaction fee :' , transferInfo.fee.toString()); 
-            console.log('ICRC ledger call transaction memo :' , transferInfo.memo); 
-            console.log('ICRC ledger call transaction created_at_time :' , element.timestamp.toString()); 
-            console.log('ICRC ledger call transaction amount :' , transferInfo.amount); 
+
             let time_stamp = element.transfer.created_at_time?element.transfer.created_at_time:element.timestamp;
             let gmt_time_stamp:number;
             if(time_stamp){
@@ -216,6 +211,7 @@ export const call_get_transactions = async (principal_id:string,pre:number, take
               amount:transferInfo.amount?Number(transferInfo.amount):Number(0),
               from:transferInfo.from?.owner.toString()
             };
+            console.log("Transaction result = ", transfer_detail_item);
             tranferDetails[index]= transfer_detail_item;        
           }        
        }

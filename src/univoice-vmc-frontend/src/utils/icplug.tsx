@@ -1,6 +1,6 @@
 import { PlugMobileProvider } from '@funded-labs/plug-mobile-sdk'
 import { isLocalNet } from '@/utils/env';
-import { tokenLedegerIdlFactory } from '@/idl/icrc1.did.js';
+import { tokenLedegerIdlFactory, } from '@/idl/icrc1.did.js';
 import {icrc7IdlFactory} from '@/idl/icrc7.did.js';
 
 import { Principal } from '@dfinity/principal';
@@ -167,11 +167,72 @@ export const call_tokens_of= async (principal_id:string) : Promise<Array<bigint>
 
 }
 
-// const getPrincipal = async (): Promise<string> => {
-//   if (!plugReady()) return '';
-//   const plug = (window as any).ic.plug;
-//   // const isConnected = await plug.isConnected(); // 会弹出连接窗
-//   return plug.principalId ? plug.principalId : '';
-// }
+export const call_get_transactions = async (principal_id:string,pre:number, take:number): Promise<TransferResponse[]> => {
+  if (!plugReady()) return null;
+  const plug = (window as any).ic.plug;
+  const principal = Principal.fromText(principal_id) ;
+  console.log('ICRC ledger call principal =' + principal);    
+
+  const request =  {'start' : pre,'length' : take };
+  await plug.requestConnect({
+   whitelist,
+  }); 
+
+  const tokenActor = await plug.createActor({
+     canisterId: tokenCanisterId,
+     interfaceFactory: tokenLedegerIdlFactory,
+  });
+  // use our actors getSwapInfo method
+  console.log('ICRC ledger call get_transactions begin');    
+
+  var response  = await tokenActor.get_transactions(request);
+
+  var transactions = response.transactions;
+  let tranferDetails:TransferResponse[] = [];
+  transactions.forEach((element,index)=> {
+    console.log('ICRC ledger call transaction kind :' , element.kind);   
+       if(element.kind=="transfer"){
+         let transferInfo = element.transfer[0];
+
+         if(element.transfer && transferInfo){
+            console.log('ICRC ledger call transaction to :' ,  transferInfo.to.toString());   
+            console.log('ICRC ledger call transaction from :' , transferInfo.from.toString());    
+            console.log('ICRC ledger call transaction fee :' , transferInfo.fee.toString()); 
+            console.log('ICRC ledger call transaction memo :' , transferInfo.memo); 
+            console.log('ICRC ledger call transaction created_at_time :' , element.timestamp.toString()); 
+            console.log('ICRC ledger call transaction amount :' , transferInfo.amount); 
+            let time_stamp = element.transfer.created_at_time?element.transfer.created_at_time:element.timestamp;
+            let gmt_time_stamp:number;
+            if(time_stamp){
+              gmt_time_stamp=Number(Number(time_stamp)/1000) ;
+            } 
+
+            let transfer_detail_item:TransferResponse={
+              txIndex:pre+index,
+              to:transferInfo.to?.owner.toString(),
+              fee:transferInfo.fee?Number(transferInfo.fee):Number(0),
+              memo:null,
+              created_at_time:gmt_time_stamp,
+              amount:transferInfo.amount?Number(transferInfo.amount):Number(0),
+              from:transferInfo.from?.owner.toString()
+            };
+            tranferDetails[index]= transfer_detail_item;        
+          }        
+       }
+    
+  });
+
+
+  return tranferDetails;
+}
+export type TransferResponse = {
+   txIndex:number,
+   to:string,
+   fee : number,
+   from : string,
+   memo : number,
+   created_at_time : number,
+   amount : number
+};
 
 export default reConnectPlug;

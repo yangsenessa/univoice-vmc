@@ -36,6 +36,7 @@ export const fmtUvBalanceFull = (balance: string | number) => {
 }
 // 有小数则显示，可不足8位小数
 export const fmtUvBalance = (balance: string | number) => {
+  console.log("fmtUvBalance parse balance:", balance);
   if (typeof balance === 'number') {
     if (balance < 100000000) {
       return (balance / 100000000)

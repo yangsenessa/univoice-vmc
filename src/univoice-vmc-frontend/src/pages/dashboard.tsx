@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance } from '@/utils';
-import {call_tokens_of,reConnectPlug} from '@/utils/icplug';
+import {call_tokens_of,reConnectPlug,call_get_transactions} from '@/utils/icplug';
 import {poll_balance,get_total_listener,get_main_site_summary,get_miner_license} from '@/utils/call_vmc_backend';
 import Paging from '@/components/paging';
 import style from './dashboard.module.scss'
@@ -31,39 +31,38 @@ function DashboardPage() {
 
 
   const queryTransaction = (pagenum: number) => {
-    let newData: any[] = [{
-      id: 1,
-      timestamp: new Date().toISOString(),
-      block: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      transactionType: 'Transfer',
-      amount: '1024123450000',
-      from: 'ewqewqre...casd',
-      to: 'ewqewqre...casd'
-    },{
-      id: 2,
-      timestamp: new Date().toISOString(),
-      block: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      transactionType: 'Transfer',
-      amount: '1024123456700',
-      from: 'ewqewqre...casd',
-      to: 'ewqewqre...casd'
-    },{
-      id: 3,
-      timestamp: new Date().toISOString(),
-      block: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      transactionType: 'Transfer',
-      amount: '1024000000000',
-      from: 'ewqewqre...casd',
-      to: 'ewqewqre...casd'
-    },{
-      id: 4,
-      timestamp: new Date().toISOString(),
-      block: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      transactionType: 'Transfer',
-      amount: '1024123456789',
-      from: 'ewqewqre...casd',
-      to: 'ewqewqre...casd'
-    }];
+    let principal_id = getPrincipal();
+    type transactionDataType={
+      id:number,
+      timestamp:string,
+      block:string,
+      transactionType:string,
+      amount:string,
+      fee:String,
+      from:string,
+      to:string
+    }
+    let newData: any[]=[];
+    call_get_transactions(principal_id,5*(pagenum-1),5).then(result=>{
+      result.forEach((element,index)=>{
+        let dataItem:transactionDataType={
+          id:element.txIndex,
+          timestamp:new Date(Number(element.created_at_time)).toISOString(),
+          block:String(element.txIndex),
+          transactionType:"Transfer",
+          amount:String(element.amount),
+          fee:String(element.fee),
+          from:element.from,
+          to:element.to
+        }
+        console.log("Transaction view dataitem", dataItem);
+        newData[index]=dataItem;
+
+      })
+      
+
+    });
+    
     setTransactionData(newData);
     let p = transactionPage;
     p.pageNum = pagenum

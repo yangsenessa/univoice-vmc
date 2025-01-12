@@ -43,6 +43,18 @@ img {
   image-rendering: pixelated;
   object-fit: cover;
 }
+.aspect-ratio-1-1 {
+  position: relative;
+  height: 0;
+  padding: 50%;
+  .aspect-ratio-wrap {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
 .color-white {
   color: #FFFFFF;
 }

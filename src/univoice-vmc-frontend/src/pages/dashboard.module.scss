@@ -87,7 +87,7 @@
 }
 .transactions_row {
   // grid-template-columns: 280px 200px 300px 300px 280px;
-  grid-template-columns: 25% 10% 15% 15% 15% 20%;
+  grid-template-columns: 12% 13% 15% 20% 20% 20%;
 }
 .nfts {
   display: grid;
@@ -98,7 +98,16 @@
   background: linear-gradient(45deg, #b926e0, #6029df);
   border-radius: 10px;
   padding: 2px;
-  position: relative;
+  .nft_wrap {
+    background-color: #110e19;
+    border-radius: 10px;
+    margin: 2px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
   .img {
     // width: 370px;
     // height: 370px;
@@ -112,6 +121,7 @@
     display: flex;
     flex-direction: row;
     overflow: hidden;
+    padding-top: 10px;
     .iconimg {
       width: 6px;
       height: 6px;
@@ -119,7 +129,7 @@
       background-color: #6C2CFD;
       box-shadow: 0 0 15px 8px #3d1f81;
       margin-left: 15px;
-      margin-top: 8px;
+      margin-top: 10px;
       margin-right: 10px;
       flex: 0 0 auto;
     }

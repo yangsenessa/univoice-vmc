@@ -36,15 +36,14 @@ export const fmtUvBalanceFull = (balance: string | number) => {
 }
 // 有小数则显示，可不足8位小数
 export const fmtUvBalance = (balance: string | number) => {
-  console.log("fmtUvBalance parse balance:", balance);
   if (typeof balance === 'number') {
     if (balance < 100000000) {
-      return (balance / 100000000)
+      return fmtDecimal(balance)
     } else {
       let z: number = Math.floor(balance / 100000000)
       let r = z.toLocaleString('en-US')
-      let xs = (balance - z * 100000000) / 100000000
-      let xsStr = xs.toString()
+      let xs = balance - z * 100000000
+      let xsStr = fmtDecimal(xs)
       let dot = xsStr.indexOf('.')
       if (dot > 0) {
         r += xsStr.substring(dot)
@@ -53,12 +52,12 @@ export const fmtUvBalance = (balance: string | number) => {
     }
   } else {
     if (balance.length < 9) {
-      return (parseInt(balance) / 100000000)
+      return fmtDecimal(parseInt(balance))
     } else {
       let z = parseInt(balance.substring(0, balance.length - 8))
       let r = z.toLocaleString('en-US')
-      let xs = parseInt(balance.substring(balance.length - 8)) / 100000000
-      let xsStr = xs.toString()
+      let xs = parseInt(balance.substring(balance.length - 8))
+      let xsStr = fmtDecimal(xs)
       let dot = xsStr.indexOf('.')
       if (dot > 0) {
         r += xsStr.substring(dot)
@@ -67,7 +66,35 @@ export const fmtUvBalance = (balance: string | number) => {
     }
   }
 }
+const fmtDecimal = (n: number) => {
+  if (n === 0) {
+    return '0'
+  } else if (n < 100) {
+    let s = n.toString()
+    let r = s.length === 1 ? '0.0000000' + s : '0.000000' + s
+    if (r.substring(9) === '0') {
+      return r.substring(0, 9)
+    }
+    return r
+  } else {
+    return (n / 100000000).toString()
+  }
+}
 // 每3位一个逗号
 export const fmtInt = (data: number) => {
   return data.toLocaleString('en-US');
+}
+export const fmtTimestamp = (time: number) => {
+  let t = time.toString().length > 13 ? Math.floor(time / 1000) : time
+  return new Date(t).toISOString()
+  // return new Date(t).toLocaleString()
+}
+export const fmtSummaryAddr = (addr: string) => {
+  if (!addr) {
+    return '--'
+  }
+  if (addr.length <= 14) {
+    return addr
+  }
+  return addr.substring(0, 11) + '...' + addr.substring(addr.length - 3)
 }

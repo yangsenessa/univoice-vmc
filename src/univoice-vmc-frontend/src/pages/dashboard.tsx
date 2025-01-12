@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fmtInt, fmtUvBalance } from '@/utils';
+import { fmtInt, fmtUvBalance, fmtTimestamp, fmtSummaryAddr } from '@/utils';
 import {call_tokens_of,reConnectPlug,call_get_transactions} from '@/utils/icplug';
 import {poll_balance,get_total_listener,get_main_site_summary,get_miner_license} from '@/utils/call_vmc_backend';
 import Paging from '@/components/paging';
@@ -13,7 +13,7 @@ import { useAcountStore } from '@/stores/user';
 function DashboardPage() {
 
   const [summaryData, setSummaryData] = useState({
-    tokenPoolAmount:0,
+    tokenPoolAmount: 0,
     totalListener: 0,
     blockCreatedNumber: 0,
     totalTransactions: 0,
@@ -34,7 +34,7 @@ function DashboardPage() {
     let principal_id = getPrincipal();
     type transactionDataType={
       id:number,
-      timestamp:string,
+      timestamp:number,
       block:string,
       transactionType:string,
       amount:string,
@@ -47,11 +47,11 @@ function DashboardPage() {
       result.forEach((element,index)=>{
         let dataItem:transactionDataType={
           id:element.txIndex,
-          timestamp:new Date(Number(element.created_at_time)).toISOString(),
+          timestamp:Number(element.created_at_time),
           block:String(element.txIndex),
           transactionType:"Transfer",
-          amount:String(element.amount),
-          fee:String(element.fee),
+          amount:element.amount,
+          fee:element.fee,
           from:element.from,
           to:element.to
         }
@@ -229,13 +229,15 @@ function DashboardPage() {
         <div className={style.block_title}>Gallery of License</div>
         <div className={style.nfts}>
         {licenseData.map((el: { id: string; imgurl: string; intro: string; txt: string}) => (
-          <div key={el.id} className={style.nft}>
-            <img className={`img-fixed ${style.img}`} src={el.imgurl} />
-            <div className={style.info}>
-              <div className={style.iconimg}></div>
-              <div className={style.infoctx}>
-                <div className={style.intro}>{el.intro}</div>
-                <div className={style.txt}>{el.txt}</div>
+          <div key={el.id} className={`${style.nft} aspect-ratio-1-1`}>
+            <div className={`${style.nft_wrap} aspect-ratio-wrap`}>
+              <img className={`img-fixed ${style.img}`} src={el.imgurl} />
+              <div className={style.info}>
+                <div className={style.iconimg}></div>
+                <div className={style.infoctx}>
+                  <div className={style.intro}>{el.intro}</div>
+                  <div className={style.txt}>{el.txt}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -255,14 +257,14 @@ function DashboardPage() {
               <div className="tbl-cell-title">To</div>
               <div className="tbl-cell-title">Timestamp</div>
             </div>
-          {transactionData.map((el: { id: string; timestamp: string; block: string; transactionType: string; amount: string | number; from: string; to: string; }) => (
+          {transactionData.map((el: { id: string; timestamp: number; block: string; transactionType: string; amount: string | number; from: string; to: string; }) => (
             <div key={el.id} className={`tbl-r ${style.transactions_row}`}>
               <div className="tbl-cell">{el.block}</div>
               <div className="tbl-cell"><div className={style.trans_type}>{el.transactionType}</div></div>
-              <div className="tbl-cell">{fmtUvBalance(el.amount)}<span className="token-unit">UVC</span></div>
-              <div className="tbl-cell">{el.from}</div>
-              <div className="tbl-cell">{el.to}</div>
-              <div className="tbl-cell">{el.timestamp}</div>
+              <div className="tbl-cell">{fmtUvBalance(el.amount)}<span className="token-unit">$UVC</span></div>
+              <div className="tbl-cell">{fmtSummaryAddr(el.from)}</div>
+              <div className="tbl-cell">{fmtSummaryAddr(el.to)}</div>
+              <div className="tbl-cell">{fmtTimestamp(el.timestamp)}</div>
             </div>
           ))}
           </div>

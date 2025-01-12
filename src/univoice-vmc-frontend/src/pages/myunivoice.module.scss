@@ -30,7 +30,7 @@
 }
 .transactions_row {
   // grid-template-columns: 280px 200px 300px 300px 280px;
-  grid-template-columns: 30% 25% 15% 20% 10%;
+  grid-template-columns: 20% 25% 20% 20% 15%;
 }
 
 .summary {
@@ -136,13 +136,28 @@
     flex-direction: row;
     align-items: center;
   }
+  .img_bg {
+    background: linear-gradient(45deg, #F44EFF, #6C2CFD);
+    border-radius: 10px;
+    width: 68px;
+    height: 68px;
+    min-width: 68px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+  }
   .img_wrap {
     width: 64px;
-    height: 64px;
-    padding: 1px;
-    margin-right: 10px;
+    min-width: 64px;
+    background-color: #110e19;
     border-radius: 10px;
-    background: linear-gradient(45deg, #F44EFF, #6C2CFD);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
   .img {
     width: 64px;

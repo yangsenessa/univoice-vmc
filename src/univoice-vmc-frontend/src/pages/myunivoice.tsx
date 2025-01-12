@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fmtInt, fmtUvBalance } from '@/utils'
+import { fmtInt, fmtUvBalance, fmtTimestamp, fmtSummaryAddr } from '@/utils';
 import Paging from '@/components/paging';
 import style from './myunivoice.module.scss'
 import ImgBgGetMoreNft from '@/assets/imgs/bg_getmorenft.png'
@@ -21,30 +21,30 @@ function MyUnivoicePage() {
   const queryTransaction = (pagenum: number) => {
     let newData: any[] = [{
       id: 1,
-      minner: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      timestamp: new Date().toISOString(),
-      block: 'ewqewqre...casd',
+      minner: '6nimk-xpves-34bk3-zf7dp-nykqv-h3ady-iu3ze-xplot-vm4uy-ptbel-3qe',
+      timestamp: new Date().getTime() * 1000,
+      block: '6nimk-xpves-34bk3-zf7dp-nykqv-h3ady-iu3ze-xplot-vm4uy-ptbel-3qe',
       amount: '1024123456789',
       claimStat: 'Complete'
     },{
       id: 2,
       minner: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      timestamp: new Date().toISOString(),
-      block: 'ewqewqre...casd',
+      timestamp: new Date().getTime() * 1000,
+      block: 'ewqewqrecasd',
       amount: '1024123456789',
       claimStat: 'Complete'
     },{
       id: 3,
       minner: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      timestamp: new Date().toISOString(),
-      block: 'ewqewqre...casd',
+      timestamp: new Date().getTime(),
+      block: 'ewqewqrecasd',
       amount: '1024123456789',
       claimStat: 'Complete'
     },{
       id: 4,
       minner: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      timestamp: new Date().toISOString(),
-      block: 'ewqewqre...casd',
+      timestamp: new Date().getTime(),
+      block: 'ewqewqrecasd',
       amount: '1024123456789',
       claimStat: 'Complete'
     }];
@@ -74,7 +74,7 @@ function MyUnivoicePage() {
   const loadLicense = () => {
     const data = [{
       id: 1,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
+      imgurl: 'abc',
       idx: '01',
       intro: 'Goodluck charm Goodluck charm Goodluck charm Goodluck charm Goodluck charm Goodluck charm',
       owners: 21000,
@@ -122,7 +122,7 @@ function MyUnivoicePage() {
             <div className={style.label}>Token Rewards</div>
             <div className={style.data}>
               <div className={style.val}>{fmtUvBalance(summaryData.rewards)}</div>
-              <div className={style.unit}>UVC</div>
+              <div className={style.unit}>$UVC</div>
             </div>
           </div>
           <div className={style.claimable_panel}>
@@ -130,7 +130,7 @@ function MyUnivoicePage() {
               <div className={style.label}>Rewards Claimable</div>
               <div className={style.data}>
                 <div className={style.val}>{fmtUvBalance(summaryData.claimable)}</div>
-                <div className={style.unit}>UVC</div>
+                <div className={style.unit}>$UVC</div>
               </div>
             </div>
             {
@@ -165,7 +165,7 @@ function MyUnivoicePage() {
           <div key={el.id} className={style.tbl_r}>
             <div className={style.cell}>{el.idx}</div>
             <div className={style.cell}>
-              <div className={style.img_wrap}><img className={`${style.img} img-fixed`} src={el.imgurl} /></div>
+                <div className={style.img_bg}><div className={style.img_wrap}><img className={`${style.img} img-fixed`} src={el.imgurl} /></div></div>
               <div className={style.intro}>{el.intro}</div>
             </div>
             <div className={style.cell}>{fmtInt(el.owners)}</div>
@@ -198,12 +198,12 @@ function MyUnivoicePage() {
               <div className="tbl-cell-title">Tokens</div>
               <div className="tbl-cell-title">Claim State</div>
             </div>
-          {transactionData.map((el: { id: string; minner: string; timestamp: string; block: string; amount: string | number; claimStat: string; }) => (
+          {transactionData.map((el: { id: string; minner: string; timestamp: number; block: string; amount: string | number; claimStat: string; }) => (
             <div key={el.id} className={`tbl-r ${style.transactions_row}`}>
-              <div className="tbl-cell">{el.minner}</div>
-              <div className="tbl-cell">{el.timestamp}</div>
-              <div className="tbl-cell">{el.block}</div>
-              <div className="tbl-cell">{fmtUvBalance(el.amount)}<span className="token-unit">UVC</span></div>
+              <div className="tbl-cell">{fmtSummaryAddr(el.minner)}</div>
+              <div className="tbl-cell">{fmtTimestamp(el.timestamp)}</div>
+              <div className="tbl-cell">{fmtSummaryAddr(el.block)}</div>
+              <div className="tbl-cell">{fmtUvBalance(el.amount)}<span className="token-unit">$UVC</span></div>
               <div className="tbl-cell">{el.claimStat}</div>
             </div>
           ))}

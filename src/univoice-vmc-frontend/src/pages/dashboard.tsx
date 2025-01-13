@@ -50,8 +50,8 @@ function DashboardPage() {
           timestamp:Number(element.created_at_time),
           block:String(element.txIndex),
           transactionType:"Transfer",
-          amount:element.amount,
-          fee:element.fee,
+          amount:String(element.amount),
+          fee:String(element.fee),
           from:element.from,
           to:element.to
         }

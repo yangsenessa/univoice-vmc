@@ -37,8 +37,8 @@ function DashboardPage() {
       timestamp:number,
       block:string,
       transactionType:string,
-      amount:string,
-      fee:String,
+      amount:number,
+      fee:number,
       from:string,
       to:string
     }
@@ -50,8 +50,8 @@ function DashboardPage() {
           timestamp:Number(element.created_at_time),
           block:String(element.txIndex),
           transactionType:"Transfer",
-          amount:String(element.amount),
-          fee:String(element.fee),
+          amount:element.amount,
+          fee:element.fee,
           from:element.from,
           to:element.to
         }
@@ -104,7 +104,9 @@ function DashboardPage() {
     // TODO
   }
 
-   
+  const catchNftImgFail = (event) => {
+    event.target.src = ImgNftThum
+  }
 
   const loadLicense = () => {
     reConnectPlug()
@@ -231,7 +233,7 @@ function DashboardPage() {
         {licenseData.map((el: { id: string; imgurl: string; intro: string; txt: string}) => (
           <div key={el.id} className={`${style.nft} aspect-ratio-1-1`}>
             <div className={`${style.nft_wrap} aspect-ratio-wrap`}>
-              <img className={`img-fixed ${style.img}`} src={el.imgurl} />
+              <img className={`img-fixed ${style.img}`} src={el.imgurl} onError={catchNftImgFail} />
               <div className={style.info}>
                 <div className={style.iconimg}></div>
                 <div className={style.infoctx}>

@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance, fmtTimestamp, fmtSummaryAddr } from '@/utils';
 import Paging from '@/components/paging';
-import style from './myunivoice.module.scss';
-import ImgBgGetMoreNft from '@/assets/imgs/bg_getmorenft.png';
-import ImgNfyThum from '@/assets/imgs/nft_thum.png';
+import style from './myunivoice.module.scss'
+import ImgBgGetMoreNft from '@/assets/imgs/bg_getmorenft.png'
+import ImgNftThum from '@/assets/imgs/nft_thum.png'
+import { showToast } from '@/components/toast';
+
 import {sum_claimed_mint_ledger,sum_unclaimed_mint_ledger_onceday} from "@/utils/call_vmc_backend";
 
 import { useAcountStore } from '@/stores/user';
 
 const { getPrincipal } = useAcountStore();
-
 
 function MyUnivoicePage() {
 
@@ -31,28 +32,28 @@ function MyUnivoicePage() {
       minner: '6nimk-xpves-34bk3-zf7dp-nykqv-h3ady-iu3ze-xplot-vm4uy-ptbel-3qe',
       timestamp: new Date().getTime() * 1000,
       block: '6nimk-xpves-34bk3-zf7dp-nykqv-h3ady-iu3ze-xplot-vm4uy-ptbel-3qe',
-      amount: '1024123456789',
+      amount: 1024123456789,
       claimStat: 'Complete'
     },{
       id: 2,
       minner: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
       timestamp: new Date().getTime() * 1000,
       block: 'ewqewqrecasd',
-      amount: '1024123456789',
+      amount: 1024123456789,
       claimStat: 'Complete'
     },{
       id: 3,
       minner: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
       timestamp: new Date().getTime(),
       block: 'ewqewqrecasd',
-      amount: '1024123456789',
+      amount: 1024123456789,
       claimStat: 'Complete'
     },{
       id: 4,
       minner: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
       timestamp: new Date().getTime(),
       block: 'ewqewqrecasd',
-      amount: '1024123456789',
+      amount: 1024123456789,
       claimStat: 'Complete'
     }];
     setTransactionData(newData);
@@ -90,6 +91,10 @@ function MyUnivoicePage() {
     // TODO
   }
 
+  const catchNftImgFail = (event) => {
+    event.target.src = ImgNftThum
+  }
+
   const loadLicense = () => {
     const data = [{
       id: 1,
@@ -120,7 +125,10 @@ function MyUnivoicePage() {
   }
 
   const clickClaim = () => {
-    setClaimable(false)
+    // setClaimable(false)
+    // showToast(new Date().toISOString())
+    // showToast(new Date().toISOString(), 'error')
+    showToast('say something', 'warn')
     // TODO
   }
 
@@ -184,7 +192,7 @@ function MyUnivoicePage() {
           <div key={el.id} className={style.tbl_r}>
             <div className={style.cell}>{el.idx}</div>
             <div className={style.cell}>
-                <div className={style.img_bg}><div className={style.img_wrap}><img className={`${style.img} img-fixed`} src={el.imgurl} /></div></div>
+                <div className={style.img_bg}><div className={style.img_wrap}><img className={`${style.img} img-fixed`} src={el.imgurl} onError={catchNftImgFail} /></div></div>
               <div className={style.intro}>{el.intro}</div>
             </div>
             <div className={style.cell}>{fmtInt(el.owners)}</div>

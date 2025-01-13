@@ -173,4 +173,5 @@ service : {
     "sum_unclaimed_mint_ledger_onceday":(text) ->(nat) query;
     "get_total_listener":() -> (opt nat64) query;
     "get_main_site_summary":() ->( MainSiteSummary);
+    "sum_claimed_mint_ledger":(text) -> (NumTokens);
 }

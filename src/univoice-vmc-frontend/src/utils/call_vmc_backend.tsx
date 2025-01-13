@@ -48,9 +48,21 @@ export const get_main_site_summary = async():Promise<MainSiteSummary> =>{
 }
 
 export const get_miner_license = async(user_principal: string, pre?: bigint, take?: bigint):Promise<Array<bigint>> =>  {
-   let res =  univoice_vmc_backend.get_miner_license(user_principal);
+   let res = await  univoice_vmc_backend.get_miner_license(user_principal);
    return res;
 
+}
+
+export const sum_claimed_mint_ledger = async(user_principal:string):Promise<bigint> => {
+  let res = await univoice_vmc_backend.sum_claimed_mint_ledger(user_principal);
+  console.log("query sum_claimed_mint_ledger res = ", res);
+  return res;
+}
+
+export const sum_unclaimed_mint_ledger_onceday = async(user_principal:string):Promise<bigint> => {
+  let res = await univoice_vmc_backend.sum_unclaimed_mint_ledger_onceday(user_principal);
+  console.log("query sum_unclaimed_mint_ledger_onceday res=", res);
+  return res;
 }
 
 

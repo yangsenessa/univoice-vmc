@@ -610,6 +610,22 @@ fn sum_unclaimed_mint_ledger_onceday(principalid: String) -> NumTokens {
     })
 }
 
+#[ic_cdk::query]
+fn sum_claimed_mint_ledger(principalid: String) -> NumTokens {
+    LEDGER_STATE.with(|s| {
+        let account: Account = Account::from_str(&principalid).expect("pack into  principal err");
+        let mut tokens: NumTokens = NumTokens::from(0 as u128);
+
+        for item in s.borrow().iter() {
+            if item.minner_principalid != principalid {
+                continue;
+            }
+            tokens += item.clone().tokens;
+        }
+        return tokens;
+    })
+}
+
 fn get_unclaimed_mint_ledger_by_principal(
     principalid: String,
 ) -> Option<Vec<UnvMinnerLedgerRecord>> {

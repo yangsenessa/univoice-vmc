@@ -1,14 +1,21 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance, fmtTimestamp, fmtSummaryAddr } from '@/utils';
 import Paging from '@/components/paging';
-import style from './myunivoice.module.scss'
-import ImgBgGetMoreNft from '@/assets/imgs/bg_getmorenft.png'
+import style from './myunivoice.module.scss';
+import ImgBgGetMoreNft from '@/assets/imgs/bg_getmorenft.png';
+import ImgNfyThum from '@/assets/imgs/nft_thum.png';
+import {sum_claimed_mint_ledger,sum_unclaimed_mint_ledger_onceday} from "@/utils/call_vmc_backend";
+
+import { useAcountStore } from '@/stores/user';
+
+const { getPrincipal } = useAcountStore();
+
 
 function MyUnivoicePage() {
 
   const [summaryData, setSummaryData] = useState({
-    rewards: 0,
-    claimable: 0,
+    rewards: '0',
+    claimable: '0',
   });
   const [transactionData, setTransactionData] = useState<any>([]);
   const [transactionPage, setTransactionPage] = useState({
@@ -64,9 +71,21 @@ function MyUnivoicePage() {
   
   const loadSummary = () => {
     const data = {
-      rewards: 1234567800000000,
-      claimable: 123123456789,
+      rewards: '1234567800000000',
+      claimable: '123123456789',
     }
+    let principal_id = getPrincipal();
+    console.log("Current principal is :", principal_id);
+    sum_claimed_mint_ledger(principal_id).then(
+      sum_tokens => {
+        data.rewards = String(sum_tokens);
+      }
+    
+    )
+    sum_unclaimed_mint_ledger_onceday(principal_id).then(unclaimed_tokens =>{
+      data.claimable = String(unclaimed_tokens) ;
+
+    })
     setSummaryData(data)
     // TODO
   }

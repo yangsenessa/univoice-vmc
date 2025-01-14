@@ -221,6 +221,68 @@ export const call_get_transactions = async (principal_id:string,pre:number, take
 
   return tranferDetails;
 }
+
+
+export const call_get_transactions_listener = async (principal_id:string,pre:number, take:number): Promise<TransferResponse[]> => {
+  if (!plugReady()) return null;
+  const plug = (window as any).ic.plug;
+  const principal = Principal.fromText(principal_id) ;
+  console.log('ICRC ledger call principal =' + principal);    
+
+  const request =  {'start' : pre,'length' : take };
+  await plug.requestConnect({
+   whitelist,
+  }); 
+
+  const tokenActor = await plug.createActor({
+     canisterId: tokenCanisterId,
+     interfaceFactory: tokenLedegerIdlFactory,
+  });
+  // use our actors getSwapInfo method
+  console.log('ICRC ledger call get_transactions begin');    
+
+  var response  = await tokenActor.get_transactions(request);
+
+  var transactions = response.transactions;
+  let tranferDetails:TransferResponse[] = [];
+  let index = 0;
+  transactions.forEach((element)=> {
+    console.log('ICRC ledger call transaction kind :' , element.kind);   
+       if(element.kind=="transfer"){
+         let transferInfo = element.transfer[0];
+
+         if(element.transfer && transferInfo){
+
+            let time_stamp = element.transfer.created_at_time?element.transfer.created_at_time:element.timestamp;
+            let gmt_time_stamp:number;
+            if(time_stamp){
+              gmt_time_stamp=Number(Number(time_stamp)/1000) ;
+            } 
+            if (transferInfo.to?.owner.toString() === principal_id) {
+              let transfer_detail_item:TransferResponse={
+                   txIndex:pre+index,
+                   to:transferInfo.to?.owner.toString(),
+                   fee:transferInfo.fee?Number(transferInfo.fee):Number(0),
+                   memo:null,
+                   created_at_time:gmt_time_stamp,
+                   amount:transferInfo.amount?Number(transferInfo.amount):Number(0),
+                   from:transferInfo.from?.owner.toString()
+                 };
+              console.log("Transaction result = ", transfer_detail_item);
+              tranferDetails[index]= transfer_detail_item;    
+              index+=1;        
+            }                
+          }        
+       }
+    
+  });
+
+
+  return tranferDetails;
+}
+
+
+
 export type TransferResponse = {
    txIndex:number,
    to:string,

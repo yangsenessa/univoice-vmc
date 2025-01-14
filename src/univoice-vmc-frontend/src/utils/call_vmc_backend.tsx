@@ -31,14 +31,11 @@ export const gener_nft_owner_wait_claims = async(principalId:string):Promise<Min
   return result;  
 }
 
-export const get_miner_jnl = async(principalid:string):Promise<[] | [Array<UnvMinnerLedgerRecord>]> =>{
-  console.log("get_miner_jnl with principalid of:"+ principalid);
-  if(principalid) {
-    return await univoice_vmc_backend.get_all_miner_jnl_with_principalid(principalid);
-
-  } else {
-    return await univoice_vmc_backend.get_all_miner_jnl();
-  }
+export const get_miner_jnl = async(principalid:string, pre:bigint, take:bigint):Promise<Array<UnvMinnerLedgerRecord>> =>{
+  console.log("get_miner_jnl with principalid of:"+ principalid,pre,take);
+  let res = await univoice_vmc_backend.get_all_miner_jnl_with_principalid(principalid,pre,take);
+  console.log("get_miner_jnl with principalid result:", res);
+  return res;
 }
 
 export const get_main_site_summary = async():Promise<MainSiteSummary> =>{
@@ -53,16 +50,32 @@ export const get_miner_license = async(user_principal: string, pre?: bigint, tak
 
 }
 
-export const sum_claimed_mint_ledger = async(user_principal:string):Promise<bigint> => {
-  let res = await univoice_vmc_backend.sum_claimed_mint_ledger(user_principal);
-  console.log("query sum_claimed_mint_ledger res = ", res);
+type SummartForMyvoice = { 
+  sum_claimed:bigint,
+  sum_unclaimed:bigint
+};
+
+export const fetch_sumary_for_myvoice = async(user_principal:string):Promise<SummartForMyvoice> =>{
+  let sum_claimed_val = await univoice_vmc_backend.sum_claimed_mint_ledger(user_principal);
+
+  let sum_unclaimed_val = await univoice_vmc_backend.sum_unclaimed_mint_ledger_onceday(user_principal);
+  const res = {
+    sum_claimed:sum_claimed_val,
+    sum_unclaimed:sum_unclaimed_val
+  }
+
   return res;
+
 }
 
-export const sum_unclaimed_mint_ledger_onceday = async(user_principal:string):Promise<bigint> => {
-  let res = await univoice_vmc_backend.sum_unclaimed_mint_ledger_onceday(user_principal);
-  console.log("query sum_unclaimed_mint_ledger_onceday res=", res);
-  return res;
+export const claim_to_account_by_principal = async(user_principal:string):Promise<bigint> =>{
+  let claim_res = await univoice_vmc_backend.claim_to_account_by_principal(user_principal);
+  console.log("Has claimed res", claim_res);
+  if("Ok" in claim_res) {
+    return  (claim_res as {'Ok': bigint}).Ok;
+
+  }
+  return BigInt(0);
 }
 
 

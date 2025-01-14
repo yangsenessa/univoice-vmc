@@ -89,6 +89,7 @@ export const fmtTimestamp = (time: number) => {
   return new Date(t).toISOString()
   // return new Date(t).toLocaleString()
 }
+
 export const fmtSummaryAddr = (addr: string) => {
   if (!addr) {
     return '--'

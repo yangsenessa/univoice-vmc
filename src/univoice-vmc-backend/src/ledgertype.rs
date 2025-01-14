@@ -69,6 +69,7 @@ pub struct UnvMinnerLedgerRecord{
     pub trans_tx_index:Option<TxIndex>,
     pub tokens:NumTokens,
     pub gmt_datetime:Timestamp,
+    pub gmt_claim_time:Timestamp,
     pub biz_state:TransferTxState
 }
 impl Storable for UnvMinnerLedgerRecord {

@@ -21,8 +21,7 @@ use ic_cdk::api::management_canister::http_request::{
     TransformContext,
 };
 use ledgertype::{
-    ApproveResult, MinerTxState, MinerWaitClaimBalance, TransferArgs, TransferTxState, TxIndex,
-    UnvMinnerLedgerRecord, UnvMinnerLedgerState, WorkLoadLedgerItem,MainSiteSummary,
+    ApproveResult, MainSiteSummary, MinerTxState, MinerWaitClaimBalance, Timestamp, TransferArgs, TransferTxState, TxIndex, UnvMinnerLedgerRecord, UnvMinnerLedgerState, WorkLoadLedgerItem
 };
 use serde::Serialize;
 use serde_json::{self, Value};
@@ -450,7 +449,7 @@ async fn get_main_site_summary() ->MainSiteSummary{
 }
 
 #[ic_cdk::query]
-fn get_all_miner_jnl_with_principalid(principalid: String) -> Vec<UnvMinnerLedgerRecord> {
+fn get_all_miner_jnl_with_principalid(principalid: String,pre:usize, take:usize) -> Vec<UnvMinnerLedgerRecord> {
     let mut minting_ledeger: Vec<UnvMinnerLedgerRecord> = Vec::new();
     let account: Account = Account::from_str(&principalid).expect("Parse principal id err");
 
@@ -461,7 +460,19 @@ fn get_all_miner_jnl_with_principalid(principalid: String) -> Vec<UnvMinnerLedge
             }
         }
     });
-    return minting_ledeger;
+    if pre > minting_ledeger.len() {
+        let empty_res:Vec<UnvMinnerLedgerRecord> = Vec::new();
+        return  empty_res;
+    }
+
+    if take >= minting_ledeger.len()  {
+        return minting_ledeger;
+    }
+    if pre +take > minting_ledeger.len()-1 {
+        return minting_ledeger[pre*take..].to_vec();
+    }    
+    return minting_ledeger[pre..(pre+take)].to_vec();
+    //return minting_ledeger;
 }
 
 #[ic_cdk::update]
@@ -511,6 +522,7 @@ async fn claim_to_account_from_index(block_index: BlockIndex) -> Result<TxIndex,
                     claimed_ledger.biz_state = TransferTxState::Claimed;
                     claimed_ledger.meta_workload.mining_status =
                         MinerTxState::Claimed(String::from("claimed"));
+                    claimed_ledger.gmt_claim_time = ic_cdk::api::time();
                     claimed_mint_ledger(&block_index, &i)
                         .map_err(|e| format!("fail to call ledger:{:?}", e));
                     ic_cdk::println!("Transfer Success {}", i);
@@ -546,8 +558,9 @@ fn gener_nft_owner_wait_claims(principal: String) -> MinerWaitClaimBalance {
 }
 
 #[ic_cdk::update]
-async fn claim_to_account_by_principal(principalid: String) -> Result<TxIndex, String> {
-    let miner_ledger_vec = get_unclaimed_mint_ledger_by_principal(principalid);
+async fn claim_to_account_by_principal(principalid: String) -> Result<NumTokens, String> {
+    let miner_ledger_vec = get_unclaimed_mint_ledger_by_principal_daily(principalid);
+    let mut sum_tx_tokens:NumTokens = NumTokens::from(0 as u128);
     match miner_ledger_vec {
         Some(ledger_item_vec) => {
             for ledger_item in ledger_item_vec.iter() {
@@ -558,10 +571,22 @@ async fn claim_to_account_by_principal(principalid: String) -> Result<TxIndex, S
                         claimed_ledger.biz_state = TransferTxState::Claimed;
                         claimed_ledger.meta_workload.mining_status =
                             MinerTxState::Claimed(String::from("claimed"));
+                        claimed_ledger.gmt_claim_time = ic_cdk::api::time();
                         let block_index: Nat = claimed_ledger.block_index.unwrap();
                         claimed_mint_ledger(&block_index, &i)
                             .map_err(|e| format!("fail to call ledger:{:?}", e));
                         ic_cdk::println!("Transfer Success {}", i);
+                        sum_tx_tokens += ledger_item.tokens.clone();
+                        LEDGER_STATE.with(|s|{
+                            for mut item in s.borrow_mut().iter() {
+                                if block_index == item.block_index.unwrap() {
+                                    item.gmt_claim_time = claimed_ledger.gmt_claim_time;
+                                    item.biz_state = TransferTxState::Claimed;
+                                }
+                            }
+
+                        });
+
                     }
                     Result::Err(e) => {
                         ic_cdk::println!("Transfer fail {}", e);
@@ -572,7 +597,7 @@ async fn claim_to_account_by_principal(principalid: String) -> Result<TxIndex, S
         }
         None => return Err(String::from("None ledger need to be claimed")),
     };
-    Ok(TxIndex::from(0 as u128))
+    Ok(sum_tx_tokens)
 }
 
 fn get_unclaimed_mint_ledger(index: &BlockIndex) -> Option<UnvMinnerLedgerRecord> {
@@ -595,14 +620,22 @@ fn sum_unclaimed_mint_ledger_onceday(principalid: String) -> NumTokens {
     LEDGER_STATE.with(|s| {
         let account: Account = Account::from_str(&principalid).expect("pack into  principal err");
         let mut tokens: NumTokens = NumTokens::from(0 as u128);
-        let day_of_nano_millsecond: u64 = 24 * 3600 * 1000;
+        let day_of_nano_millsecond: u64 = 24 * 3600 * 1000 * 1000;
         let nowtime = ic_cdk::api::time();
         for item in s.borrow().iter() {
             if (item.biz_state == TransferTxState::Claimed)
-                || (day_of_nano_millsecond > nowtime - item.gmt_datetime)
+                || ((item.biz_state != TransferTxState::Claimed) && (day_of_nano_millsecond > nowtime - item.gmt_claim_time))
                 || (item.minner_principalid != principalid)
             {
+                if day_of_nano_millsecond > nowtime - item.gmt_claim_time {
+                    ic_cdk::println!("Cal time: {} >{} -{}", 
+                        day_of_nano_millsecond,nowtime, item.gmt_claim_time)
+                 }
                 continue;
+            }
+            if day_of_nano_millsecond <= nowtime - item.gmt_claim_time {
+                ic_cdk::println!("Cal time full fill: {} >{} -{}", 
+                    day_of_nano_millsecond,nowtime, item.gmt_claim_time)
             }
             tokens += item.clone().tokens;
         }
@@ -633,7 +666,46 @@ fn get_unclaimed_mint_ledger_by_principal(
         let mut ledgerRecord: Vec<UnvMinnerLedgerRecord> = Vec::new();
         for item in s.borrow().iter() {
             if principalid == item.clone().minner_principalid {
-                if item.biz_state == TransferTxState::Claimed {
+                if item.biz_state != TransferTxState::Claimed {
+                    ledgerRecord.push(item.clone());
+                }
+            }
+        }
+        return Some(ledgerRecord);
+    })
+}
+
+fn get_unclaimed_mint_ledger_by_principal_daily(
+    principalid: String,
+) -> Option<Vec<UnvMinnerLedgerRecord>> {
+    LEDGER_STATE.with(|s| {
+        let nowtime = ic_cdk::api::time();
+        let day_of_nano_millsecond: u64 = 24 * 3600 * 1000 * 1000;
+
+        let mut ledgerRecord: Vec<UnvMinnerLedgerRecord> = Vec::new();
+        //24hour can claim once
+        for item in s.borrow().iter() {
+            if (principalid == item.clone().minner_principalid) &&
+               (item.biz_state == TransferTxState::Claimed) && 
+               (day_of_nano_millsecond > nowtime - item.gmt_claim_time) {
+                   if day_of_nano_millsecond > nowtime - item.gmt_claim_time {
+                        ic_cdk::println!("Cal time daliy: {} >{} -{}", 
+                        day_of_nano_millsecond,nowtime, item.gmt_claim_time)
+                   }
+                   
+                  let empty_res:Vec<UnvMinnerLedgerRecord> =  Vec::new();
+                  return Some(empty_res);
+               }
+               if day_of_nano_millsecond <= nowtime - item.gmt_claim_time {
+                    ic_cdk::println!("Cal time full fill daily: {} >{} -{}", 
+                    day_of_nano_millsecond,nowtime, item.gmt_claim_time)
+               }
+        }
+
+
+        for item in s.borrow().iter() {
+            if principalid == item.clone().minner_principalid {
+                if (item.biz_state != TransferTxState::Claimed) {
                     ledgerRecord.push(item.clone());
                 }
             }
@@ -652,6 +724,7 @@ fn claimed_mint_ledger(index: &BlockIndex, trans_index: &TxIndex) -> Result<(), 
                 item_clone.biz_state = TransferTxState::Claimed;
                 item_clone.meta_workload.mining_status =
                     MinerTxState::Claimed(String::from("claimed"));
+                item_clone.gmt_claim_time= ic_cdk::api::time();
                 item_clone.trans_tx_index = Some(trans_index.clone());
                 stable_mem.set(mem_index, &item_clone);
                 return Ok(());
@@ -803,6 +876,7 @@ fn produce_unv_miner_ledger(
             tokens: block_tokens.clone(),
             trans_tx_index: Option::None,
             gmt_datetime: ic_cdk::api::time(),
+            gmt_claim_time: Timestamp::from(0 as u64),
             biz_state: TransferTxState::WaitClaim,
         };
         s.borrow_mut()

@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance, fmtTimestamp, fmtSummaryAddr } from '@/utils';
+import {reConnectPlug,call_tokens_of,call_get_transactions_listener} from '@/utils/icplug';
+import type {UnvMinnerLedgerRecord,TransferTxState} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
 import Paging from '@/components/paging';
 import style from './myunivoice.module.scss'
 import ImgBgGetMoreNft from '@/assets/imgs/bg_getmorenft.png'
 import ImgNftThum from '@/assets/imgs/nft_thum.png'
 import { showToast } from '@/components/toast';
 
-import {sum_claimed_mint_ledger,sum_unclaimed_mint_ledger_onceday} from "@/utils/call_vmc_backend";
+import {fetch_sumary_for_myvoice,claim_to_account_by_principal,get_miner_jnl} from "@/utils/call_vmc_backend";
 
 import { useAcountStore } from '@/stores/user';
+import { timeStamp } from 'console';
 
-const { getPrincipal } = useAcountStore();
 
 function MyUnivoicePage() {
 
@@ -25,38 +27,34 @@ function MyUnivoicePage() {
   });
   const [licenseData, setLicenseData] = useState<any>([]);
   const [claimable, setClaimable] = useState(true)
+  const { getPrincipal } = useAcountStore();
+
 
   const queryTransaction = (pagenum: number) => {
-    let newData: any[] = [{
-      id: 1,
-      minner: '6nimk-xpves-34bk3-zf7dp-nykqv-h3ady-iu3ze-xplot-vm4uy-ptbel-3qe',
-      timestamp: new Date().getTime() * 1000,
-      block: '6nimk-xpves-34bk3-zf7dp-nykqv-h3ady-iu3ze-xplot-vm4uy-ptbel-3qe',
-      amount: 1024123456789,
-      claimStat: 'Complete'
-    },{
-      id: 2,
-      minner: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      timestamp: new Date().getTime() * 1000,
-      block: 'ewqewqrecasd',
-      amount: 1024123456789,
-      claimStat: 'Complete'
-    },{
-      id: 3,
-      minner: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      timestamp: new Date().getTime(),
-      block: 'ewqewqrecasd',
-      amount: 1024123456789,
-      claimStat: 'Complete'
-    },{
-      id: 4,
-      minner: 'ewrtertwerdfsdfadsfstw...fasfasfasdfas',
-      timestamp: new Date().getTime(),
-      block: 'ewqewqrecasd',
-      amount: 1024123456789,
-      claimStat: 'Complete'
-    }];
-    setTransactionData(newData);
+
+    if(!getPrincipal()){
+      reConnectPlug();
+    }
+    let minner_txs = [];
+    get_miner_jnl(getPrincipal(), BigInt(5*pagenum),BigInt(5)).then(
+      miner_jnls =>{
+        miner_jnls.forEach((element:UnvMinnerLedgerRecord,index)=> {
+          console.log("Fetch one trx_element:", element);
+          let data={
+            id:index,
+            minner:element.minner_principalid,
+            timestamp:element.gmt_claim_time == BigInt(0)?Number(element.gmt_datetime):Number(element.gmt_claim_time),
+            block:String(element.block_index[0]),
+            amount:Number(element.tokens),
+            claimStat: 'Claimed' in element.biz_state? 'Claimed':'WaitClaim'
+          };
+          minner_txs[index] = data;
+        });
+
+      }
+    );
+
+    setTransactionData(minner_txs);
     let p = transactionPage;
     p.pageNum = pagenum
     // p.totalPage = 10
@@ -64,71 +62,100 @@ function MyUnivoicePage() {
   }
 
   useEffect(() => {
-    window.scrollTo(0, 0)
-    loadSummary()
-    loadLicense()
-    queryTransaction(1)
+    window.scrollTo(0, 0);
+    loadSummary();
+    loadLicense();
+    queryTransaction(0);
   }, []);
   
   const loadSummary = () => {
-    const data = {
-      rewards: '1234567800000000',
-      claimable: '123123456789',
-    }
-    let principal_id = getPrincipal();
-    console.log("Current principal is :", principal_id);
-    sum_claimed_mint_ledger(principal_id).then(
-      sum_tokens => {
-        data.rewards = String(sum_tokens);
-      }
-    
-    )
-    sum_unclaimed_mint_ledger_onceday(principal_id).then(unclaimed_tokens =>{
-      data.claimable = String(unclaimed_tokens) ;
 
-    })
-    setSummaryData(data)
-    // TODO
+    let data={
+      rewards: '888',
+      claimable: '888',
+    };
+    
+    let principal_id = getPrincipal();
+    if(!principal_id) {
+      reConnectPlug();
+    }
+    console.log("Current principal is :", principal_id);
+    fetch_sumary_for_myvoice(principal_id).then(
+      sum_tokens => {
+        data.claimable =  String(sum_tokens.sum_unclaimed);
+        data.rewards = String(sum_tokens.sum_claimed);
+        console.log("get sum_tokens:", sum_tokens);
+        console.log("Set summary1");
+        setSummaryData(data);
+        
+      }
+    );  
   }
 
   const catchNftImgFail = (event) => {
-    event.target.src = ImgNftThum
+    //event.target.src = ImgNftThum
   }
 
   const loadLicense = () => {
-    const data = [{
-      id: 1,
-      imgurl: 'abc',
-      idx: '01',
-      intro: 'Goodluck charm Goodluck charm Goodluck charm Goodluck charm Goodluck charm Goodluck charm',
-      owners: 21000,
-      quantity: 10,
-      myhashs: '#2001,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010'
-    },{
-      id: 2,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
-      idx: '02',
-      intro: 'Goodluck charm2',
-      owners: 21000,
-      quantity: 1,
-      myhashs: '#2001'
-    },{
-      id: 3,
-      imgurl: 'http://y.tiancaikeji.cn/aa/nft2.png',
-      idx: '03',
-      intro: 'Goodluck charm3',
-      owners: 21000,
-      quantity: 8,
-      myhashs: '#2001,#2002,#2003,#2004,#2005,#2006,#2007,#2008'
-    },]
-    setLicenseData(data)
+    const dataItem ={ 
+       id: 1,
+       imgurl: 'https://bafybeibhnv326rmac22wfcxsmtrbdbzjzn5mviykq3rbt4ltqkqqfgobga.ipfs.w3s.link/thum.jpg',
+       idx: '01',
+       intro: 'Univoice listener',
+       owners: 21000,
+       quantity: 10,
+       myhashs: '#2001,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010'
+    }
+
+    const data = [];
+    reConnectPlug()
+          .then((principal_id) => {
+            console.log('reConnectPlug done, pid:', principal_id)
+            if (principal_id) {
+              //get_miner_license(principal_id);
+              
+              call_tokens_of(principal_id).then(tokenIds=>{
+                let owner_cnt = 0;
+                let myhash_str = "";
+                console.log("Origin nft tokens is",tokenIds);
+
+                for (let token_id in  tokenIds) {
+                    console.log("hold license of token_id", tokenIds[token_id]);
+                    owner_cnt +=1;
+                    myhash_str += '#'+tokenIds[token_id]+',';
+
+                }
+                dataItem.owners = owner_cnt;
+                dataItem.myhashs = myhash_str;
+                data[0] = dataItem;
+                setLicenseData(data);
+
+              })      
+            }
+          }).catch((e) => {
+            console.log('reConnectPlug exception!', e)
+          })
+
+
+
+
+    //setLicenseData(data)
   }
 
   const clickClaim = () => {
     // setClaimable(false)
     // showToast(new Date().toISOString())
     // showToast(new Date().toISOString(), 'error')
-    showToast('say something', 'warn')
+    if(getPrincipal()){
+      reConnectPlug();
+    }
+    claim_to_account_by_principal(getPrincipal()).then(trans_tokens=>{
+      showToast("You have claimed "+String(trans_tokens)+" success. You can recheck by your wallet.", 'info');
+      loadSummary();
+    }
+
+    );
+   
     // TODO
   }
 

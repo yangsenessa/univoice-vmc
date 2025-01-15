@@ -86,8 +86,20 @@ export const fmtInt = (data: number) => {
 }
 export const fmtTimestamp = (time: number) => {
   let t = time.toString().length > 13 ? Math.floor(time / 1000) : time
-  return new Date(t).toISOString()
+  let r = new Date(t).toISOString()
+  r = r.substring(0, 10) + ', ' + r.substring(11, 19) + ' UTC';
+  let now = Date.now()
+  if (now - t <= 60000) {
+    r += ', justnow'
+  } else if (now - t <= 3600000) {
+    r += ', ' + Math.floor((now - t) / 60000) + ' min ago'
+  } else if (now - t <= 86400000) {
+    r += ', ' + Math.floor((now - t) / 3600000) + ' hour ago'
+  }
+  // return new Date(t).toISOString()
   // return new Date(t).toLocaleString()
+
+  return r
 }
 
 export const fmtSummaryAddr = (addr: string) => {

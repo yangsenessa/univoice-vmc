@@ -17,6 +17,17 @@
 .flip_card_front, .flip_card_back {
   backface-visibility: hidden;
 }
+.flip_card_front {
+  background-image: url("@/assets/imgs/BG@1x.png");
+  background-size: auto;
+  background-position: top center;
+  background-repeat: no-repeat;
+}
+@media (min-width: 880px) {
+  .flip_card_front {
+    background-size: contain;
+  }
+}
 .flip_card_back {
   transform: rotateY(180deg);
   position: absolute;
@@ -58,14 +69,12 @@
 // block1 menu+ip
 .home_1 {
   position: relative;
-  min-height: 910px;
+  margin-bottom: 100px;
   .bg {
     width: 100%;
     min-height: 670px;
   }
   .ctx {
-    position: absolute;
-    top: 0;
     width: 100%;
   }
   .mainpanel {
@@ -125,7 +134,7 @@
 }
 @media (min-width: 600px) {
   .home_1 {
-    min-height: 500px;
+    margin-bottom: 150px;
     .mainpanel {
       .info {
         min-width: 300px;
@@ -183,7 +192,7 @@
 }
 @media (min-width: 1280px) {
   .home_1 {
-    min-height: 996px;
+    margin-bottom: 300px;
     .mainpanel {
       max-width: 1500px;
       .info {

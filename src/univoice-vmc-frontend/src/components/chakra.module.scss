@@ -47,6 +47,9 @@
   cursor: pointer;
   box-shadow: inset -3px -3px 7px 0px #FFFFFF,inset 4px 4px 7px 0px #8896A393,0px 0px 24px 0px #FFFFFF66;
 }
+.chakra_circle:hover {
+  box-shadow: inset 4px 4px 7px 0px #8896A393,0px 0px 24px 0px #FFFFFF66;
+}
 .chakra_click_count {
   font-size: 12px;
   line-height: 24px;

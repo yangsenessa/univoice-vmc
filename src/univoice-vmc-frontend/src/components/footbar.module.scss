@@ -65,6 +65,9 @@
     margin-bottom: 12px;
     cursor: pointer;
   }
+  .lnk:hover {
+    color: #FFFFFF;
+  }
 }
 .btn_split {
   margin: 0 12px;
@@ -105,6 +108,9 @@
   justify-content: center;
   cursor: pointer;
   background: linear-gradient(180deg, #824BFF 0%, #6C2CFD 100%);
+}
+.btn_round:hover {
+  background: linear-gradient(180deg, #824BFFCC 0%, #6C2CFDCC 100%);
 }
 .btn_round.disable {
   cursor: auto;

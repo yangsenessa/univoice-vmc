@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import style from './home.module.scss'
 import TopBar from '@/components/topbar'
 import FootBar from '@/components/footbar'
-import ImgBg from '@/assets/imgs/BG@1x.png'
 import ImgService from '@/assets/imgs/Services@2x.png'
 import ImgSpeakingIcon from '@/assets/imgs/Speakingicon@2x.png'
 import ImgListeningIcon from '@/assets/imgs/Listeningicon@2x.png'
@@ -121,7 +120,6 @@ function UvHomePage() {
       <div className={`${style.flip_card_inner} ${isFlipped ? style.flip_card_inner_flipped : ''}`}>
         <div className={`${style.flip_card_front}`}>
           <div className={style.home_1}>
-            <img src={ImgBg} className={`${style.bg} img-fixed`} />
             <div className={style.ctx} onClick={handleHideProfile}>
               <TopBar ref={topbarRef}/>
               <div className={style.mainpanel}>
@@ -152,7 +150,7 @@ function UvHomePage() {
               <img src={ImgSpeakingIcon} className={style.img} />
               <div className={style.title}>Speaking</div>
               <div className={style.intro}>
-                <p>the essence of Univoice, where every individual can freely express themselves and contribute to the creation of a harmonious, voice-driven world.</p>
+                <p>The essence of Univoice, where every individual can freely express themselves and contribute to the creation of a harmonious, voice-driven world.</p>
                 <div className={style.lnk_learn_more} onClick={goSpeaking}>learn more ...</div>
               </div>
               <div className={`${style.btn} btn-link-1`} onClick={startSpeaking}>

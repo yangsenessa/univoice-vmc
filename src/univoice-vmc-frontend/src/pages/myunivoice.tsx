@@ -160,10 +160,6 @@ function MyUnivoicePage() {
    
     // TODO
   }
-
-  const clickCopyMyNftHashs = (str: string) => {
-    navigator.clipboard.writeText(str)
-  }
   
   return (
     <div className="uv-container-1 container-subpg pg-dashboard">
@@ -227,7 +223,6 @@ function MyUnivoicePage() {
             <div className={style.cell}>{fmtInt(el.owners)}</div>
             <div className={style.cell}>
               <div className={style.myhashs}>{el.myhashs}</div>
-              <div className={style.copy} onClick={() => {clickCopyMyNftHashs(el.myhashs)}}></div>
             </div>
             <div className={`${style.cell} ${style.quantity}`}>+{fmtInt(el.quantity)}</div>
           </div>

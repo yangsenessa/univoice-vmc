@@ -127,6 +127,8 @@ function MyUnivoicePage() {
                 }
                 dataItem.owners = owner_cnt;
                 dataItem.myhashs = myhash_str;
+                dataItem.quantity = Number(summaryData.rewards);
+                dataItem.imgurl = ImgNftThum;
                 data[0] = dataItem;
                 setLicenseData(data);
 

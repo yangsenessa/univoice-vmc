@@ -149,7 +149,7 @@ img {
 .paging .paging-item {
   height: 32px;
   min-width: 16px;
-  background-color: #3C364B;
+  background-color: #2B2736;
   border-radius: 4px;
   margin: 0 5px;
   padding: 0 8px;
@@ -159,6 +159,9 @@ img {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.paging .paging-item:hover {
+  background-color: #3C364B;
 }
 .paging .paging-item.paging-item-txt {
   cursor: auto;

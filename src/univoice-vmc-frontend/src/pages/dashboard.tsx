@@ -59,15 +59,15 @@ function DashboardPage() {
         newData[index]=dataItem;
 
       })
-      
+      setTransactionData(newData);
+      let p = transactionPage;
+      p.pageNum = pagenum
+      // p.totalPage = 10
+      setTransactionPage(p);
 
     });
     
-    setTransactionData(newData);
-    let p = transactionPage;
-    p.pageNum = pagenum
-    // p.totalPage = 10
-    setTransactionPage(p);
+   
   }
 
   useEffect(() => {

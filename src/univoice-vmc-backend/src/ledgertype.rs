@@ -87,6 +87,12 @@ impl Storable for UnvMinnerLedgerRecord {
     };
 }
 
+#[derive(CandidType,Deserialize,Clone,Default)]
+pub struct MinerJnlPageniaze {
+    pub ledgers:Vec<UnvMinnerLedgerRecord>,
+    pub total_log:usize
+}
+
 
 #[derive(CandidType,Deserialize,Clone,Default)]
 pub struct UnvMinnerLedgerState {

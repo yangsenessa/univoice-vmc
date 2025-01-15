@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance, fmtTimestamp, fmtSummaryAddr } from '@/utils';
-import {call_tokens_of,reConnectPlug,call_get_transactions} from '@/utils/icplug';
+import {call_tokens_of_nftcollection,reConnectPlug,call_get_transactions} from '@/utils/icplug';
 import {poll_balance,get_total_listener,get_main_site_summary,get_miner_license} from '@/utils/call_vmc_backend';
 import Paging from '@/components/paging';
 import style from './dashboard.module.scss'
@@ -43,6 +43,7 @@ function DashboardPage() {
       to:string
     }
     let newData: any[]=[];
+    let total_log = 0;
     call_get_transactions(principal_id,5*(pagenum-1),5).then(result=>{
       result.forEach((element,index)=>{
         let dataItem:transactionDataType={
@@ -55,14 +56,16 @@ function DashboardPage() {
           from:element.from,
           to:element.to
         }
-        console.log("Transaction view dataitem", dataItem);
+        total_log = element.total_log;
+        console.log("Transaction view dataitem", dataItem, total_log);
         newData[index]=dataItem;
 
       })
       setTransactionData(newData);
       let p = transactionPage;
-      p.pageNum = pagenum
-      // p.totalPage = 10
+      p.pageNum = pagenum;
+      p.totalPage = parseInt(String( Number(total_log)/5)) +1;
+      console.log("setTransactionPage:",p);
       setTransactionPage(p);
 
     });
@@ -109,38 +112,16 @@ function DashboardPage() {
   }
 
   const loadLicense = () => {
-    reConnectPlug()
-          .then((principal_id) => {
-            console.log('reConnectPlug done, pid:', principal_id)
-            if (principal_id) {
-              //get_miner_license(principal_id);
-              
-              call_tokens_of(principal_id).then(tokenIds=>{
-                let index = 0;
-                let data =[];
-                console.log("Origin nft tokens is",tokenIds);
-
-                for (let token_id in  tokenIds) {
-                    console.log("hold license of token_id", tokenIds[token_id]);
-            
-                    let license_item = {
-                      id: Number(tokenIds[token_id]),
-                      imgurl: 'https://bafybeibhnv326rmac22wfcxsmtrbdbzjzn5mviykq3rbt4ltqkqqfgobga.ipfs.w3s.link/thum.jpg',
-                      intro: 'Univoice listener',
-                      txt: 'A liciense for identify as Univoice-Listener.'
-                    }
-                    data[index]=license_item;
-                    index=index+1;
-
-                }
-                setLicenseData(data)
-
-              })      
-            }
-          }).catch((e) => {
-            console.log('reConnectPlug exception!', e)
-          })
-
+    let index = 0;
+    let data =[];
+    let license_item = {
+      id: Number(1),
+      imgurl: 'https://bafybeibhnv326rmac22wfcxsmtrbdbzjzn5mviykq3rbt4ltqkqqfgobga.ipfs.w3s.link/thum.jpg',
+      intro: 'Univoice listener',
+      txt: 'A liciense for identify as Univoice-Listener.'
+    }
+    data[index]=license_item;
+    setLicenseData(data);
   }
 
   const loadTokenPoolAmount =  (data) => {

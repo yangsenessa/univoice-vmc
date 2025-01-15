@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance, fmtTimestamp, fmtSummaryAddr } from '@/utils';
 import {reConnectPlug,call_tokens_of,call_get_transactions_listener} from '@/utils/icplug';
-import type {UnvMinnerLedgerRecord,TransferTxState} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
+import type {UnvMinnerLedgerRecord,TransferTxState,MinerJnlPageniaze} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
 import Paging from '@/components/paging';
 import style from './myunivoice.module.scss'
 import ImgBgGetMoreNft from '@/assets/imgs/bg_getmorenft.png'
@@ -36,9 +36,10 @@ function MyUnivoicePage() {
       reConnectPlug();
     }
     let minner_txs = [];
+    let total_log = 0;
     get_miner_jnl(getPrincipal(), BigInt(5*pagenum),BigInt(5)).then(
       miner_jnls =>{
-        miner_jnls.forEach((element:UnvMinnerLedgerRecord,index)=> {
+        miner_jnls.ledgers.forEach((element:UnvMinnerLedgerRecord,index)=> {
           console.log("Fetch one trx_element:", element);
           let data={
             id:index,
@@ -50,14 +51,16 @@ function MyUnivoicePage() {
           };
           minner_txs[index] = data;
         });
+        total_log = Number(miner_jnls.total_log);
 
       }
     );
 
     setTransactionData(minner_txs);
     let p = transactionPage;
-    p.pageNum = pagenum
-    // p.totalPage = 10
+    p.pageNum = pagenum;
+    p.totalPage = parseInt(String( Number(total_log)/5)) +1;
+    console.log("setTransactionPage:",p);
     setTransactionPage(p);
   }
 

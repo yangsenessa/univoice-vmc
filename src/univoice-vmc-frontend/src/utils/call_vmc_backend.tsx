@@ -1,5 +1,5 @@
 import { univoice_vmc_backend } from 'declarations/univoice-vmc-backend';
-import type {Result,MinerWaitClaimBalance,UnvMinnerLedgerRecord,MainSiteSummary} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
+import type {Result,MinerWaitClaimBalance,UnvMinnerLedgerRecord,MainSiteSummary,MinerJnlPageniaze} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
 import { isLocalNet } from '@/utils/env';
 
 
@@ -31,7 +31,7 @@ export const gener_nft_owner_wait_claims = async(principalId:string):Promise<Min
   return result;  
 }
 
-export const get_miner_jnl = async(principalid:string, pre:bigint, take:bigint):Promise<Array<UnvMinnerLedgerRecord>> =>{
+export const get_miner_jnl = async(principalid:string, pre:bigint, take:bigint):Promise<MinerJnlPageniaze> =>{
   console.log("get_miner_jnl with principalid of:"+ principalid,pre,take);
   let res = await univoice_vmc_backend.get_all_miner_jnl_with_principalid(principalid,pre,take);
   console.log("get_miner_jnl with principalid result:", res);

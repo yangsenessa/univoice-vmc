@@ -167,6 +167,34 @@ export const call_tokens_of= async (principal_id:string) : Promise<Array<bigint>
 
 }
 
+export const call_tokens_of_nftcollection= async (principal_id:string) : Promise<Array<bigint>> =>{
+  if (!plugReady()) return null;
+  const plug = (window as any).ic.plug;
+  if(!plug) {
+     return null;
+  }
+  const principal = Principal.fromText("br5f7-7uaaa-aaaaa-qaaca-cai") ;
+  console.log('ICRC7 ledger call principal =' + principal);    
+
+  const account =  {'owner' : principal,'subaccount' : [] };
+  // requestConnect callback function
+  console.log('ICRC7 ledger call onConnectionUpdate');    
+
+   // rebuild actor and test by getting Sonic info
+  const tokenActor = await plug.createActor({
+        canisterId: nftCanisterId,
+        interfaceFactory: icrc7IdlFactory,
+  });
+// use our actors getSwapInfo method
+  console.log('ICRC7 ledger call agent');    
+
+  const tokenIds = await tokenActor.icrc7_tokens_of(account);
+  console.log('ICRC7 ledger call: ', tokenIds);    
+ 
+  return tokenIds;
+
+}
+
 export const call_get_transactions = async (principal_id:string,pre:number, take:number): Promise<TransferResponse[]> => {
   if (!plugReady()) return null;
   const plug = (window as any).ic.plug;
@@ -188,6 +216,7 @@ export const call_get_transactions = async (principal_id:string,pre:number, take
   var response  = await tokenActor.get_transactions(request);
 
   var transactions = response.transactions;
+  var log_length = response.log_length;
   let tranferDetails:TransferResponse[] = [];
   transactions.forEach((element,index)=> {
     console.log('ICRC ledger call transaction kind :' , element.kind);   
@@ -203,6 +232,7 @@ export const call_get_transactions = async (principal_id:string,pre:number, take
             } 
 
             let transfer_detail_item:TransferResponse={
+              total_log:log_length,
               txIndex:pre+index,
               to:transferInfo.to?.owner.toString(),
               fee:transferInfo.fee?Number(transferInfo.fee):Number(0),
@@ -246,6 +276,7 @@ export const call_get_transactions_listener = async (principal_id:string,pre:num
   var transactions = response.transactions;
   let tranferDetails:TransferResponse[] = [];
   let index = 0;
+  let total_log = response.total_log;
   transactions.forEach((element)=> {
     console.log('ICRC ledger call transaction kind :' , element.kind);   
        if(element.kind=="transfer"){
@@ -260,6 +291,7 @@ export const call_get_transactions_listener = async (principal_id:string,pre:num
             } 
             if (transferInfo.to?.owner.toString() === principal_id) {
               let transfer_detail_item:TransferResponse={
+                   total_log:total_log,
                    txIndex:pre+index,
                    to:transferInfo.to?.owner.toString(),
                    fee:transferInfo.fee?Number(transferInfo.fee):Number(0),
@@ -284,6 +316,7 @@ export const call_get_transactions_listener = async (principal_id:string,pre:num
 
 
 export type TransferResponse = {
+   total_log:number;
    txIndex:number,
    to:string,
    fee : number,

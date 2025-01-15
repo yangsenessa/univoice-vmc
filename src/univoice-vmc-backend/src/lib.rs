@@ -21,7 +21,9 @@ use ic_cdk::api::management_canister::http_request::{
     TransformContext,
 };
 use ledgertype::{
-    ApproveResult, MainSiteSummary, MinerTxState, MinerWaitClaimBalance, Timestamp, TransferArgs, TransferTxState, TxIndex, UnvMinnerLedgerRecord, UnvMinnerLedgerState, WorkLoadLedgerItem
+    ApproveResult, MainSiteSummary, MinerTxState, MinerWaitClaimBalance, Timestamp, 
+    TransferArgs, TransferTxState, TxIndex, UnvMinnerLedgerRecord, 
+    UnvMinnerLedgerState, WorkLoadLedgerItem,MinerJnlPageniaze
 };
 use serde::Serialize;
 use serde_json::{self, Value};
@@ -449,7 +451,7 @@ async fn get_main_site_summary() ->MainSiteSummary{
 }
 
 #[ic_cdk::query]
-fn get_all_miner_jnl_with_principalid(principalid: String,pre:usize, take:usize) -> Vec<UnvMinnerLedgerRecord> {
+fn get_all_miner_jnl_with_principalid(principalid: String,pre:usize, take:usize) -> MinerJnlPageniaze {
     let mut minting_ledeger: Vec<UnvMinnerLedgerRecord> = Vec::new();
     let account: Account = Account::from_str(&principalid).expect("Parse principal id err");
 
@@ -462,16 +464,28 @@ fn get_all_miner_jnl_with_principalid(principalid: String,pre:usize, take:usize)
     });
     if pre > minting_ledeger.len() {
         let empty_res:Vec<UnvMinnerLedgerRecord> = Vec::new();
-        return  empty_res;
+        return  MinerJnlPageniaze{
+            total_log : 0,
+            ledgers : empty_res
+        };
     }
 
     if take >= minting_ledeger.len()  {
-        return minting_ledeger;
+        return MinerJnlPageniaze {
+            total_log:minting_ledeger.len(),
+            ledgers:minting_ledeger
+        } ;
     }
     if pre +take > minting_ledeger.len()-1 {
-        return minting_ledeger[pre*take..].to_vec();
+        return MinerJnlPageniaze {
+            total_log:minting_ledeger[pre*take..].to_vec().len(),
+            ledgers:minting_ledeger[pre*take..].to_vec()
+        };
     }    
-    return minting_ledeger[pre..(pre+take)].to_vec();
+    return MinerJnlPageniaze {
+        total_log: minting_ledeger[pre..(pre+take)].to_vec().len(),
+        ledgers: minting_ledeger[pre..(pre+take)].to_vec()
+    };  
     //return minting_ledeger;
 }
 

@@ -1,6 +1,7 @@
 import { univoice_vmc_backend } from 'declarations/univoice-vmc-backend';
-import type {Result,MinerWaitClaimBalance,UnvMinnerLedgerRecord,MainSiteSummary,MinerJnlPageniaze} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
+import type {Result,MinerWaitClaimBalance,UnvMinnerLedgerRecord,MainSiteSummary,MinerJnlPageniaze,ChakraItem} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
 import { isLocalNet } from '@/utils/env';
+import exp from 'constants';
 
 
 // Mode
@@ -76,6 +77,16 @@ export const claim_to_account_by_principal = async(user_principal:string):Promis
 
   }
   return BigInt(0);
+}
+
+export const query_chakra_data=async (user_principal:string):Promise<ChakraItem> =>{
+  console.log("call query_chakra_data",user_principal);
+  return univoice_vmc_backend.query_chakra_data(user_principal);
+}
+
+export const update_chakra_data=async (chakraItem:ChakraItem) => {
+  console.log("call update_chakra_data", chakraItem);
+  univoice_vmc_backend.update_chakra(chakraItem);
 }
 
 

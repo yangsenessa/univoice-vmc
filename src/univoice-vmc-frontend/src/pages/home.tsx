@@ -21,6 +21,11 @@ import ImgChakra from '@/assets/imgs/bg_chakra.png'
 // import { getPrincipal, goLogin } from '@/utils/icplug';
 // import { readStorage, writeStorage, removeStorage } from '@/utils';
 import Chakra from '@/components/chakra'
+import {query_chakra_data} from '@/utils/call_vmc_backend'
+import { useAcountStore } from '@/stores/user';
+import {reConnectPlug,call_tokens_of,call_get_transactions_listener} from '@/utils/icplug';
+import type {ChakraItem} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
+
 
 function UvHomePage() {
   const location = useLocation();
@@ -29,6 +34,8 @@ function UvHomePage() {
   const refPartner:any = useRef(null);
   const refVision:any = useRef(null);
   const [isFlipped, setIsFlipped] = useState(false);
+  const { getPrincipal } = useAcountStore();
+  
 
   const [chakraClickStat, setChakraClickStat] = useState({
     cnt1: 0,
@@ -107,7 +114,27 @@ function UvHomePage() {
       cnt5: 5,
       cnt6: 6,
       cnt7: 7,
-    })
+    });
+    if(!getPrincipal()) {
+          reConnectPlug();
+      }
+
+    query_chakra_data(getPrincipal()).then(
+       resultItem =>{
+       let dataItem = {
+         cnt1 : Number(resultItem.cnt1),
+         cnt2 : Number(resultItem.cnt2),
+         cnt3 : Number(resultItem.cnt3),
+         cnt4 : Number(resultItem.cnt4),
+         cnt5 : Number(resultItem.cnt5),
+         cnt6 : Number(resultItem.cnt6),
+         cnt7 : Number(resultItem.cnt7)
+       }
+       setChakraClickStat(dataItem);
+     }
+
+
+    );
   }
 
   useEffect(() => {

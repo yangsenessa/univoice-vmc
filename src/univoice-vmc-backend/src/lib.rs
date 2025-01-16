@@ -967,19 +967,19 @@ fn query_chakra_data(principalid:String)->ChakraItem {
         let charas:Vec<ChakraItem> =  s.borrow().chakra_colloction.clone();
 
         for chakra_item in charas {
-            if chakra_item.pricipalid_txt == principalid {
+            if chakra_item.pricipalid_txt == principalid.clone() {
                 return chakra_item;
             }
         }
         return ChakraItem {
-           pricipalid_txt : principalid,
-           cnt1:0,
-           cnt2:0,
-           cnt3:0,
-           cnt4:0,
-           cnt5:0,
-           cnt6:0,
-           cnt7:0
+           pricipalid_txt : principalid.clone(),
+           cnt1:Nat::from(0 as u32) ,
+           cnt2:Nat::from(0 as u32),
+           cnt3:Nat::from(0 as u32),
+           cnt4:Nat::from(0 as u32),
+           cnt5:Nat::from(0 as u32),
+           cnt6:Nat::from(0 as u32),
+           cnt7:Nat::from(0 as u32)
         }
 
     }
@@ -992,29 +992,21 @@ fn update_chakra(item:ChakraItem)->Result<Nat,String> {
     STATEHEAP.with(
        |s|{
             let mut cnt = 0;
+            let item_input = item.clone();
             for  chakra_item in s.borrow_mut().chakra_colloction.iter_mut() {
                 if chakra_item.pricipalid_txt == item.pricipalid_txt {
                     cnt+=1;
-                    chakra_item.cnt1 = item.cnt1;
-                    chakra_item.cnt2 = item.cnt2;
-                    chakra_item.cnt3 = item.cnt3;
-                    chakra_item.cnt4 = item.cnt4;
-                    chakra_item.cnt5 = item.cnt5;
-                    chakra_item.cnt6 = item.cnt6;
-                    chakra_item.cnt7 = item.cnt7;
+                    chakra_item.cnt1 = item_input.cnt1.clone();
+                    chakra_item.cnt2 = item_input.cnt2.clone();
+                    chakra_item.cnt3 = item_input.cnt3.clone();
+                    chakra_item.cnt4 = item_input.cnt4.clone();
+                    chakra_item.cnt5 = item_input.cnt5.clone();
+                    chakra_item.cnt6 = item_input.cnt6.clone();
+                    chakra_item.cnt7 = item_input.cnt7.clone();
                 }
             }
             if cnt == 0 {
-                let item_add =  ChakraItem {
-                    pricipalid_txt : item.pricipalid_txt,
-                    cnt1:item.cnt1,
-                    cnt2:item.cnt2,
-                    cnt3:item.cnt3,
-                    cnt4:item.cnt4,
-                    cnt5:item.cnt5,
-                    cnt6:item.cnt6,
-                    cnt7:item.cnt7
-                 };
+                let item_add = item.clone();
                 s.borrow_mut().chakra_colloction.push(item_add);
                
             }

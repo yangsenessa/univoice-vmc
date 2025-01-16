@@ -141,13 +141,13 @@ pub enum ApproveResult {
 #[derive(CandidType, Deserialize,Default, Serialize,Clone)]
 pub struct ChakraItem {
     pub pricipalid_txt:String,
-    pub cnt1:u32,
-    pub cnt2:u32,
-    pub cnt3:u32,
-    pub cnt4:u32,
-    pub cnt5:u32,
-    pub cnt6:u32,
-    pub cnt7:u32
+    pub cnt1:Nat,
+    pub cnt2:Nat,
+    pub cnt3:Nat,
+    pub cnt4:Nat,
+    pub cnt5:Nat,
+    pub cnt6:Nat,
+    pub cnt7:Nat
 }
 
 

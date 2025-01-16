@@ -190,7 +190,7 @@ function UvHomePage() {
               <img src={ImgAiAgentIcon} className={style.img} />
               <div className={style.title}>AI Agent</div>
               <div className={style.intro}>
-                <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
+                <p>“Univoice is a Web3 project that harnesses AI to empower users,and it constantly evolves, adapting to new demands through artificial intelligence, ensuring its relevance in an ever-changing world.</p>
               </div>
               <div className={`${style.btn} btn-link-1`} onClick={goAiAgent}>
                 <div>Training Process</div>
@@ -201,7 +201,7 @@ function UvHomePage() {
               <img src={ImgTokenIcon} className={style.img} />
               <div className={style.title}>Token</div>
               <div className={style.intro}>
-                <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
+                <p>“Each contribution to Univoice through voices is rewarded with tokens，Univoice use blockchain to manage token transactions, upholds transparency and trust among its users.</p>
               </div>
               <div className={`${style.btn} btn-link-1`} onClick={goToken}>
                 <div>View Dashboard</div>

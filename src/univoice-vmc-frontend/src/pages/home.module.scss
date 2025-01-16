@@ -23,6 +23,12 @@
   background-position: top center;
   background-repeat: no-repeat;
 }
+.flip_card_back {
+  background-image: url("@/assets/imgs/bg_homeback.png");
+  background-size: auto;
+  background-position: top center;
+  background-repeat: repeat;
+}
 @media (min-width: 880px) {
   .flip_card_front {
     background-size: contain;
@@ -422,15 +428,13 @@
     padding: 60px;
     padding-top: 30px;
     text-align: center;
-    z-index: 3;
   }
   .logo {
     position: absolute;
     width: 277px;
     height: 277px;
-    top: 310px;
+    top: 330px;
     margin-left: 20px;
-    z-index: 2;
   }
 }
 .home_4_ctx {
@@ -443,7 +447,7 @@
 }
 // 背面
 .side_back {
-  background-color: #000000;
+  background-color: #090910;
 }
 .btn_turnback {
   position: fixed;

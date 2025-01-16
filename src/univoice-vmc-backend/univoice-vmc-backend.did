@@ -160,6 +160,17 @@ type MainSiteSummary = record {
     token_pool_balance:NumTokens;
 };
 
+type ChakraItem = record {
+    pricipalid_txt:text;
+    cnt1:nat;
+    cnt2:nat;
+    cnt3:nat;
+    cnt4:nat;
+    cnt5:nat;
+    cnt6:nat;
+    cnt7:nat;
+};
+
 
 service : {
     "greet": (text) -> (text) query;
@@ -181,4 +192,6 @@ service : {
     "get_main_site_summary":() ->( MainSiteSummary);
     "sum_claimed_mint_ledger":(text) -> (NumTokens);
     "claim_to_account_by_principal":(text) ->(Result);
+    "query_chakra_data":(text) -> (ChakraItem) query;
+    "update_chakra":(ChakraItem)->(Result);
 }

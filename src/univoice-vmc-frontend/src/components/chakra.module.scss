@@ -133,25 +133,136 @@
 }
 // home 背面脉轮点击后提示+1淡出
 .fade_area {
-  position: relative;
+  // position: relative;
+  position: absolute;
+  top: 0px;
+  left: 10px;
 }
-.fade_out_text {
-  position: relative;
-  animation: fadeOutMove 1s forwards;
-  font-size: 14px;
+.chakra_right .fade_area {
+  right: 30px;
+  left: unset;
 }
-@media (min-width: 700px) {
-  .fade_out_text {
-    font-size: 20px;
-  }
-}
-@keyframes fadeOutMove {
+
+@keyframes bubble_y {
   0% {
+    transform: scale(1);
+    bottom: 0;
+    opacity: 0;
+  }
+  5% {
+    transform: scale(1.5);
     opacity: 1;
-    transform: translateY(0);
+  }
+  80% {
+    transform: scale(1);
+    opacity: 1;
   }
   100% {
+    bottom: 100px;
+    transform: scale(0.8);
     opacity: 0;
-    transform: translateY(-40px); /* Adjust the movement distance as needed */
+  }
+}
+@keyframes bubble_swing_1 {
+  0% {
+    margin-left: 0;
+  }
+  25% {
+    margin-left: -25px;
+  }
+  75% {
+    margin-left: 12px;
+  }
+  100% {
+    margin-left: 0;
+  }
+}
+@keyframes bubble_swing_2 {
+  0% {
+    margin-left: 0;
+  }
+  33% {
+    margin-left: 25px;
+  }
+  100% {
+    margin-left: -12px;
+  }
+}
+@keyframes bubble_swing_3 {
+  0% {
+    margin-left: 0;
+  }
+  25% {
+    margin-left: 20px;
+  }
+  75% {
+    margin-left: -20px;
+  }
+  100% {
+    margin-left: 0;
+  }
+}
+@keyframes bubble_swing_4 {
+  0% {
+    margin-left: 0;
+  }
+  25% {
+    margin-left: -20px;
+  }
+  75% {
+    margin-left: 20px;
+  }
+  100% {
+    margin-left: 0;
+  }
+}
+@for$i from 1 through 4 {
+  @for$j from 1 through 2 {
+    .bl_#{$i}_#{$j} {
+      animation: bubble_y calc(1.5s + $j * 0.5s) linear 1 forwards,
+        bubble_swing_#{$i} calc(1.5s + $j * 0.5s) linear 1 forwards;
+    }
+  }
+}
+@for$i from 0 through 7 {
+  .b#{$i} {
+    background-image: url('@/assets/svg/icon_heart.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+}
+.bubble {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+}
+@media (min-width: 700px) {
+  .bubble {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+  }
+  .fade_area {
+    top: -5px;
+    left: 15px;
+  }
+  .chakra_right .fade_area {
+    right: 45px;
+    left: unset;
+  }
+}
+@media (min-width: 1100px) {
+  .bubble {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+  }
+  .fade_area {
+    top: -10px;
+    left: 20px;
+  }
+  .chakra_right .fade_area {
+    right: 55px;
+    left: unset;
   }
 }

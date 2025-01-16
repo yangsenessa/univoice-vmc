@@ -23,7 +23,7 @@ use ic_cdk::api::management_canister::http_request::{
 use ledgertype::{
     ApproveResult, MainSiteSummary, MinerTxState, MinerWaitClaimBalance, Timestamp, 
     TransferArgs, TransferTxState, TxIndex, UnvMinnerLedgerRecord, 
-    UnvMinnerLedgerState, WorkLoadLedgerItem,MinerJnlPageniaze
+    UnvMinnerLedgerState, WorkLoadLedgerItem,MinerJnlPageniaze,ChakraItem
 };
 use serde::Serialize;
 use serde_json::{self, Value};
@@ -51,8 +51,8 @@ struct Event0301008 {
 pub struct StateHeap {
     unv_nft_owners: Vec<Account>,
     unv_user_infos: Vec<UserIdentityInfo>,
-    main_site_summary:MainSiteSummary
-
+    main_site_summary:MainSiteSummary,
+    chakra_colloction:Vec<ChakraItem>
 }
 #[derive(CandidType, Default, Deserialize, Clone)]
 struct StableState {
@@ -959,6 +959,69 @@ async fn get_account_transactions(args: GetAccountTransactionsArgs) -> GetTransa
             })
         }
     }
+}
+
+#[ic_cdk::query]
+fn query_chakra_data(principalid:String)->ChakraItem {
+    STATEHEAP.with( |s| {
+        let charas:Vec<ChakraItem> =  s.borrow().chakra_colloction.clone();
+
+        for chakra_item in charas {
+            if chakra_item.pricipalid_txt == principalid {
+                return chakra_item;
+            }
+        }
+        return ChakraItem {
+           pricipalid_txt : principalid,
+           cnt1:0,
+           cnt2:0,
+           cnt3:0,
+           cnt4:0,
+           cnt5:0,
+           cnt6:0,
+           cnt7:0
+        }
+
+    }
+    )
+
+}
+
+#[ic_cdk::update]
+fn update_chakra(item:ChakraItem)->Result<Nat,String> {
+    STATEHEAP.with(
+       |s|{
+            let mut cnt = 0;
+            for  chakra_item in s.borrow_mut().chakra_colloction.iter_mut() {
+                if chakra_item.pricipalid_txt == item.pricipalid_txt {
+                    cnt+=1;
+                    chakra_item.cnt1 = item.cnt1;
+                    chakra_item.cnt2 = item.cnt2;
+                    chakra_item.cnt3 = item.cnt3;
+                    chakra_item.cnt4 = item.cnt4;
+                    chakra_item.cnt5 = item.cnt5;
+                    chakra_item.cnt6 = item.cnt6;
+                    chakra_item.cnt7 = item.cnt7;
+                }
+            }
+            if cnt == 0 {
+                let item_add =  ChakraItem {
+                    pricipalid_txt : item.pricipalid_txt,
+                    cnt1:item.cnt1,
+                    cnt2:item.cnt2,
+                    cnt3:item.cnt3,
+                    cnt4:item.cnt4,
+                    cnt5:item.cnt5,
+                    cnt6:item.cnt6,
+                    cnt7:item.cnt7
+                 };
+                s.borrow_mut().chakra_colloction.push(item_add);
+               
+            }
+            Ok(Nat::from(0 as u32))
+        }
+    )
+
 }
 
 ic_cdk::export_candid!();

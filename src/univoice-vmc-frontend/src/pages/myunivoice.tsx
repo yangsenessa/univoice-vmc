@@ -130,7 +130,7 @@ function MyUnivoicePage() {
                 }
                 dataItem.owners = owner_cnt;
                 dataItem.myhashs = myhash_str;
-                dataItem.quantity = Number(summaryData.rewards);
+                dataItem.quantity = owner_cnt;
                 dataItem.imgurl = ImgNftThum;
                 data[0] = dataItem;
                 setLicenseData(data);
@@ -212,18 +212,16 @@ function MyUnivoicePage() {
           <div className={style.tbl_r}>
             <div className={style.title}>#</div>
             <div className={style.title}>Collection</div>
-            <div className={style.title}>Owners</div>
             <div className={style.title}>The number I hold</div>
             <div className={style.title}>Quantity</div>
           </div>
-        {licenseData.map((el: { id: string; idx: string; imgurl: string; intro: string; owners: number; quantity: number; myhashs: string}) => (
+        {licenseData.map((el: { id: string; idx: string; imgurl: string; intro: string; quantity: number; myhashs: string}) => (
           <div key={el.id} className={style.tbl_r}>
             <div className={style.cell}>{el.idx}</div>
             <div className={style.cell}>
                 <div className={style.img_bg}><div className={style.img_wrap}><img className={`${style.img} img-fixed`} src={el.imgurl} onError={catchNftImgFail} /></div></div>
               <div className={style.intro}>{el.intro}</div>
             </div>
-            <div className={style.cell}>{fmtInt(el.owners)}</div>
             <div className={style.cell}>
               <div className={style.myhashs}>{el.myhashs}</div>
             </div>

@@ -190,7 +190,7 @@ async fn query_poll_balance() -> Result<NumTokens, String> {
     let balance = ic_cdk::call::<(Account,), (Nat,)>(
         //todo: dev:mxzaz-hqaaa-aaaar-qaada-cai
         //todo: prod:jfqe5-daaaa-aaaai-aqwvq-cai
-        Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
+        Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai")
             .expect("Could not decode the principal."),
         "icrc1_balance_of",
         (pool_account,),
@@ -232,7 +232,7 @@ async fn transfer(args: TransferArgs) -> Result<BlockIndex, String> {
     ic_cdk::call::<(TransferFromArgs,), (Result<BlockIndex, TransferFromError>,)>(
         // 2. Convert a textual representation of a Principal into an actual `Principal` object. The principal is the one we specified in `dfx.json`.
         //    `expect` will panic if the conversion fails, ensuring the code does not proceed with an invalid principal.
-        Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
+        Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai")
             .expect("Could not decode the principal."),
         //ic_cdk::caller(),
         // 3. Specify the method name on the target canister to be called, in this case, "icrc1_transfer".
@@ -761,7 +761,7 @@ async fn call_approve_with_block_tokens(account: &Account, tokens: &NumTokens) -
         spender: account.clone(),
     };
     ic_cdk::call::<(ApproveArgs,), (ApproveResult,)>(
-        Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
+        Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai")
             .expect("Could not decode the principal."),
         // 3. Specify the method name on the target canister to be called, in this case, "icrc1_transfer".
         "icrc2_approve",
@@ -800,7 +800,7 @@ async fn call_transfer(miner_ledger: &UnvMinnerLedgerRecord) -> Result<BlockInde
     ic_cdk::call::<(TransferFromArgs,), (Result<BlockIndex, TransferFromError>,)>(
         // 2. Convert a textual representation of a Principal into an actual `Principal` object. The principal is the one we specified in `dfx.json`.
         //    `expect` will panic if the conversion fails, ensuring the code does not proceed with an invalid principal.
-        Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai")
+        Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai")
             .expect("Could not decode the principal."),
         // 3. Specify the method name on the target canister to be called, in this case, "icrc2_transfer_from".
         "icrc2_transfer_from",
@@ -924,7 +924,7 @@ async fn get_user_balance(account_owner: Principal) -> Result<Nat, String> {
     ic_cdk::println!("Received account_owner: {}", account_owner.to_text());
 
     let ledger_canister_id =
-        Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai").expect("Invalid Ledger Canister ID");
+        Principal::from_text("jfqe5-daaaa-aaaai-aqwvq-cai").expect("Invalid Ledger Canister ID");
 
     let account = Account {
         owner: account_owner,

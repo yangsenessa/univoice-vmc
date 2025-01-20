@@ -250,9 +250,12 @@
   justify-content: flex-end;
   align-items: center;
   .img {
-    top: 100px;
     width: 180px;
     height: 50px;
+    background-image: url("@/assets/imgs/Services@2x.png");
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
   }
 }
 // block service_pannels
@@ -293,9 +296,43 @@
     .icon {
       width: 18px;
       height: 18px;
-      margin-left: 10px
+      margin-left: 10px;
+      background-image: url("@/assets/imgs/icon_arrow_r.png");
+      background-size: contain;
+      background-position: center center;
+      background-repeat: no-repeat;
     }
   }
+}
+.icon_speaking {
+  background-image: url("@/assets/imgs/Speakingicon@2x.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.icon_listening {
+  background-image: url("@/assets/imgs/Listeningicon@2x.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.icon_creating {
+  background-image: url("@/assets/imgs/creatingicon@2x.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.icon_aiagent {
+  background-image: url("@/assets/imgs/AIAgenticon@2x.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.icon_tokens {
+  background-image: url("@/assets/imgs/Tokenicon@2x.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 .home_2_1 {
   padding-top: 75px;
@@ -380,6 +417,51 @@
     justify-content: space-between;
   }
 }
+.ptn_icp {
+  background-image: url("@/assets/imgs/ICP_logo@2x.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  width: 159px;
+  height: 29px;
+  margin-top: 21px;
+}
+.ptn_plug {
+  background-image: url("@/assets/imgs/plug.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  width: 120px;
+  height: 120px;
+  margin-top: 21px;
+}
+.ptn_mixlab {
+  background-image: url("@/assets/imgs/Mixlab_logo@2x.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  width: 120px;
+  height: 120px;
+  margin-top: 21px;
+}
+.ptn_yuku {
+  background-image: url("@/assets/svg/YUKU.svg");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  width: 120px;
+  height: 120px;
+  margin-top: 21px;
+}
+.ptn_zonli {
+  background-image: url("@/assets/imgs/zonli.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  width: 85px;
+  height: 35px;
+  margin-top: 21px;
+}
 // block vision
 .home_4 {
   padding-top: 180px;
@@ -435,6 +517,10 @@
     height: 277px;
     top: 330px;
     margin-left: 20px;
+    background-image: url("@/assets/imgs/logo_homebottom@2x.png");
+    background-size: contain;
+    background-position: bottom center;
+    background-repeat: no-repeat;
   }
 }
 .home_4_ctx {
@@ -504,20 +590,24 @@
 }
 
 .bg_chakra {
-  position: absolute;
-  top: 100px;
-  min-width: 700px;
-  .ctx {
-    position: relative;
-  }
+  position: relative;
+  margin-top: 100px;
+  width: 700px;
+  height: 466px;
+  background-image: url("@/assets/imgs/bg_chakra.png");
+  background-size: contain;
+  background-position: top center;
+  background-repeat: no-repeat;
 }
 @media (min-width: 700px) {
   .bg_chakra {
-    min-width: 1100px;
+    width: 1100px;
+    height: 733px;
   }
 }
 @media (min-width: 1100px) {
   .bg_chakra {
-    min-width: 1280px;
+    width: 1280px;
+    height: 853px;
   }
 }

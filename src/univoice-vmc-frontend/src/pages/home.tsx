@@ -3,21 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import style from './home.module.scss'
 import TopBar from '@/components/topbar'
 import FootBar from '@/components/footbar'
-import ImgService from '@/assets/imgs/Services@2x.png'
-import ImgSpeakingIcon from '@/assets/imgs/Speakingicon@2x.png'
-import ImgListeningIcon from '@/assets/imgs/Listeningicon@2x.png'
-import ImgCoCreatingIcon from '@/assets/imgs/creatingicon@2x.png'
-import ImgAiAgentIcon from '@/assets/imgs/AIAgenticon@2x.png'
-import ImgTokenIcon from '@/assets/imgs/Tokenicon@2x.png'
-import ImgArrowRIcon from '@/assets/imgs/icon_arrow_r.png'
-import ImgPlugLogo from '@/assets/imgs/plug.png'
-import ImgICPLogo from '@/assets/imgs/ICP_logo@2x.png'
-import ImgZonliLogo from '@/assets/imgs/zonli.png'
-import ImgMixlabLogo from '@/assets/imgs/Mixlab_logo@2x.png'
-import ImgYukuLogo from '@/assets/svg/YUKU.svg'
-import ImgUVbottomLogo from '@/assets/imgs/logo_homebottom@2x.png'
-import ImgBgBack from '@/assets/imgs/bg_homeback.png'
-import ImgChakra from '@/assets/imgs/bg_chakra.png'
 // import { getPrincipal, goLogin } from '@/utils/icplug';
 // import { readStorage, writeStorage, removeStorage } from '@/utils';
 import Chakra from '@/components/chakra'
@@ -168,13 +153,13 @@ function UvHomePage() {
           </div>
 
           <div className={`${style.home_2} uv-container-1`}>
-              <img src={ImgService} className={style.img} />
+              <div className={style.img}></div>
               <div className={style.txt_wwd}>What We Do ?</div>
           </div>
 
           <div className={`${style.home_2_ctx} ${style.home_2_1} uv-container-1`}>
             <div className={style.panel}>
-              <img src={ImgSpeakingIcon} className={style.img} />
+              <div className={`${style.img} ${style.icon_speaking}`}></div>
               <div className={style.title}>Speaking</div>
               <div className={style.intro}>
                 <p>The essence of Univoice, where every individual can freely express themselves and contribute to the creation of a harmonious, voice-driven world.</p>
@@ -182,11 +167,11 @@ function UvHomePage() {
               </div>
               <div className={`${style.btn} btn-link-1`} onClick={startSpeaking}>
                 <div>Start</div>
-                <img src={ImgArrowRIcon} className={style.icon} />
+                <div className={style.icon}></div>
               </div>
             </div>
             <div className={style.panel}>
-              <img src={ImgListeningIcon} className={style.img} />
+              <div className={`${style.img} ${style.icon_listening}`}></div>
               <div className={style.title}>Listening</div>
               <div className={style.intro}>
                 <p>“ Let AI know you better,you be yourself ”.</p>
@@ -195,11 +180,11 @@ function UvHomePage() {
               </div>
               <div className={`${style.btn} btn-link-1`} onClick={startListening}>
                 <div>Start</div>
-                <img src={ImgArrowRIcon} className={style.icon} />
+                <div className={style.icon}></div>
               </div>
             </div>
             <div className={style.panel}>
-              <img src={ImgCoCreatingIcon} className={style.img} />
+              <div className={`${style.img} ${style.icon_creating}`}></div>
               <div className={style.title}>Co-creating</div>
               <div className={style.intro}>
                 <p>“ Understand that voice, see that person, comprehend that heart ”, communicate smoothly and create harmoniously together.</p>
@@ -207,32 +192,32 @@ function UvHomePage() {
               </div>
               <div className={`${style.btn} btn-link-1`} onClick={startCoCreating}>
                 <div>Start</div>
-                <img src={ImgArrowRIcon} className={style.icon} />
+                <div className={style.icon}></div>
               </div>
             </div>
           </div>
 
           <div className={`${style.home_2_ctx} ${style.home_2_2} uv-container-1`}>
             <div className={style.panel}>
-              <img src={ImgAiAgentIcon} className={style.img} />
+              <div className={`${style.img} ${style.icon_aiagent}`}></div>
               <div className={style.title}>AI Agent</div>
               <div className={style.intro}>
                 <p>“Univoice is a Web3 project that harnesses AI to empower users,and it constantly evolves, adapting to new demands through artificial intelligence, ensuring its relevance in an ever-changing world.</p>
               </div>
               <div className={`${style.btn} btn-link-1`} onClick={goAiAgent}>
                 <div>Training Process</div>
-                <img src={ImgArrowRIcon} className={style.icon} />
+                <div className={style.icon}></div>
               </div>
             </div>
             <div className={style.panel}>
-              <img src={ImgTokenIcon} className={style.img} />
+              <div className={`${style.img} ${style.icon_tokens}`}></div>
               <div className={style.title}>Token</div>
               <div className={style.intro}>
                 <p>“Each contribution to Univoice through voices is rewarded with tokens，Univoice use blockchain to manage token transactions, upholds transparency and trust among its users.</p>
               </div>
               <div className={`${style.btn} btn-link-1`} onClick={goToken}>
                 <div>View Dashboard</div>
-                <img src={ImgArrowRIcon} className={style.icon} />
+                <div className={style.icon}></div>
               </div>
             </div>
           </div>
@@ -247,35 +232,35 @@ function UvHomePage() {
             <div className={style.card}>
               <div className={style.panel}>
                 <div className={style.panel_ctx}>
-                  <img src={ ImgMixlabLogo } style={{ width:'120px', height:'120px', marginTop:'21px'}} />
+                <div className={style.ptn_mixlab}></div>
                 </div>
               </div>
             </div>
             <div className={style.card}>
               <div className={style.panel}>
                 <div className={style.panel_ctx}>
-                  <img src={ ImgPlugLogo } style={{ width:'100px', height:'100px', marginTop:'21px'}} />
+                  <div className={style.ptn_plug}></div>
                 </div>
               </div>
             </div>
             <div className={style.card}>
               <div className={style.panel}>
                 <div className={style.panel_ctx}>
-                  <img src={ ImgICPLogo } style={{ width:'159px', height:'29px', marginTop:'21px'}} />
+                  <div className={style.ptn_icp}></div>
                 </div>
               </div>
             </div>
             <div className={style.card}>
               <div className={style.panel}>
                 <div className={style.panel_ctx}>
-                  <img src={ ImgYukuLogo } style={{ width:'120px', height:'120px', marginTop:'21px'}} />
+                  <div className={style.ptn_yuku}></div>
                 </div>
               </div>
             </div>
             <div className={style.card}>
               <div className={style.panel}>
                 <div className={style.panel_ctx}>
-                  <img src={ ImgZonliLogo } style={{ width:'85px', height:'35px', marginTop:'21px'}} />
+                <div className={style.ptn_zonli}></div>
                 </div>
               </div>
             </div>
@@ -293,7 +278,7 @@ function UvHomePage() {
                     <p>Together! let's co-create an univioce AI Agent that listens to all voices and understands our the best.</p>
                     <p>Create an AI agent that is unique to you. You are unique soul with Authentic Freedom Infinite.</p>
                   </div>
-                  <img src={ ImgUVbottomLogo } className={style.logo} />
+                  <div className={style.logo}></div>
                 </div>
               </div>
               
@@ -311,18 +296,14 @@ function UvHomePage() {
               </div>
             </div>
             <div className={style.home_b_2}>
-              <img src={ ImgBgBack } className={`${style.bg} img-fixed`} />
               <div className={style.bg_chakra}>
-                <div className={style.ctx}>
-                  <img src={ ImgChakra } className="img-fixed" />
-                  <Chakra idx={1} clickcnt={chakraClickStat.cnt1}/>
-                  <Chakra idx={2} clickcnt={chakraClickStat.cnt2}/>
-                  <Chakra idx={3} clickcnt={chakraClickStat.cnt3}/>
-                  <Chakra idx={4} clickcnt={chakraClickStat.cnt4}/>
-                  <Chakra idx={5} clickcnt={chakraClickStat.cnt5}/>
-                  <Chakra idx={6} clickcnt={chakraClickStat.cnt6}/>
-                  <Chakra idx={7} clickcnt={chakraClickStat.cnt7}/>
-                </div>
+                <Chakra idx={1} clickcnt={chakraClickStat.cnt1}/>
+                <Chakra idx={2} clickcnt={chakraClickStat.cnt2}/>
+                <Chakra idx={3} clickcnt={chakraClickStat.cnt3}/>
+                <Chakra idx={4} clickcnt={chakraClickStat.cnt4}/>
+                <Chakra idx={5} clickcnt={chakraClickStat.cnt5}/>
+                <Chakra idx={6} clickcnt={chakraClickStat.cnt6}/>
+                <Chakra idx={7} clickcnt={chakraClickStat.cnt7}/>
               </div>
             </div>
             <div onClick={fnClickFlip} className={style.btn_turnback}>Back</div>

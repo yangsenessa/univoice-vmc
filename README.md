@@ -1,4 +1,68 @@
 # `univoice-vmc`
+## Generating Documentation for `univoice-vmc`
+
+To generate documentation for the `univoice-vmc` project, including all subfolders, you can use a documentation generator tool like `jsdoc` for JavaScript or `rustdoc` for Rust. Below are the steps to generate documentation for each subfolder in your project.
+
+### Using `jsdoc` for JavaScript
+
+1. **Install `jsdoc`**:
+  ```bash
+  npm install -g jsdoc
+  ```
+
+2. **Generate Documentation**:
+  ```bash
+  jsdoc -c jsdoc.json
+  ```
+
+  Ensure you have a `jsdoc.json` configuration file in your project root. Here is an example configuration:
+  ```json
+  {
+    "source": {
+     "include": ["src"],
+     "includePattern": ".+\\.js(doc|x)?$",
+     "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "opts": {
+     "destination": "./docs"
+    }
+  }
+  ```
+
+### Using `rustdoc` for Rust
+
+1. **Generate Documentation**:
+  ```bash
+  cargo doc --no-deps
+  ```
+
+2. **Open Documentation**:
+  ```bash
+  open target/doc/univoice_vmc/index.html
+  ```
+
+### Combining Documentation
+
+If your project contains both JavaScript and Rust code, you can combine the generated documentation into a single directory. For example, you can generate JavaScript documentation into a `docs/js` folder and Rust documentation into a `docs/rust` folder.
+
+### Automating Documentation Generation
+
+You can automate the documentation generation process by adding scripts to your `package.json`:
+
+```json
+"scripts": {
+  "docs:js": "jsdoc -c jsdoc.json",
+  "docs:rust": "cargo doc --no-deps",
+  "docs": "npm run docs:js && npm run docs:rust"
+}
+```
+
+Run the following command to generate all documentation:
+```bash
+npm run docs
+```
+
+This will generate and combine the documentation for all subfolders in your `univoice-vmc` project.
 
 Welcome to your new `univoice-vmc` project and to the Internet Computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
 

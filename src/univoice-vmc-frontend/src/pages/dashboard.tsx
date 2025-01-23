@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance, fmtTimestamp, fmtSummaryAddr } from '@/utils';
-import {call_tokens_of_nftcollection,reConnectPlug,call_get_transactions} from '@/utils/icplug';
-import {poll_balance,get_total_listener,get_main_site_summary,get_miner_license} from '@/utils/call_vmc_backend';
+import { call_get_transactions } from '@/utils/wallet'
+import { poll_balance, get_total_listener, get_main_site_summary } from '@/utils/call_vmc_backend';
 import Paging from '@/components/paging';
 import style from './dashboard.module.scss'
 import ImgBgTopLight from '@/assets/imgs/bg_toplight.png'
 import ImgBgTopLight2 from '@/assets/imgs/bg_toplight_over.png'
 import ImgNftThum from '@/assets/imgs/nft_thum.png'
-import { useAcountStore } from '@/stores/user';
-
+import { toastWarn } from '@/components/toast';
 
 function DashboardPage() {
 
@@ -27,11 +26,9 @@ function DashboardPage() {
   });
   const [licenseData, setLicenseData] = useState<any>([]);
 
-  const { setUserByPlugWallet, getPrincipal, getWalletType } = useAcountStore();
-
+  const PAGE_SIZE_TRANS = 15;
 
   const queryTransaction = (pagenum: number) => {
-    let principal_id = getPrincipal();
     type transactionDataType={
       id:number,
       timestamp:number,
@@ -44,7 +41,7 @@ function DashboardPage() {
     }
     let newData: any[]=[];
     let total_log = 0;
-    call_get_transactions(principal_id,5*(pagenum-1),5).then(result=>{
+    call_get_transactions(PAGE_SIZE_TRANS * (pagenum-1), PAGE_SIZE_TRANS).then(result=>{
       result.forEach((element,index)=>{
         let dataItem:transactionDataType={
           id:element.txIndex,
@@ -57,20 +54,18 @@ function DashboardPage() {
           to:element.to
         }
         total_log = element.total_log;
-        console.log("Transaction view dataitem", dataItem, total_log);
+        // console.log("Transaction view dataitem", dataItem, total_log);
         newData[index]=dataItem;
 
       })
       setTransactionData(newData);
       let p = transactionPage;
       p.pageNum = pagenum;
-      p.totalPage = parseInt(String( Number(total_log)/5)) +1;
-      console.log("setTransactionPage:",p);
+      p.totalPage = parseInt(String( Number(total_log) / PAGE_SIZE_TRANS)) +1;
       setTransactionPage(p);
-
+    }).catch(e => {
+      toastWarn('Failed to query transaction data: ' + e.toString())
     });
-    
-   
   }
 
   useEffect(() => {
@@ -81,30 +76,27 @@ function DashboardPage() {
   }, []);
   
   const loadSummary = async() => {
-    let data = {
-      tokenPoolAmount:2100000000000,
-      totalListener: 2100,
-      blockCreatedNumber: 123456,
-      totalTransactions: 123456789123456,
-      blockProduceSpeed: 123.456,
-      tokensPerBlocks: 12345600000000,
-    }
-    setSummaryData(data);
-    get_main_site_summary().then(
-      mainsite_summary=>{
-        data = summaryData;
+    // let data = {
+    //   tokenPoolAmount:2100000000000,
+    //   totalListener: 2100,
+    //   blockCreatedNumber: 123456,
+    //   totalTransactions: 123456789123456,
+    //   blockProduceSpeed: 123.456,
+    //   tokensPerBlocks: 12345600000000,
+    // }
+    // setSummaryData(data);
+    get_main_site_summary()
+      .then(mainsite_summary=>{
+        let data = summaryData;
         data.blockCreatedNumber = Number(mainsite_summary.aigcblock_created_number);
         data.tokensPerBlocks = Number(mainsite_summary.token_per_block) ;
         data.totalListener = Number(mainsite_summary.listener_count) ;
         data.tokenPoolAmount = Number(mainsite_summary.token_pool_balance);
         data.blockProduceSpeed = 900;
         setSummaryData(data);
-
-      }
-
-    );
-    
-    // TODO
+      }).catch(e => {
+        toastWarn('Failed to query dashboard data!')
+      });
   }
 
   const catchNftImgFail = (event) => {
@@ -138,8 +130,7 @@ function DashboardPage() {
           if("Err" in result) {
             console.log("Balance result Err");
           }
-     }) 
-    
+     })
   }
 
   const load_total_listener =  (data):Number=>{
@@ -170,40 +161,40 @@ function DashboardPage() {
           <div className={style.item}>
             <div className={style.label}>Token Pool Amount</div>
             <div className={style.data}>
-              <div className={style.val}>{fmtUvBalance(summaryData.tokenPoolAmount)}</div>
+              <div className={style.val}>{summaryData.tokenPoolAmount === 0 ? '--' : fmtUvBalance(summaryData.tokenPoolAmount)}</div>
               <div className={style.unit}>$UVC</div>
             </div>
           </div>
           <div className={style.item}>
             <div className={style.label}>Total Listener</div>
             <div className={style.data}>
-              <div className={style.val}>{fmtInt(summaryData.totalListener)}</div>
+              <div className={style.val}>{summaryData.totalListener === 0 ? '--' : fmtInt(summaryData.totalListener)}</div>
             </div>
           </div>
           <div className={style.item}>
             <div className={style.label}>Block Created Number</div>
             <div className={style.data}>
-              <div className={style.val}>{fmtInt(summaryData.blockCreatedNumber)}</div>
+              <div className={style.val}>{summaryData.blockCreatedNumber === 0 ? '--' : fmtInt(summaryData.blockCreatedNumber)}</div>
               <div className={style.unit}>Blocks</div>
             </div>
           </div>
           <div className={style.item}>
             <div className={style.label}>Total Transactions</div>
             <div className={style.data}>
-              <div className={style.val}>{fmtInt(summaryData.totalTransactions)}</div>
+              <div className={style.val}>{summaryData.totalTransactions === 0 ? '--' : fmtInt(summaryData.totalTransactions)}</div>
               <div className={style.unit}>TX</div>
             </div>
           </div>
           <div className={style.item}>
             <div className={style.label}>Block Produce Speed</div>
             <div className={style.data}>
-              <div className={style.val}>{fmtInt(summaryData.blockProduceSpeed)}</div>
+              <div className={style.val}>{summaryData.blockProduceSpeed === 0 ? '--' : fmtInt(summaryData.blockProduceSpeed)}</div>
             </div>
           </div>
           <div className={style.item}>
             <div className={style.label}>Tokens Per-Blocks</div>
             <div className={style.data}>
-              <div className={style.val}>{fmtUvBalance(summaryData.tokensPerBlocks)}</div>
+              <div className={style.val}>{summaryData.tokensPerBlocks === 0 ? '--' : fmtUvBalance(summaryData.tokensPerBlocks)}</div>
             </div>
           </div>
       </div>
@@ -230,6 +221,13 @@ function DashboardPage() {
 
       <div className="sub-qa-block transactions">
         <div className={style.block_title}>Transactions</div>
+        {
+        transactionData.length === 0 ? 
+        <div className="nodata">
+          <div className="nodata-img"></div>
+          <div className="nodata-txt">No data</div>
+        </div>
+        :
         <div className="tbl-paged">
           <div className="tbl">
             <div className={`tbl-r tbl-r-title ${style.transactions_row}`}>
@@ -253,6 +251,7 @@ function DashboardPage() {
           </div>
           <Paging pageNum={transactionPage.pageNum} totalPage={transactionPage.totalPage} queryHandler={queryTransaction} />
         </div>
+        }
       </div>
     </div>
   )

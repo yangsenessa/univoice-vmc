@@ -1,24 +1,23 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance, fmtTimestamp, fmtSummaryAddr } from '@/utils';
-import {reConnectPlug,call_tokens_of,call_get_transactions_listener} from '@/utils/icplug';
-import type {UnvMinnerLedgerRecord,TransferTxState,MinerJnlPageniaze} from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
+import { call_tokens_of, getPrincipal as getPrincipalByWallet } from '@/utils/wallet'
+import type { UnvMinnerLedgerRecord, TransferTxState, MinerJnlPageniaze } from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
 import Paging from '@/components/paging';
 import style from './myunivoice.module.scss'
 import ImgBgGetMoreNft from '@/assets/imgs/bg_getmorenft.png'
 import ImgNftThum from '@/assets/imgs/nft_thum.png'
-import { showToast } from '@/components/toast';
+import { toastSuccess, toastError, toastWarn } from '@/components/toast';
+import { ERROR_MSG } from '@/utils/uv_const';
 
-import {fetch_sumary_for_myvoice,claim_to_account_by_principal,get_miner_jnl} from "@/utils/call_vmc_backend";
+import {fetch_sumary_for_myvoice, claim_to_account_by_principal, get_miner_jnl} from "@/utils/call_vmc_backend";
 
 import { useAcountStore } from '@/stores/user';
-import { timeStamp } from 'console';
-
 
 function MyUnivoicePage() {
 
   const [summaryData, setSummaryData] = useState({
-    rewards: '0',
-    claimable: '0',
+    rewards: '',
+    claimable: '',
   });
   const [transactionData, setTransactionData] = useState<any>([]);
   const [transactionPage, setTransactionPage] = useState({
@@ -29,16 +28,18 @@ function MyUnivoicePage() {
   const [claimable, setClaimable] = useState(true)
   const { getPrincipal } = useAcountStore();
 
+  const PAGE_SIZE_TRANS = 15;
 
   const queryTransaction = (pagenum: number) => {
-
-    if(!getPrincipal()){
-      reConnectPlug();
+    const principal_id = getPrincipal();
+    if(!principal_id){
+      toastWarn('Failed to query transaction data: ' + ERROR_MSG.USER_NOT_AUTH)
+      return;
     }
-    let minner_txs = [];
-    let total_log = 0;
-    get_miner_jnl(getPrincipal(), BigInt(5*pagenum),BigInt(5)).then(
-      miner_jnls =>{
+    get_miner_jnl(principal_id, BigInt(PAGE_SIZE_TRANS * pagenum), BigInt(PAGE_SIZE_TRANS))
+      .then( miner_jnls => {
+        let minner_txs = [];
+        let total_log = Number(miner_jnls.total_log);
         miner_jnls.ledgers.forEach((element:UnvMinnerLedgerRecord,index)=> {
           console.log("Fetch one trx_element:", element);
           let data={
@@ -51,48 +52,48 @@ function MyUnivoicePage() {
           };
           minner_txs[index] = data;
         });
-        total_log = Number(miner_jnls.total_log);
-
-      }
-    );
-
-    setTransactionData(minner_txs);
-    let p = transactionPage;
-    p.pageNum = pagenum;
-    p.totalPage = parseInt(String( Number(total_log)/5)) +1;
-    console.log("setTransactionPage:",p);
-    setTransactionPage(p);
+        setTransactionData(minner_txs);
+        let p = transactionPage;
+        p.pageNum = pagenum;
+        p.totalPage = parseInt(String( Number(total_log) / PAGE_SIZE_TRANS)) +1;
+        setTransactionPage(p);
+      }).catch(e => {
+        toastWarn('Failed to query transaction data!')
+      });
   }
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    loadSummary();
-    loadLicense();
-    queryTransaction(0);
-  }, []);
+    getPrincipalByWallet().then(pid => {
+      if(pid){
+        loadSummary();
+        loadLicense();
+        queryTransaction(0);
+      }
+    }).catch(e => {
+      toastError('Failed to load page data: ' + e.toString())
+    });
+  }, [getPrincipal()]);
   
   const loadSummary = () => {
-
     let data={
-      rewards: '888',
-      claimable: '888',
+      rewards: '',
+      claimable: '',
     };
     
-    let principal_id = getPrincipal();
+    const principal_id = getPrincipal();
     if(!principal_id) {
-      reConnectPlug();
+      toastWarn('Failed to query my performance data: ' + ERROR_MSG.USER_NOT_AUTH)
+      return;
     }
-    console.log("Current principal is :", principal_id);
-    fetch_sumary_for_myvoice(principal_id).then(
-      sum_tokens => {
-        data.claimable =  String(sum_tokens.sum_unclaimed);
+    fetch_sumary_for_myvoice(principal_id)
+      .then( sum_tokens => {
+        data.claimable = String(sum_tokens.sum_unclaimed);
         data.rewards = String(sum_tokens.sum_claimed);
-        console.log("get sum_tokens:", sum_tokens);
-        console.log("Set summary1");
         setSummaryData(data);
-        
-      }
-    );  
+      }).catch(e => {
+        toastWarn('Failed to query my performance data!')
+      });  
   }
 
   const catchNftImgFail = (event) => {
@@ -105,63 +106,40 @@ function MyUnivoicePage() {
        imgurl: 'https://bafybeibhnv326rmac22wfcxsmtrbdbzjzn5mviykq3rbt4ltqkqqfgobga.ipfs.w3s.link/thum.jpg',
        idx: '01',
        intro: 'Univoice listener',
-       owners: 21000,
-       quantity: 10,
-       myhashs: '#2001,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010,#2002,#2003,#2004,#2005,#2006,#2007,#2008,#2009,#2010'
+       quantity: 1,
+       myhashs: ''
     }
 
     const data = [];
-    reConnectPlug()
-          .then((principal_id) => {
-            console.log('reConnectPlug done, pid:', principal_id)
-            if (principal_id) {
-              //get_miner_license(principal_id);
               
-              call_tokens_of(principal_id).then(tokenIds=>{
-                let owner_cnt = 0;
-                let myhash_str = "";
-                console.log("Origin nft tokens is",tokenIds);
+    call_tokens_of().then(tokenIds=>{
+      let owner_cnt = 0;
+      let myhash_str = "";
+      console.log("Origin nft tokens is",tokenIds);
 
-                for (let token_id in  tokenIds) {
-                    console.log("hold license of token_id", tokenIds[token_id]);
-                    owner_cnt +=1;
-                    myhash_str += '#'+tokenIds[token_id]+',';
-
-                }
-                dataItem.owners = owner_cnt;
-                dataItem.myhashs = myhash_str;
-                dataItem.quantity = owner_cnt;
-                dataItem.imgurl = ImgNftThum;
-                data[0] = dataItem;
-                setLicenseData(data);
-
-              })      
-            }
-          }).catch((e) => {
-            console.log('reConnectPlug exception!', e)
-          })
-
-
-
-
-    //setLicenseData(data)
+      for (let token_id in tokenIds) {
+        console.log("hold license of token_id", tokenIds[token_id]);
+        owner_cnt +=1;
+        myhash_str += '#'+tokenIds[token_id]+',';
+      }
+      dataItem.myhashs = myhash_str;
+      dataItem.quantity = owner_cnt;
+      dataItem.imgurl = ImgNftThum;
+      data[0] = dataItem;
+      setLicenseData(data);
+    })      
   }
 
   const clickClaim = () => {
-    // setClaimable(false)
-    // showToast(new Date().toISOString())
-    // showToast(new Date().toISOString(), 'error')
-    if(getPrincipal()){
-      reConnectPlug();
+    if(!getPrincipal()){
+      toastWarn('Failed to claim rewards: ' + ERROR_MSG.USER_NOT_AUTH)
+      return
     }
     claim_to_account_by_principal(getPrincipal()).then(trans_tokens=>{
-      showToast("You have claimed "+String(trans_tokens)+" success. You can recheck by your wallet.", 'info');
+      toastSuccess("You have claimed "+String(trans_tokens)+" success. You can recheck by your wallet.");
       loadSummary();
-    }
-
-    );
-   
-    // TODO
+      setClaimable(false)
+    });
   }
   
   return (
@@ -176,7 +154,7 @@ function MyUnivoicePage() {
           <div className={style.rewards_panel}>
             <div className={style.label}>Token Rewards</div>
             <div className={style.data}>
-              <div className={style.val}>{fmtUvBalance(summaryData.rewards)}</div>
+              <div className={style.val}>{summaryData.rewards === '' ? '--' : fmtUvBalance(summaryData.rewards)}</div>
               <div className={style.unit}>$UVC</div>
             </div>
           </div>
@@ -184,7 +162,7 @@ function MyUnivoicePage() {
             <div>
               <div className={style.label}>Rewards Claimable</div>
               <div className={style.data}>
-                <div className={style.val}>{fmtUvBalance(summaryData.claimable)}</div>
+                <div className={style.val}>{summaryData.claimable === '' ? '--' : fmtUvBalance(summaryData.claimable)}</div>
                 <div className={style.unit}>$UVC</div>
               </div>
             </div>

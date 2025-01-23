@@ -1,17 +1,20 @@
 import { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { plugReady, reConnectPlug, callBalance, initPlug } from '@/utils/icplug';
+import { checkPlugReady, reConnectPlug } from '@/utils/icplug';
 import { useAcountStore } from '@/stores/user';
 import { fmtUvBalance } from '@/utils';
 import style from './topbar.module.scss'
+import { toastInfo, toastError, toastWarn } from '@/components/toast';
+import { queryBalance as queryWalletBalance, checkLoginByWallet } from '@/utils/wallet'
+import { WALLET_TYPE } from '@/utils/uv_const'
 
 const TopBar = (props:any, ref:any) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [currentPath, setCurrentPath] = useState('');
-  const [isLinkWallet, setIsLinkWallet]= useState<boolean>();
-  const { setUserByPlugWallet, clearAccount, getUid, getPrincipal, getBalance, setBalance, getWalletType } = useAcountStore();
+  const { setUserByWallet, clearAccount, getPrincipal, getWalletType } = useAcountStore();
   const [showProfile, setShowProfile] = useState(false)
+  const [walletBalance, setWalletBalance] = useState('')
 
   useImperativeHandle(ref, () => ({
     hideProfile: () => {
@@ -21,6 +24,11 @@ const TopBar = (props:any, ref:any) => {
 
   useEffect(() => {
     setCurrentPath(location.pathname);
+    checkLoginByWallet().then((logined) => {
+      if (logined) {
+        refreshBalance()
+      }
+    })
   }, [location]);
 
   const clickHome = () => {
@@ -30,15 +38,11 @@ const TopBar = (props:any, ref:any) => {
   }
 
   const clickWallet = () => {
-    if (getUid()) {
-      return;
+    if (!checkPlugReady()) {
+      toastInfo('Please install plug-wallet extension first');
+      return
     }
-    const pReady = plugReady();
-    if (!pReady) {
-      alert('Please install plug-wallet extension first');
-    } else {
-      loginPlug();
-    }
+    loginPlug();
   }
 
   const clickProfile = (e: { stopPropagation: () => void; }) => {
@@ -51,33 +55,27 @@ const TopBar = (props:any, ref:any) => {
   }
 
   const loginPlug = () => {
-    reConnectPlug()
-      .then((principal_id) => {
-        console.log('reConnectPlug done, pid:', principal_id)
-        if (principal_id) {
-          setIsLinkWallet(true);
-           callBalance(principal_id).then(
-               (tokenstr) =>{
-                   console.log('callBalance done, tokens:', tokenstr);
-                   setBalance(Number(tokenstr));
-               }
-          );          
-          setUserByPlugWallet(principal_id);
-        }
-      }).catch((e) => {
-        console.log('reConnectPlug exception!', e)
-      })
+    reConnectPlug().then((principal_id) => {
+      if (!principal_id) return;
+      setUserByWallet(WALLET_TYPE.PLUG, principal_id)
+      refreshBalance(WALLET_TYPE.PLUG)
+    }).catch((e) => {
+      toastError('Failed to connect wallet! ' + e.toString())
+    })
   }
-  const clickA = () => {
-    initPlug()
+
+  const refreshBalance = (walletType: string='') => {
+    queryWalletBalance(walletType).then((balance) => {
+      if (balance) {
+        setWalletBalance(Number(balance).toString())
+      }
+    }).catch((e) => {
+      toastWarn('Failed to query balance data: ' + e.toString())
+    })
   }
 
   const getPrincipalStr = (len1: number, len2: number) => {
     const pid = getPrincipal()
-    // callBalance(pid).then((token_str) =>{
-    //      console.log('callBalance done, tokens:', token_str);
-    //     }
-    // );
     return pid.substring(0, len1) + '...' + pid.substring(pid.length - len2);
   }
 
@@ -98,7 +96,6 @@ const TopBar = (props:any, ref:any) => {
   const clickDisconnect = () => {
     reverseShowProfile()
     clearAccount()
-    setIsLinkWallet(false)
   }
 
   return (
@@ -134,7 +131,11 @@ const TopBar = (props:any, ref:any) => {
               </div>
               <div className={style.r}>
                 <div className={style.label}>Univoice Balance</div>
-                <div className={style.balance}>{fmtUvBalance(getBalance())}</div>
+                <div className={style.balance}>{
+                  walletBalance ==='' ?
+                  '--' :
+                  fmtUvBalance(walletBalance)
+                }</div>
               </div>
               <div className={style.r}>
                 <div className={style.myuv_border} onClick={clickMyUnivoice}>
@@ -155,7 +156,6 @@ const TopBar = (props:any, ref:any) => {
           </div>
         </div>
         }
-        {/* <div className="m-[10px]" onClick={clickA}>A</div> */}
       </div>
     </div>
   )

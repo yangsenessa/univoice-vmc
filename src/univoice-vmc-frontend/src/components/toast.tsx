@@ -19,7 +19,7 @@ const Toast = forwardRef((props, ref) => {
     
     setTimeout(() => {
       removeToast(id)
-    }, 5000);
+    }, 8000);
   }
 
   const removeToast = (id) => {
@@ -33,9 +33,14 @@ const Toast = forwardRef((props, ref) => {
           <div className={style.wrap}>
             <div className={style.icon}></div>
             <div className={style.ctx}>
-              {toast.mtype === 'warn' && <div className={style.title}>Warning</div>}
-              {toast.mtype === 'error' && <div className={style.title}>Error</div>}
-              {toast.message}
+              <div className={style.ctx_info}>
+                {toast.mtype === 'warn' && <div className={style.title}>Warning</div>}
+                {toast.mtype === 'error' && <div className={style.title}>Error</div>}
+                {toast.mtype === 'success' && <div className={style.title}>Success</div>}
+                {(toast.mtype === 'info' || toast.mtype === '') && <div className={style.title}>Info</div>}
+                <div className={style.ctx_msg} dangerouslySetInnerHTML={{ __html: toast.message }}></div>
+              </div>
+              <div className={style.close} onClick={() => removeToast(toast.id)}></div>
             </div>
           </div>
         </div>
@@ -54,4 +59,20 @@ export const showToast = (msg: string, mtype: string = 'info') => {
   if (ToastRef.current) {
     ToastRef.current.show(msg, mtype)
   }
+}
+
+export const toastInfo = (msg: string) => {
+  showToast(msg, 'info')
+}
+
+export const toastWarn = (msg: string) => {
+  showToast(msg, 'warn')
+}
+
+export const toastError = (msg: string) => {
+  showToast(msg, 'error')
+}
+
+export const toastSuccess = (msg: string) => {
+  showToast(msg, 'success')
 }

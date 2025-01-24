@@ -66,17 +66,9 @@ const FootBar = (option:any) => {
               <div className={`${style.btn_img} ${style.telegram}`}></div>
               </div></a>
               <div className={style.btn_split}></div>
-              <div className={`${style.btn_round} ${style.disable}`}>
-                <div className={`${style.btn_img} ${style.discord}`}></div>
-              </div>
-              <div className={style.btn_split}></div>
-              <div className={`${style.btn_round} ${style.disable}`}>
-                <div className={`${style.btn_img} ${style.medium}`}></div>
-              </div>
-              <div className={style.btn_split}></div>
-              <div className={`${style.btn_round} ${style.disable}`}>
+              <a href="https://github.com/yangsenessa/univoice-vmc" target='_blank'><div className={style.btn_round}>
                 <div className={`${style.btn_img} ${style.github}`}></div>
-              </div>
+              </div></a>
             </div>
             <div className={style.copyright}>© Copyright 2024, All Rights Reserved by Univoice</div>
         </div>

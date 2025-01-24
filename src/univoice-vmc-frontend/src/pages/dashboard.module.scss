@@ -2,17 +2,11 @@
   margin-top: -148px;
   min-height: 1147px;
   mix-blend-mode: color-dodge;
-  // position: absolute;
-  // top: 0;
-  // z-index: 1;
 }
 .toplight2 {
   margin-top: -1147px;
   min-height: 1147px;
   mix-blend-mode: overlay;
-  // position: absolute;
-  // top: 0;
-  // z-index: 2;
 }
 .panel_0 {
   display: flex;
@@ -22,11 +16,11 @@
 }
 .pg_title {
   background: -webkit-linear-gradient(90deg, #FFFFFF, #999999); /* Chrome, Safari */
-  background: linear-gradient(90deg, #FFFFFF, #999999); /* 标准语法 */
+  background: linear-gradient(90deg, #FFFFFF, #999999);
   -webkit-background-clip: text; /* Chrome, Safari */
   background-clip: text;
   -webkit-text-fill-color: transparent; /* Chrome, Safari */
-  color: transparent; /* 标准语法, 也可以用这个属性 */
+  color: transparent;
   font-size: 64px;
   font-weight: 600;
   text-align: center;
@@ -109,8 +103,6 @@
     justify-content: center;
   }
   .img {
-    // width: 370px;
-    // height: 370px;
     border-radius: 10px;
   }
   .info {
@@ -156,11 +148,6 @@
     gap: 80px;
   }
 }
-// @media (min-width: 1280px) {
-//   .nfts {
-//     grid-template-columns: repeat(4, minmax(0, 1fr));
-//   }
-// }
 .trans_type {
   background-color: #2F2347;
   border: 1px solid #5D458A;

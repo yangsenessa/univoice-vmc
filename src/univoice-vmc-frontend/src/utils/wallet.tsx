@@ -21,31 +21,6 @@ export const getPrincipal = async (): Promise<string> => {
   return Promise.reject(ERROR_MSG.UNKNOWN_WALLET_TYPE)
 }
 
-// 未使用
-// 检查当前用户是否连接
-export const currentUserConnected = async () => {
-  const userPrincipal = useAcountStore.getState().getPrincipal()
-  if (!userPrincipal) {
-    console.log('currentUserConnected: false, no user pid')
-    return Promise.resolve(false)
-  }
-  const walletType = useAcountStore.getState().getWalletType()
-  if (WALLET_TYPE.PLUG === walletType) {
-    const eq = await getPlugPrincipal().then((principal) => {
-      const comparePid = userPrincipal === principal
-      if (!comparePid) {
-        console.log('currentUserConnected: ', comparePid)
-        console.log('user pid: ', userPrincipal)
-        console.log('wallet pid: ', principal)
-      }
-      return comparePid
-    })
-    return Promise.resolve(eq)
-  } else {
-    return Promise.reject(ERROR_MSG.UNKNOWN_WALLET_TYPE)
-  }
-}
-
 export const checkLoginByWallet = async (): Promise<boolean> => {
   const userPrincipal = useAcountStore.getState().getPrincipal()
   const walletType = useAcountStore.getState().getWalletType()

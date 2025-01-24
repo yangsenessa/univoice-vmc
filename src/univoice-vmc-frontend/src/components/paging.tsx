@@ -5,7 +5,6 @@ function PagingComponent( props:{ pageNum: number, totalPage: number, queryHandl
   
   useEffect(() => {
     let listItem:any = []
-    // 当前页码和最大页码，取小值
     let maxLeNum = props.pageNum
     if (props.totalPage && props.totalPage > 0 && props.totalPage < maxLeNum) {
         maxLeNum = props.totalPage

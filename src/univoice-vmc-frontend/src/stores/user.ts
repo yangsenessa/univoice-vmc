@@ -11,14 +11,13 @@ const buildExpire = () => {
   return new Date().getTime() + expire_ms;
 }
 
-// =========================== 网站相关数据持久化 ===========================
-
+// =========================== data persistence ===========================
 interface AccountState {
   uid: string | number;
   wallet: string;
   principal: string;
   // balance:number;
-  expire: number; // 登录有效时间截止(ms)
+  expire: number; // Login expiration(ms)
   setUser: (user_id: string | number) => void;
   setUserByWallet: (wallet_type: string, principal_id: string) => void;
   // setBalance:(tokens:number) => void;

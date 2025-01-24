@@ -42,10 +42,6 @@ export default defineConfig({
         find: "@",
         replacement: path.resolve(__dirname, 'src'),
       }
-    ], // 要相应tsconfig.json配置path
-    // alias: {
-    //   '@': path.resolve(__dirname, 'src'), // @符号要解析
-    // },
-    // extensions: ['.js', '.ts', '.jsx', '.tsx'], // import 可以省略的拓展名
+    ],
   },
 });

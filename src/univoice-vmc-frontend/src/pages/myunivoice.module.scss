@@ -5,11 +5,11 @@
 }
 .pg_title {
   background: -webkit-linear-gradient(90deg, #FFFFFF, #999999); /* Chrome, Safari */
-  background: linear-gradient(90deg, #FFFFFF, #999999); /* 标准语法 */
+  background: linear-gradient(90deg, #FFFFFF, #999999);
   -webkit-background-clip: text; /* Chrome, Safari */
   background-clip: text;
   -webkit-text-fill-color: transparent; /* Chrome, Safari */
-  color: transparent; /* 标准语法, 也可以用这个属性 */
+  color: transparent;
   font-size: 64px;
   font-weight: 600;
   text-align: center;
@@ -29,7 +29,6 @@
   margin-bottom: 28px;
 }
 .transactions_row {
-  // grid-template-columns: 280px 200px 300px 300px 280px;
   grid-template-columns: 20% 25% 20% 20% 15%;
 }
 
@@ -188,11 +187,11 @@
     left: 20px;
     font-size: 30px;
     background: -webkit-linear-gradient(90deg, #FFFFFF, #999999); /* Chrome, Safari */
-    background: linear-gradient(90deg, #FFFFFF, #999999); /* 标准语法 */
+    background: linear-gradient(90deg, #FFFFFF, #999999);
     -webkit-background-clip: text; /* Chrome, Safari */
     background-clip: text;
     -webkit-text-fill-color: transparent; /* Chrome, Safari */
-    color: transparent; /* 标准语法, 也可以用这个属性 */
+    color: transparent;
   }
   .btn {
     position: absolute;

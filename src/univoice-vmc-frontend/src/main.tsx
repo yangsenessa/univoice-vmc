@@ -7,7 +7,6 @@ import App from './App';
 import './index.scss';
 
 const isDev = isLocalNet();
-// 调试
 isDev && eruda.init();
 
 export const Root = () => {

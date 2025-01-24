@@ -1,21 +1,18 @@
-
-// 读取存储的值
 export const readStorage = (key: string): string | undefined => {
   const r = localStorage.getItem(key);
   if (r == null) return undefined;
   return r;
 };
 
-// 写入值
 export const writeStorage = (key: string, value: string) => {
   localStorage.setItem(key, value);
 };
 
-// 写入值
 export const removeStorage = (key: string) => {
   localStorage.removeItem(key);
 };
-// 固定保留8位小数
+
+// Fixed retention of 8 decimal places
 export const fmtUvBalanceFull = (balance: string | number) => {
   if (typeof balance === 'number') {
     if (balance < 100000000) {
@@ -34,7 +31,8 @@ export const fmtUvBalanceFull = (balance: string | number) => {
     }
   }
 }
-// 有小数则显示，可不足8位小数
+
+// Integer does not display decimal point, decimal places may be less than 8 decimal places
 export const fmtUvBalance = (balance: string | number) => {
   if (typeof balance === 'number') {
     if (balance < 100000000) {
@@ -66,6 +64,8 @@ export const fmtUvBalance = (balance: string | number) => {
     }
   }
 }
+
+// Data conversion string less than 100 will not be in the form of Scientific notation
 const fmtDecimal = (n: number) => {
   if (n === 0) {
     return '0'
@@ -80,10 +80,11 @@ const fmtDecimal = (n: number) => {
     return (n / 100000000).toString()
   }
 }
-// 每3位一个逗号
+
 export const fmtInt = (data: number) => {
   return data.toLocaleString('en-US');
 }
+
 export const fmtTimestamp = (time: number) => {
   let t = time.toString().length > 13 ? Math.floor(time / 1000) : time
   let r = new Date(t).toISOString()
@@ -98,7 +99,6 @@ export const fmtTimestamp = (time: number) => {
   }
   // return new Date(t).toISOString()
   // return new Date(t).toLocaleString()
-
   return r
 }
 

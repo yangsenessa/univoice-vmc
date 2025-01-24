@@ -12,7 +12,6 @@ function ChakraComponent( props:{ idx: number, clickcnt: number } ) {
   
   const clickChakra = () => {
     addBubble()
-    // TODO: 后台 props.idx 号脉轮点击数+1
     sendToBackendStore();
   }
 
@@ -63,7 +62,7 @@ function ChakraComponent( props:{ idx: number, clickcnt: number } ) {
 
   }
   
-  // 点chakra+1效果
+  // heart bubble
   const addBubble = () => {
     const id = Date.now()
     const swing = Math.floor(Math.random() * 4) + 1
@@ -94,7 +93,8 @@ function ChakraComponent( props:{ idx: number, clickcnt: number } ) {
     <div className={`${style.chakra} ${style['chakra_' + props.idx]}`}>
       <div className={`${props.idx % 2 === 1 ? style.chakra_right : style.chakra_left}`}>
         <div className={style.chakra_circle} onClick={clickChakra}></div>
-        <div className={style.chakra_click_count}>🧡{props.clickcnt + totalClick}</div>
+        <div className={style.heart}></div>
+        <div className={style.chakra_click_count}>{props.clickcnt + totalClick}</div>
         <div className={style.fade_area}>
         {bubbles.map((el: { id: Key | null | undefined; swing: number; speed: number; }) => (
           <div key={el.id} className={`${style.bubble} ${style.b1} ${style['bl_' + el.swing + '_' + el.speed]}`}></div>

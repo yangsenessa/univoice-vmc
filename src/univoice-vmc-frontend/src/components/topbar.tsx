@@ -34,7 +34,6 @@ const TopBar = (props:any, ref:any) => {
   const clickHome = () => {
     if (currentPath === '/') return
     navigate('/')
-    // navigate('/', { replace: true })
   }
 
   const clickWallet = () => {

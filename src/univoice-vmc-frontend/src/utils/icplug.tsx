@@ -45,7 +45,6 @@ export const queryBalance = async (): Promise<string> => {
 }
 
 export const reConnectPlug = async (): Promise<string> => {
-  // 断开旧的连接
   // try{
   //   plug.disconnect()
   // } catch (e) {
@@ -87,7 +86,6 @@ export const call_tokens_of = async () : Promise<Array<bigint>> => {
   return tokenIds;
 }
 
-// 未使用
 export const call_tokens_of_nftcollection= async (principal_id:string) : Promise<Array<bigint>> =>{
   const plug = (window as any).ic.plug;
   if(!plug) {
@@ -116,7 +114,6 @@ export const call_tokens_of_nftcollection= async (principal_id:string) : Promise
 }
 
 // dashboard query transaction data
-// 备注: plug的index是从0开始的。由于第1条记录是mint，隐藏，所以正好txIndex总体减1
 export const call_get_transactions = async (pre:number, take:number): Promise<TransferResponse[]> => {
   const connected = await plug.isConnected();
   if (!connected) {
@@ -165,7 +162,6 @@ export const call_get_transactions = async (pre:number, take:number): Promise<Tr
   return tranferDetails;
 }
 
-// 未使用
 export const call_get_transactions_listener = async (principal_id:string,pre:number, take:number): Promise<TransferResponse[]> => {
   const plug = (window as any).ic.plug;
   const principal = Principal.fromText(principal_id) ;

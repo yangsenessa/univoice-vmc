@@ -7,7 +7,6 @@ import Chakra from '@/components/chakra'
 import {query_chakra_data} from '@/utils/call_vmc_backend'
 // import { useAcountStore } from '@/stores/user';
 
-
 function UvHomePage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -16,7 +15,6 @@ function UvHomePage() {
   const refVision:any = useRef(null);
   const [isFlipped, setIsFlipped] = useState(false);
   // const { getPrincipal } = useAcountStore();
-  
 
   const [chakraClickStat, setChakraClickStat] = useState({
     cnt1: 0,

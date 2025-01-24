@@ -45,7 +45,6 @@ const updateAuthed = async () => {
   // const accountId = AccountIdentifier.fromPrincipal({ principal: identity.getPrincipal() });
   // console.log('accountId:', accountId.toHex());
 
-  // 有效时间(s)
   const nextExpiration = identity.getDelegation().delegations
     .map((d: { delegation: { expiration: any; }; }) => d.delegation.expiration)
     .reduce((current: number, next: number) => next < current ? next : current);
@@ -53,7 +52,7 @@ const updateAuthed = async () => {
   const expirationDuration  = (nextExpiration / BigInt(1000_000) - BigInt(Date.now())) / BigInt(1000);
   console.log('expire(s):', expirationDuration);
   
-  // 获取principal
+  // get principal
   // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
   const agent = new HttpAgent({ identity })
   if (isLocal()) {

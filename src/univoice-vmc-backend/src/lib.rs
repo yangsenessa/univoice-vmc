@@ -719,7 +719,7 @@ fn get_unclaimed_mint_ledger_by_principal_daily(
 
         for item in s.borrow().iter() {
             if principalid == item.clone().minner_principalid {
-                if (item.biz_state != TransferTxState::Claimed) {
+                if item.biz_state != TransferTxState::Claimed {
                     ledgerRecord.push(item.clone());
                 }
             }

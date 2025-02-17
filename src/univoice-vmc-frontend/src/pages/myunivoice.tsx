@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fmtInt, fmtUvBalance, fmtTimestamp, fmtSummaryAddr } from '@/utils';
-import { call_tokens_of, getPrincipal as getPrincipalByWallet } from '@/utils/wallet'
+import { call_tokens_of, getWalletPrincipal } from '@/utils/wallet'
 import type { UnvMinnerLedgerRecord, TransferTxState, MinerJnlPageniaze } from 'declarations/univoice-vmc-backend/univoice-vmc-backend.did';
 import Paging from '@/components/paging';
 import style from './myunivoice.module.scss'
@@ -64,7 +64,7 @@ function MyUnivoicePage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    getPrincipalByWallet().then(pid => {
+    getWalletPrincipal().then(pid => {
       if(pid){
         loadSummary();
         loadLicense();
@@ -125,7 +125,9 @@ function MyUnivoicePage() {
       dataItem.myhashs = myhash_str;
       dataItem.quantity = owner_cnt;
       dataItem.imgurl = ImgNftThum;
-      data[0] = dataItem;
+      if (owner_cnt > 0) {
+        data[0] = dataItem;
+      }
       setLicenseData(data);
     })      
   }

@@ -7,6 +7,7 @@ import style from './topbar.module.scss'
 import { toastInfo, toastError, toastWarn } from '@/components/toast';
 import { queryBalance as queryWalletBalance, checkLoginByWallet } from '@/utils/wallet'
 import { WALLET_TYPE } from '@/utils/uv_const'
+import { reConnectII } from '@/utils/icii'
 
 const TopBar = (props:any, ref:any) => {
   const location = useLocation();
@@ -24,12 +25,12 @@ const TopBar = (props:any, ref:any) => {
 
   useEffect(() => {
     setCurrentPath(location.pathname);
-    checkLoginByWallet().then((logined) => {
-      if (logined) {
-        refreshBalance()
-      }
-    })
+    checkLoginByWallet()
   }, [location]);
+
+  useEffect(() => {
+    refreshBalance()
+  }, [getPrincipal()]);
 
   const clickHome = () => {
     if (currentPath === '/') return
@@ -57,18 +58,25 @@ const TopBar = (props:any, ref:any) => {
     reConnectPlug().then((principal_id) => {
       if (!principal_id) return;
       setUserByWallet(WALLET_TYPE.PLUG, principal_id)
-      refreshBalance(WALLET_TYPE.PLUG)
     }).catch((e) => {
       toastError('Failed to connect wallet! ' + e.toString())
     })
   }
+  
+  const loginII = () => {
+    reConnectII()
+  }
 
-  const refreshBalance = (walletType: string='') => {
-    queryWalletBalance(walletType).then((balance) => {
+  const refreshBalance = () => {
+    if (getPrincipal() === '') {
+      return
+    }
+    queryWalletBalance().then((balance) => {
       if (balance) {
         setWalletBalance(Number(balance).toString())
       }
     }).catch((e) => {
+      setWalletBalance('')
       toastWarn('Failed to query balance data: ' + e.toString())
     })
   }
@@ -155,6 +163,7 @@ const TopBar = (props:any, ref:any) => {
           </div>
         </div>
         }
+        {/* <div onClick={loginII}>II</div> */}
       </div>
     </div>
   )

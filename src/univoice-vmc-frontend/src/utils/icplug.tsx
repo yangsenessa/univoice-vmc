@@ -24,24 +24,20 @@ export const getPlugPrincipal = async (): Promise<string> => {
   return plug.principalId ? plug.principalId : ''
 }
 
-export const checkPlugReady = (): boolean => {
-  return plug ? true : false;
-}
-
-export const queryBalance = async (): Promise<string> => {
+export const buildActor = async (idl, canisterId) => {
   const connected = await plug.isConnected();
   if (!connected) {
-    return '';
+    return Promise.reject(ERROR_MSG.WALLET_NOT_CONNECTED)
   }
-  const principal = Principal.fromText(plug.principalId);
-  const account =  {'owner' : principal, 'subaccount' : [] };
-  const tokenActor = await plug.createActor({
-    canisterId: tokenCanisterId,
-    interfaceFactory: tokenLedegerIdlFactory,
+  const actor = await plug.createActor({
+    canisterId: canisterId,
+    interfaceFactory: idl,
   });
-  // use our actors getSwapInfo method
-  var tokensStr  = await tokenActor.icrc1_balance_of(account);
-  return tokensStr;
+  return actor;
+}
+
+export const checkPlugReady = (): boolean => {
+  return plug ? true : false;
 }
 
 export const reConnectPlug = async (): Promise<string> => {
@@ -63,6 +59,24 @@ export const reConnectPlug = async (): Promise<string> => {
   }
 }
 
+// The following is currently not in use
+
+// export const queryBalance = async (): Promise<string> => {
+//   const connected = await plug.isConnected();
+//   if (!connected) {
+//     return '';
+//   }
+//   const principal = Principal.fromText(plug.principalId);
+//   const account =  {'owner' : principal, 'subaccount' : [] };
+//   const tokenActor = await plug.createActor({
+//     canisterId: tokenCanisterId,
+//     interfaceFactory: tokenLedegerIdlFactory,
+//   });
+//   // use our actors getSwapInfo method
+//   var tokensStr  = await tokenActor.icrc1_balance_of(account);
+//   return tokensStr;
+// }
+
 export const call_tokens_of = async () : Promise<Array<bigint>> => {
   const connected = await plug.isConnected();
   if (!connected) {
@@ -72,7 +86,7 @@ export const call_tokens_of = async () : Promise<Array<bigint>> => {
   const principal = Principal.fromText(principal_id) ;
   const account =  {'owner' : principal,'subaccount' : [] };
   // requestConnect callback function
-  console.log('ICRC7 ledger call onConnectionUpdate');    
+  console.log('ICRC7 ledger call onConnectionUpdate');
 
    // rebuild actor and test by getting Sonic info
   const tokenActor = await plug.createActor({

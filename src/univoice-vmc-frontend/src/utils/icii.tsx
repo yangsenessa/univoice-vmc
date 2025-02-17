@@ -1,101 +1,93 @@
-import { Identity, Actor, HttpAgent, AnonymousIdentity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client"
-import type { IDL } from "@dfinity/candid"
-import dotenv from 'dotenv';
+import { Identity, Actor, HttpAgent } from "@dfinity/agent";
+// import { Principal } from '@dfinity/principal';
 // import { AccountIdentifier } from "@dfinity/nns";
+import { useAcountStore } from '@/stores/user'
+import { WALLET_TYPE, TransferResponse, ERROR_MSG } from '@/utils/uv_const'
 
-// // The interface of the whoami canister
-// const webapp_idl = ({ IDL }) => {
-//   return IDL.Service({ whoami: IDL.Func([], [IDL.Principal], ["query"]) });
-// };
-// export const init = ({ IDL }) => {
-//   return [];
-// };
-const idlFactory = ({ IDL }: {IDL:any}) =>
-  IDL.Service({
-     whoami: IDL.Func([], [IDL.Principal], ['query']),
+// import { tokenLedegerIdlFactory } from '@/idl/icrc1.did.js';
+// // Canister Ids
+// const tokenCanisterId  = 'jfqe5-daaaa-aaaai-aqwvq-cai';
+
+// Host
+const host = 'https://icp-api.io' //'https://mainnet.dfinity.network'
+
+let authClient: any = undefined
+
+export const init = async () => {
+  if (!authClient) {
+    authClient = await AuthClient.create({
+      idleOptions: {
+        disableIdle: true,
+        disableDefaultIdleCallback: true,
+      },
+    });
+  }
+}
+
+export const getPrincipal = async (): Promise<string> => {
+  await init();
+  const connected = await authClient.isAuthenticated();
+  if (!connected) {
+    return '';
+  }
+  return authClient.getIdentity().getPrincipal().toString()
+}
+
+export const buildActor = async (idl, canisterId) => {
+  await init();
+  const agent = new HttpAgent({ 
+    host: host
   });
-const ii_canisterId = "qwsdo-xaaaa-aaaah-aaa3a-cai";
-
-console.log('env', process.env.DFX_NETWORK)
-
-let authClient: any = undefined;
-// let identity;
-let principal_id: any = undefined;
-
-export const getPrincipal = () => {
-  if (principal_id === undefined) {
-    getIdentity();
-  }
-  return principal_id;
+  const actor = Actor.createActor(
+    idl, {
+      agent,
+      canisterId,
+    }
+  )
+  return actor;
 }
 
-const updateAuthed = async () => {
-  let identity: any;
-  if (await authClient.isAuthenticated()) {
-    identity = authClient.getIdentity();
-  } else {
-    console.log('ii not auth yet');
-    return
-  }
-  console.log('icii', identity); // AnonymousIdentity
-  // console.log('Anonymous?', identity.getPrincipal().isAnonymous())
-  console.log('pid:', identity.getPrincipal().toString())
-  console.log(JSON.stringify(identity.getPrincipal()))
-  // const accountId = AccountIdentifier.fromPrincipal({ principal: identity.getPrincipal() });
-  // console.log('accountId:', accountId.toHex());
-
-  const nextExpiration = identity.getDelegation().delegations
-    .map((d: { delegation: { expiration: any; }; }) => d.delegation.expiration)
-    .reduce((current: number, next: number) => next < current ? next : current);
-  // const expirationDuration  = nextExpiration - BigInt(Date.now()) * BigInt(1000_000);
-  const expirationDuration  = (nextExpiration / BigInt(1000_000) - BigInt(Date.now())) / BigInt(1000);
-  console.log('expire(s):', expirationDuration);
-  
-  // get principal
-  // Using the identity obtained from the auth client, we can create an agent to interact with the IC.
-  const agent = new HttpAgent({ identity })
-  if (isLocal()) {
-    await agent.fetchRootKey();
-  }
-  // Using the interface description of our webapp, we create an actor that we use to call the service methods.
-  const actor = Actor.createActor(idlFactory, {
-    agent,
-    canisterId: ii_canisterId,
-  })
-  // Call whoami which returns the principal (user id) of the current user.
-  const principal = await actor.whoami();
-  console.log('principal:', principal);
-  principal_id = principal;
-}
-
-const getIdentity = async () => {
-  if (authClient === undefined) {
-    authClient = await AuthClient.create();
-  }
-  updateAuthed();
-}
-
-const isLocal = () => {
-  return process.env.DFX_NETWORK === 'local';
-}
-
-export const goLogin = async () => {
-  if (authClient === undefined) {
-    authClient = await AuthClient.create();
-  }
-  const identityProvider = isLocal() ? 'https://identity.ic0.app' : 'https://identity.ic0.app';
-  new Promise((resolve, reject) => {
-    authClient.login({
-      identityProvider: identityProvider,
-      onSuccess: resolve,
-      onError: reject
-    })
-  }).then(async result => {
-    console.log('ic login result', result)
-    updateAuthed();
-  }).catch(error =>{
-    alert(error)
-    console.log('ic login error:', error)
+export const reConnectII = async () => {
+  await init();
+  await authClient.login({
+    identityProvider: "https://identity.ic0.app",
+    onSuccess: () => {
+      const identity = authClient.getIdentity();
+      const principal = identity.getPrincipal().toString();
+      console.log('II login success, principal_id:', principal)
+      if (principal) {
+        useAcountStore.getState().setUserByWallet(WALLET_TYPE.II, principal)
+      }
+    },
+    onError: (error) => {
+      console.log('II login error:', error);
+    }
   })
 }
+
+// export const queryBalance = async (): Promise<string> => {
+//   await init();
+//   const connected = await authClient.isAuthenticated();
+//   if (!connected) {
+//     return '';
+//   }
+//   // const agent = new HttpAgent({ identity: authClient.getIdentity() });
+//   const agent = new HttpAgent({ 
+//     host: 'https://icp-api.io' //'https://mainnet.dfinity.network'
+//   });
+//   // await agent.fetchRootKey();
+//   const tokenActor = Actor.createActor(
+//     tokenLedegerIdlFactory, {
+//       agent,
+//       canisterId: tokenCanisterId,
+//     }
+//   )
+//   const pid = authClient.getIdentity().getPrincipal().toString();
+//   const principal = Principal.fromText(pid);
+//   const account =  {'owner' : principal, 'subaccount' : [] };
+//   // use our actors getSwapInfo method
+//   var tokensStr  = await tokenActor.icrc1_balance_of(account);
+//   console.log('icrc1_balance_of :', tokensStr)
+//   return tokensStr.toString();
+// }

@@ -1,6 +1,7 @@
 
 export const WALLET_TYPE = {
-  PLUG: 'plug'
+  PLUG: 'plug',
+  II: 'ii'
 }
 
 export type TransferResponse = {
@@ -16,6 +17,6 @@ export type TransferResponse = {
 
 export const ERROR_MSG = {
   UNKNOWN_WALLET_TYPE: 'Unsupported wallet type',
-  WALLET_NOT_CONNECTED: 'Wallet not yet connected',
+  WALLET_NOT_CONNECTED: 'Wallet not yet connected or connection expired',
   USER_NOT_AUTH: 'Wallet not yet connected'
 }

@@ -8,7 +8,9 @@
     "start": "vite --port 3000",
     "prebuild": "dfx generate",
     "build": "tsc && vite build",
-    "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\""
+    "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\"",
+    "generate-certs": "mkdir -p .certificates && cd .certificates && openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj '/CN=localhost'",
+    "start:https": "vite --port 4945"
   },
   "dependencies": {
     "@dfinity/agent": "^2.2.0",
@@ -40,10 +42,14 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-react": "^7.24.0",
+    "@babel/preset-typescript": "^7.24.0",
     "@types/node": "^22.10.1",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
-    "@vitejs/plugin-react": "^4.0.1",
+    "@vitejs/plugin-react": "^3.1.0",
     "autoprefixer": "^10.4.20",
     "dotenv": "^16.3.1",
     "eruda": "^3.4.1",
